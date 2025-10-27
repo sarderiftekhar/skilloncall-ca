@@ -9,3 +9,4 @@ Whenever creating a page always start with Mobile view first. Always check the r
 All the card titles and page section titles should be colored
 
 Always check for closing tags The issue is with the JSX syntax, before completing a tak always double check the code
+Dont push to git until I ask for it

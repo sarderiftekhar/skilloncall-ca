@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,6 +68,16 @@ export default function WorkHistoryStep({
     const [showSkillSuggestions, setShowSkillSuggestions] = useState<{[key: string]: boolean}>({});
     const [showIndustrySuggestions, setShowIndustrySuggestions] = useState<{[key: string]: boolean}>({});
 
+    // Sync local state with parent formData only on initial mount
+    useEffect(() => {
+        if (formData.work_experiences && workExperiences.length === 0) {
+            setWorkExperiences(formData.work_experiences);
+        }
+        if (formData.references && references.length === 0) {
+            setReferences(formData.references);
+        }
+    }, []); // Empty dependency array - only run on mount
+
     // Work Experience Management
     const addWorkExperience = () => {
         const newExperience: WorkExperience = {
@@ -96,11 +106,56 @@ export default function WorkHistoryStep({
     };
 
     const updateWorkExperience = (id: string, field: string, value: any) => {
-        const updated = workExperiences.map(exp => 
-            exp.id === id ? { ...exp, [field]: value } : exp
-        );
-        setWorkExperiences(updated);
-        updateFormData({ work_experiences: updated });
+        setWorkExperiences(prevExperiences => {
+            const updated = prevExperiences.map(exp => 
+                exp.id === id ? { ...exp, [field]: value } : exp
+            );
+            
+            // Debug logging for checkbox changes
+            if (field === 'is_current') {
+                console.log('Updating is_current for experience:', id, 'to:', value);
+                console.log('Updated experience:', updated.find(exp => exp.id === id));
+                console.log('Full updated array:', updated);
+            }
+            
+            // Force update parent formData with new array
+            setTimeout(() => updateFormData({ work_experiences: updated }), 0);
+            
+            return updated;
+        });
+    };
+
+    // Helper to toggle current job state reliably
+    const toggleCurrentJob = (id: string) => {
+        setWorkExperiences(prevExperiences => {
+            const exp = prevExperiences.find(e => e.id === id);
+            const next = !(exp?.is_current);
+            console.log('Toggling current job for:', id, 'from:', exp?.is_current, 'to:', next);
+            
+            const updated = prevExperiences.map(exp => 
+                exp.id === id ? { ...exp, is_current: next, end_date: next ? '' : exp.end_date } : exp
+            );
+            
+            // Update parent after state update
+            setTimeout(() => updateFormData({ work_experiences: updated }), 0);
+            
+            return updated;
+        });
+    };
+
+    // Canadian phone formatter
+    const formatCanadianPhone = (value: string) => {
+        // Remove all non-numeric characters
+        const cleaned = value.replace(/\D/g, '');
+        
+        // Limit to 10 digits
+        const limited = cleaned.substring(0, 10);
+        
+        // Format as (XXX) XXX-XXXX
+        if (limited.length === 0) return '';
+        if (limited.length <= 3) return `(${limited}`;
+        if (limited.length <= 6) return `(${limited.slice(0, 3)}) ${limited.slice(3)}`;
+        return `(${limited.slice(0, 3)}) ${limited.slice(3, 6)}-${limited.slice(6)}`;
     };
 
     // Reference Management
@@ -267,9 +322,9 @@ export default function WorkHistoryStep({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => removeWorkExperience(experience.id)}
-                                        className="text-gray-400 hover:text-red-500 cursor-pointer"
+                                        className="text-gray-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
                                     >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-5 w-5" />
                                     </Button>
                                 </div>
 
@@ -312,12 +367,20 @@ export default function WorkHistoryStep({
                                                     updateWorkExperience(experience.id, 'custom_skill_name', value);
                                                 }}
                                                 onFocus={() => setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: true})}
+                                                onBlur={() => {
+                                                    setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: false});
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === 'Escape') {
+                                                        setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: false});
+                                                    }
+                                                }}
                                                 placeholder="Type to search or enter custom skill..."
                                                 className="mt-1"
                                             />
                                             
                                             {/* Suggestions dropdown */}
-                                            {showSkillSuggestions[experience.id] && skillSearches[experience.id] && (
+                                            {showSkillSuggestions[experience.id] && skillSearches[experience.id] && skillSearches[experience.id].length > 0 && (
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                                                     {globalSkills
                                                         .filter(skill => skill.name.toLowerCase().includes(skillSearches[experience.id].toLowerCase()))
@@ -326,7 +389,8 @@ export default function WorkHistoryStep({
                                                             <div
                                                                 key={skill.id}
                                                                 className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
-                                                                onClick={() => {
+                                                                onMouseDown={(e) => {
+                                                                    e.preventDefault(); // Prevent blur
                                                                     updateWorkExperience(experience.id, 'global_skill_id', skill.id);
                                                                     updateWorkExperience(experience.id, 'custom_skill_name', undefined);
                                                                     setSkillSearches({...skillSearches, [experience.id]: skill.name});
@@ -338,7 +402,7 @@ export default function WorkHistoryStep({
                                                         ))}
                                                     {globalSkills.filter(skill => skill.name.toLowerCase().includes(skillSearches[experience.id].toLowerCase())).length === 0 && (
                                                         <div className="px-3 py-2 text-sm text-gray-500">
-                                                            No matches. Press Enter to add "{skillSearches[experience.id]}" as custom skill.
+                                                            No matches. "{skillSearches[experience.id]}" will be added as custom skill.
                                                         </div>
                                                     )}
                                                 </div>
@@ -359,12 +423,20 @@ export default function WorkHistoryStep({
                                                     updateWorkExperience(experience.id, 'custom_industry_name', value);
                                                 }}
                                                 onFocus={() => setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: true})}
+                                                onBlur={() => {
+                                                    setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: false});
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === 'Enter' || e.key === 'Escape') {
+                                                        setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: false});
+                                                    }
+                                                }}
                                                 placeholder="Type to search or enter custom industry..."
                                                 className="mt-1"
                                             />
                                             
                                             {/* Suggestions dropdown */}
-                                            {showIndustrySuggestions[experience.id] && industrySearches[experience.id] && (
+                                            {showIndustrySuggestions[experience.id] && industrySearches[experience.id] && industrySearches[experience.id].length > 0 && (
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                                                     {globalIndustries
                                                         .filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase()))
@@ -373,7 +445,8 @@ export default function WorkHistoryStep({
                                                             <div
                                                                 key={industry.id}
                                                                 className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
-                                                                onClick={() => {
+                                                                onMouseDown={(e) => {
+                                                                    e.preventDefault(); // Prevent blur
                                                                     updateWorkExperience(experience.id, 'global_industry_id', industry.id);
                                                                     updateWorkExperience(experience.id, 'custom_industry_name', undefined);
                                                                     setIndustrySearches({...industrySearches, [experience.id]: industry.name});
@@ -385,7 +458,7 @@ export default function WorkHistoryStep({
                                                         ))}
                                                     {globalIndustries.filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase())).length === 0 && (
                                                         <div className="px-3 py-2 text-sm text-gray-500">
-                                                            No matches. Press Enter to add "{industrySearches[experience.id]}" as custom industry.
+                                                            No matches. "{industrySearches[experience.id]}" will be added as custom industry.
                                                         </div>
                                                     )}
                                                 </div>
@@ -394,27 +467,8 @@ export default function WorkHistoryStep({
                                         </div>
                                     </div>
 
-                                    {/* Current Job Toggle */}
-                                    <div className="flex items-center space-x-2">
-                                        <input
-                                            type="checkbox"
-                                            id={`current-${experience.id}`}
-                                            checked={experience.is_current}
-                                            onChange={(e) => {
-                                                updateWorkExperience(experience.id, 'is_current', e.target.checked);
-                                                if (e.target.checked) {
-                                                    updateWorkExperience(experience.id, 'end_date', '');
-                                                }
-                                            }}
-                                            className="h-4 w-4 text-blue-600 rounded"
-                                        />
-                                        <Label htmlFor={`current-${experience.id}`} className="text-sm">
-                                            This is my current job
-                                        </Label>
-                                    </div>
-
-                                    {/* Date Range */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {/* Dates and Current Job */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
                                         <div>
                                             <Label className="text-sm font-medium">Start Date *</Label>
                                             <Input
@@ -425,19 +479,43 @@ export default function WorkHistoryStep({
                                                 max={new Date().toISOString().split('T')[0]}
                                             />
                                         </div>
-                                        {!experience.is_current && (
-                                            <div>
-                                                <Label className="text-sm font-medium">End Date *</Label>
-                                                <Input
-                                                    type="date"
-                                                    value={experience.end_date}
-                                                    onChange={(e) => updateWorkExperience(experience.id, 'end_date', e.target.value)}
-                                                    className="mt-1"
-                                                    min={experience.start_date}
-                                                    max={new Date().toISOString().split('T')[0]}
+                                        <div>
+                                            <Label className="text-sm font-medium">End Date (Optional)</Label>
+                                            <Input
+                                                type="date"
+                                                value={experience.end_date}
+                                                onChange={(e) => updateWorkExperience(experience.id, 'end_date', e.target.value)}
+                                                className="mt-1"
+                                                min={experience.start_date}
+                                                max={new Date().toISOString().split('T')[0]}
+                                                disabled={experience.is_current}
+                                            />
+                                        </div>
+                                        <div className="relative z-50 flex items-center space-x-3 sm:justify-start whitespace-nowrap self-end h-[42px]">
+                                            <button
+                                                type="button"
+                                                onClick={() => toggleCurrentJob(experience.id)}
+                                                className={`
+                                                    relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer
+                                                    ${experience.is_current ? 'bg-blue-600' : 'bg-gray-200'}
+                                                `}
+                                                role="switch"
+                                                aria-checked={experience.is_current}
+                                            >
+                                                <span
+                                                    className={`
+                                                        inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out
+                                                        ${experience.is_current ? 'translate-x-6' : 'translate-x-1'}
+                                                    `}
                                                 />
-                                            </div>
-                                        )}
+                                            </button>
+                                            <span
+                                                onClick={() => toggleCurrentJob(experience.id)}
+                                                className="text-sm cursor-pointer select-none"
+                                            >
+                                                This is my current job
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Job Description */}
@@ -474,9 +552,13 @@ export default function WorkHistoryStep({
                                                 <Label className="text-sm">Supervisor Phone</Label>
                                                 <Input
                                                     value={experience.supervisor_contact || ''}
-                                                    onChange={(e) => updateWorkExperience(experience.id, 'supervisor_contact', e.target.value)}
+                                                    onChange={(e) => {
+                                                        const formatted = formatCanadianPhone(e.target.value);
+                                                        updateWorkExperience(experience.id, 'supervisor_contact', formatted);
+                                                    }}
                                                     placeholder="(416) 555-0123"
                                                     className="mt-1"
+                                                    maxLength={14}
                                                 />
                                             </div>
                                         </div>
@@ -531,9 +613,9 @@ export default function WorkHistoryStep({
                                         variant="ghost"
                                         size="sm"
                                         onClick={() => removeReference(reference.id)}
-                                        className="text-gray-400 hover:text-red-500 cursor-pointer"
+                                        className="text-gray-500 hover:text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
                                     >
-                                        <X className="h-4 w-4" />
+                                        <X className="h-5 w-5" />
                                     </Button>
                                 </div>
 
@@ -575,9 +657,13 @@ export default function WorkHistoryStep({
                                             <Label className="text-sm font-medium">Phone Number *</Label>
                                             <Input
                                                 value={reference.reference_phone}
-                                                onChange={(e) => updateReference(reference.id, 'reference_phone', e.target.value)}
+                                                onChange={(e) => {
+                                                    const formatted = formatCanadianPhone(e.target.value);
+                                                    updateReference(reference.id, 'reference_phone', formatted);
+                                                }}
                                                 placeholder="(416) 555-0123"
                                                 className="mt-1"
+                                                maxLength={14}
                                             />
                                         </div>
                                         <div>
