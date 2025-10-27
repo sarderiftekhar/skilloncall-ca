@@ -342,6 +342,18 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    // Clear city when province changes
+    React.useEffect(() => {
+        if (formData.province && formData.city) {
+            const selectedCity = CANADIAN_CITIES.find((city) => city.value === formData.city);
+            if (selectedCity && !selectedCity.label.endsWith(`, ${formData.province}`)) {
+                // City doesn't match the province, clear it
+                handleInputChange('city', '');
+                setCitySearch('');
+            }
+        }
+    }, [formData.province]);
+
     // Initialize citySearch with the selected city label
     React.useEffect(() => {
         if (formData.city && !citySearch) {
@@ -367,8 +379,16 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         }
     }, [formData.city, citySearch]);
 
-    // Filter cities based on search
-    const filteredCities = CANADIAN_CITIES.filter((city) => city.label.toLowerCase().includes(citySearch.toLowerCase())).slice(0, 10); // Show max 10 results
+    // Filter cities based on selected province and search
+    const filteredCities = CANADIAN_CITIES.filter((city) => {
+        // First filter by province if one is selected
+        if (formData.province) {
+            const provinceMatch = city.label.endsWith(`, ${formData.province}`);
+            if (!provinceMatch) return false;
+        }
+        // Then filter by search text
+        return city.label.toLowerCase().includes(citySearch.toLowerCase());
+    }).slice(0, 10); // Show max 10 results
 
     const handleInputChange = (field: string, value: unknown) => {
         updateFormData({ [field]: value });
