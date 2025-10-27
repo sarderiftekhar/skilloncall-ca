@@ -260,6 +260,30 @@ class OnboardingController extends Controller
 
     private function saveSkillsExperience(WorkerProfile $profile, array $data)
     {
+        // First, handle custom skills by creating them in global_skills
+        if (isset($data['selected_skills']) && is_array($data['selected_skills'])) {
+            foreach ($data['selected_skills'] as &$skill) {
+                // Check if this is a custom skill (has is_custom flag or ID doesn't exist in DB)
+                if (isset($skill['is_custom']) && $skill['is_custom']) {
+                    // Create the custom skill in global_skills table
+                    $globalSkill = \App\Models\GlobalSkill::firstOrCreate(
+                        ['name' => $skill['name'], 'category' => $skill['category'] ?? 'Other'],
+                        [
+                            'description' => null,
+                            'requires_certification' => false,
+                            'is_active' => true,
+                            'sort_order' => 9999, // Put custom skills at the end
+                        ]
+                    );
+                    
+                    // Replace the temporary ID with the real database ID
+                    $skill['id'] = $globalSkill->id;
+                    // Remove the is_custom flag for validation
+                    unset($skill['is_custom']);
+                }
+            }
+        }
+
         $validated = validator($data, [
             'overall_experience' => 'required|in:beginner,intermediate,advanced,expert',
             'selected_skills' => 'required|array|min:1',
