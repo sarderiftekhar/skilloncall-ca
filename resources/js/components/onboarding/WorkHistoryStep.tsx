@@ -295,14 +295,13 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Main Skill Used (Optional)</Label>
                                             <Select
-                                                value={experience.global_skill_id?.toString() || ''}
+                                                value={experience.global_skill_id?.toString()}
                                                 onValueChange={(value) => updateWorkExperience(experience.id, 'global_skill_id', parseInt(value))}
                                             >
                                                 <SelectTrigger className="mt-1">
                                                     <SelectValue placeholder="Select skill or skip if not listed" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="">None / Skip</SelectItem>
                                                     {globalSkills.map((skill) => (
                                                         <SelectItem key={skill.id} value={skill.id.toString()}>
                                                             {skill.name}
@@ -315,14 +314,13 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Industry (Optional)</Label>
                                             <Select
-                                                value={experience.global_industry_id?.toString() || ''}
+                                                value={experience.global_industry_id?.toString()}
                                                 onValueChange={(value) => updateWorkExperience(experience.id, 'global_industry_id', parseInt(value))}
                                             >
                                                 <SelectTrigger className="mt-1">
                                                     <SelectValue placeholder="Select industry or skip if not listed" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="">None / Skip</SelectItem>
                                                     {globalIndustries.map((industry) => (
                                                         <SelectItem key={industry.id} value={industry.id.toString()}>
                                                             {industry.name}

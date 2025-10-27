@@ -298,7 +298,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                         <Label htmlFor="work_authorization" className="text-sm font-medium">
                             Work Authorization Status *
                         </Label>
-                        <Select value={formData.work_authorization || ''} onValueChange={(value) => handleInputChange('work_authorization', value)}>
+                        <Select value={formData.work_authorization as string | undefined} onValueChange={(value) => handleInputChange('work_authorization', value)}>
                             <SelectTrigger className="mt-1">
                                 <SelectValue placeholder="Select your work status" />
                             </SelectTrigger>
@@ -350,7 +350,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                             <Label htmlFor="province" className="text-sm font-medium">
                                 Province *
                             </Label>
-                            <Select value={formData.province || ''} onValueChange={(value) => handleInputChange('province', value)}>
+                            <Select value={formData.province as string | undefined} onValueChange={(value) => handleInputChange('province', value)}>
                                 <SelectTrigger className="mt-1">
                                     <SelectValue placeholder="Select" />
                                 </SelectTrigger>
