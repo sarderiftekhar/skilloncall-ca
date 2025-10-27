@@ -307,6 +307,40 @@ class OnboardingController extends Controller
 
     private function saveWorkHistory(WorkerProfile $profile, array $data)
     {
+        // First, handle custom skills and industries in work experiences
+        if (isset($data['work_experiences']) && is_array($data['work_experiences'])) {
+            foreach ($data['work_experiences'] as $index => $experience) {
+                // Handle custom skill
+                if (!empty($experience['custom_skill_name']) && empty($experience['global_skill_id'])) {
+                    $globalSkill = \App\Models\GlobalSkill::firstOrCreate(
+                        ['name' => $experience['custom_skill_name'], 'category' => 'Other'],
+                        [
+                            'description' => null,
+                            'requires_certification' => false,
+                            'is_active' => true,
+                            'sort_order' => 9999,
+                        ]
+                    );
+                    $data['work_experiences'][$index]['global_skill_id'] = $globalSkill->id;
+                    unset($data['work_experiences'][$index]['custom_skill_name']);
+                }
+                
+                // Handle custom industry
+                if (!empty($experience['custom_industry_name']) && empty($experience['global_industry_id'])) {
+                    $globalIndustry = \App\Models\GlobalIndustry::firstOrCreate(
+                        ['name' => $experience['custom_industry_name'], 'category' => 'Other'],
+                        [
+                            'description' => null,
+                            'is_active' => true,
+                            'sort_order' => 9999,
+                        ]
+                    );
+                    $data['work_experiences'][$index]['global_industry_id'] = $globalIndustry->id;
+                    unset($data['work_experiences'][$index]['custom_industry_name']);
+                }
+            }
+        }
+
         $validated = validator($data, [
             'employment_status' => 'required|in:employed,unemployed,self_employed',
             'work_experiences' => 'required|array|min:1',

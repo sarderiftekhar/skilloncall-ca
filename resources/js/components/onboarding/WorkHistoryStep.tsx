@@ -28,6 +28,8 @@ interface WorkExperience {
     supervisor_contact?: string;
     global_skill_id?: number;
     global_industry_id?: number;
+    custom_skill_name?: string;
+    custom_industry_name?: string;
 }
 
 interface Reference {
@@ -61,6 +63,10 @@ export default function WorkHistoryStep({
     const [references, setReferences] = useState<Reference[]>(
         formData.references || []
     );
+    const [skillSearches, setSkillSearches] = useState<{[key: string]: string}>({});
+    const [industrySearches, setIndustrySearches] = useState<{[key: string]: string}>({});
+    const [showSkillSuggestions, setShowSkillSuggestions] = useState<{[key: string]: boolean}>({});
+    const [showIndustrySuggestions, setShowIndustrySuggestions] = useState<{[key: string]: boolean}>({});
 
     // Work Experience Management
     const addWorkExperience = () => {
@@ -292,43 +298,99 @@ export default function WorkHistoryStep({
 
                                     {/* Skill & Industry */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
+                                        <div className="relative">
                                             <Label className="text-sm font-medium">Main Skill Used (Optional)</Label>
-                                            <Select
-                                                value={experience.global_skill_id?.toString()}
-                                                onValueChange={(value) => updateWorkExperience(experience.id, 'global_skill_id', parseInt(value))}
-                                            >
-                                                <SelectTrigger className="mt-1">
-                                                    <SelectValue placeholder="Select skill or skip if not listed" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {globalSkills.map((skill) => (
-                                                        <SelectItem key={skill.id} value={skill.id.toString()}>
-                                                            {skill.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <p className="text-xs text-gray-500 mt-1">Select if your skill is in the list, or skip this</p>
+                                            <Input
+                                                type="text"
+                                                value={skillSearches[experience.id] || experience.custom_skill_name || globalSkills.find(s => s.id === experience.global_skill_id)?.name || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setSkillSearches({...skillSearches, [experience.id]: value});
+                                                    setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: true});
+                                                    // Clear the selected skill when typing
+                                                    updateWorkExperience(experience.id, 'global_skill_id', undefined);
+                                                    updateWorkExperience(experience.id, 'custom_skill_name', value);
+                                                }}
+                                                onFocus={() => setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: true})}
+                                                placeholder="Type to search or enter custom skill..."
+                                                className="mt-1"
+                                            />
+                                            
+                                            {/* Suggestions dropdown */}
+                                            {showSkillSuggestions[experience.id] && skillSearches[experience.id] && (
+                                                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                                    {globalSkills
+                                                        .filter(skill => skill.name.toLowerCase().includes(skillSearches[experience.id].toLowerCase()))
+                                                        .slice(0, 10)
+                                                        .map((skill) => (
+                                                            <div
+                                                                key={skill.id}
+                                                                className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
+                                                                onClick={() => {
+                                                                    updateWorkExperience(experience.id, 'global_skill_id', skill.id);
+                                                                    updateWorkExperience(experience.id, 'custom_skill_name', undefined);
+                                                                    setSkillSearches({...skillSearches, [experience.id]: skill.name});
+                                                                    setShowSkillSuggestions({...showSkillSuggestions, [experience.id]: false});
+                                                                }}
+                                                            >
+                                                                {skill.name}
+                                                            </div>
+                                                        ))}
+                                                    {globalSkills.filter(skill => skill.name.toLowerCase().includes(skillSearches[experience.id].toLowerCase())).length === 0 && (
+                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                            No matches. Press Enter to add "{skillSearches[experience.id]}" as custom skill.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">Select from list or type your own</p>
                                         </div>
-                                        <div>
+                                        <div className="relative">
                                             <Label className="text-sm font-medium">Industry (Optional)</Label>
-                                            <Select
-                                                value={experience.global_industry_id?.toString()}
-                                                onValueChange={(value) => updateWorkExperience(experience.id, 'global_industry_id', parseInt(value))}
-                                            >
-                                                <SelectTrigger className="mt-1">
-                                                    <SelectValue placeholder="Select industry or skip if not listed" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {globalIndustries.map((industry) => (
-                                                        <SelectItem key={industry.id} value={industry.id.toString()}>
-                                                            {industry.name}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <p className="text-xs text-gray-500 mt-1">Select if your industry is in the list, or skip this</p>
+                                            <Input
+                                                type="text"
+                                                value={industrySearches[experience.id] || experience.custom_industry_name || globalIndustries.find(i => i.id === experience.global_industry_id)?.name || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setIndustrySearches({...industrySearches, [experience.id]: value});
+                                                    setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: true});
+                                                    // Clear the selected industry when typing
+                                                    updateWorkExperience(experience.id, 'global_industry_id', undefined);
+                                                    updateWorkExperience(experience.id, 'custom_industry_name', value);
+                                                }}
+                                                onFocus={() => setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: true})}
+                                                placeholder="Type to search or enter custom industry..."
+                                                className="mt-1"
+                                            />
+                                            
+                                            {/* Suggestions dropdown */}
+                                            {showIndustrySuggestions[experience.id] && industrySearches[experience.id] && (
+                                                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                                    {globalIndustries
+                                                        .filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase()))
+                                                        .slice(0, 10)
+                                                        .map((industry) => (
+                                                            <div
+                                                                key={industry.id}
+                                                                className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
+                                                                onClick={() => {
+                                                                    updateWorkExperience(experience.id, 'global_industry_id', industry.id);
+                                                                    updateWorkExperience(experience.id, 'custom_industry_name', undefined);
+                                                                    setIndustrySearches({...industrySearches, [experience.id]: industry.name});
+                                                                    setShowIndustrySuggestions({...showIndustrySuggestions, [experience.id]: false});
+                                                                }}
+                                                            >
+                                                                {industry.name}
+                                                            </div>
+                                                        ))}
+                                                    {globalIndustries.filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase())).length === 0 && (
+                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                            No matches. Press Enter to add "{industrySearches[experience.id]}" as custom industry.
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-1">Select from list or type your own</p>
                                         </div>
                                     </div>
 
