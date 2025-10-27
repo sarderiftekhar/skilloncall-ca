@@ -592,8 +592,27 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                         placeholder="Apt 4B, Unit 101, etc."
                     />
 
-                    {/* City, Province, Postal Code */}
+                    {/* Province, City, Postal Code */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div>
+                            <Label htmlFor="province" className="text-sm font-medium">
+                                Province *
+                            </Label>
+                            <Select value={formData.province || ''} onValueChange={(value) => handleInputChange('province', value)}>
+                                <SelectTrigger className="mt-1">
+                                    <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CANADIAN_PROVINCES.map((province) => (
+                                        <SelectItem key={province.value} value={province.value}>
+                                            {province.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            {validationErrors.province && <p className="mt-1 text-sm text-red-600">{validationErrors.province}</p>}
+                        </div>
+
                         <div ref={cityInputRef} className="relative">
                             <Label htmlFor="city" className="text-sm font-medium">
                                 City *
@@ -644,25 +663,6 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                 )}
                             </div>
                             {validationErrors.city && <p className="mt-1 text-sm text-red-600">{validationErrors.city}</p>}
-                        </div>
-
-                        <div>
-                            <Label htmlFor="province" className="text-sm font-medium">
-                                Province *
-                            </Label>
-                            <Select value={formData.province || ''} onValueChange={(value) => handleInputChange('province', value)}>
-                                <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {CANADIAN_PROVINCES.map((province) => (
-                                        <SelectItem key={province.value} value={province.value}>
-                                            {province.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            {validationErrors.province && <p className="mt-1 text-sm text-red-600">{validationErrors.province}</p>}
                         </div>
 
                         <ValidatedInput
