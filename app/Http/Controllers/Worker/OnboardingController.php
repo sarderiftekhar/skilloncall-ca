@@ -262,7 +262,7 @@ class OnboardingController extends Controller
     {
         // First, handle custom skills by creating them in global_skills
         if (isset($data['selected_skills']) && is_array($data['selected_skills'])) {
-            foreach ($data['selected_skills'] as &$skill) {
+            foreach ($data['selected_skills'] as $index => $skill) {
                 // Check if this is a custom skill (has is_custom flag or ID doesn't exist in DB)
                 if (isset($skill['is_custom']) && $skill['is_custom']) {
                     // Create the custom skill in global_skills table
@@ -277,9 +277,9 @@ class OnboardingController extends Controller
                     );
                     
                     // Replace the temporary ID with the real database ID
-                    $skill['id'] = $globalSkill->id;
+                    $data['selected_skills'][$index]['id'] = $globalSkill->id;
                     // Remove the is_custom flag for validation
-                    unset($skill['is_custom']);
+                    unset($data['selected_skills'][$index]['is_custom']);
                 }
             }
         }
