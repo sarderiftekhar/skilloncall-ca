@@ -182,8 +182,7 @@ export default function ValidatedTextarea({
       
       {/* Character count for bio field */}
       {fieldType === 'bio' && (
-        <div className="flex justify-between text-xs text-gray-400">
-          <span>{INPUT_RESTRICTIONS.bio.description}</span>
+        <div className="flex justify-end text-xs text-gray-400">
           <span>{value.length}/200</span>
         </div>
       )}
