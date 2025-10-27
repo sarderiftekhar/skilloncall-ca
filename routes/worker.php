@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified', 'worker'])->prefix('worker')->name('worke
     Route::prefix('api')->name('api.')->group(function () {
         Route::get('/provinces', [LocationController::class, 'getProvinces'])->name('provinces');
         Route::get('/provinces/{provinceId}/cities', [LocationController::class, 'getCitiesByProvince'])->name('cities');
+        Route::get('/provinces/code/{provinceCode}/cities', [LocationController::class, 'getCitiesByProvinceCode'])->name('cities.by.code');
     });
 });
 
