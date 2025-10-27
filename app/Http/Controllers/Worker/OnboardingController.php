@@ -226,7 +226,7 @@ class OnboardingController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'date_of_birth' => 'required|date|before:today',
+            'date_of_birth' => 'nullable|date|before:today',
             'bio' => 'nullable|string|max:500',
             'address_line_1' => 'required|string|max:255',
             'address_line_2' => 'nullable|string|max:255',

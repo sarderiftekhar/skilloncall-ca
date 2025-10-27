@@ -143,8 +143,6 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         return age;
     };
 
-    const isValidAge = formData.date_of_birth ? calculateAge(formData.date_of_birth) >= 16 : true;
-
     return (
         <div className="space-y-6">
             {/* Welcome Message */}
@@ -249,18 +247,16 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                         <div>
                             <ValidatedInput
                                 id="date_of_birth"
-                                label="Date of Birth"
+                                label="Date of Birth (Optional)"
                                 fieldType="date"
                                 value={formData.date_of_birth || ''}
                                 onChange={(value) => handleInputChange('date_of_birth', value)}
                                 error={validationErrors.date_of_birth}
-                                required
                                 max={new Date().toISOString().split('T')[0]}
                             />
                             {formData.date_of_birth && (
-                                <p className={`mt-1 text-xs ${isValidAge ? 'text-gray-500' : 'text-red-600'}`}>
+                                <p className="mt-1 text-xs text-gray-500">
                                     Age: {calculateAge(formData.date_of_birth)} years
-                                    {!isValidAge && ' (Must be at least 16 years old)'}
                                 </p>
                             )}
                         </div>
