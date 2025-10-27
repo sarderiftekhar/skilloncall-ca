@@ -78,13 +78,34 @@ export default function SkillsExperienceStep({
     }, {});
 
     const addSkill = () => {
-        if (!selectedSkillId) return;
+        if (!selectedSkillId && !skillSearch.trim()) return;
         
         // Check if maximum skills limit is reached
         if (selectedSkills.length >= MAX_SKILLS) {
             return;
         }
 
+        // Check if it's a custom skill (no selectedSkillId but has skillSearch)
+        if (!selectedSkillId && skillSearch.trim()) {
+            // Add custom skill
+            const customSkill = {
+                id: Date.now(), // Use timestamp as temporary ID
+                name: skillSearch.trim(),
+                category: 'Other',
+                proficiency_level: 'intermediate',
+                is_primary: selectedSkills.length === 0,
+                is_custom: true // Flag to identify custom skills
+            };
+
+            const updatedSkills = [...selectedSkills, customSkill];
+            setSelectedSkills(updatedSkills);
+            updateFormData({ selected_skills: updatedSkills });
+            setSkillSearch('');
+            setSelectedSkillId('');
+            return;
+        }
+
+        // Add from predefined skills
         const skill = globalSkills.find(s => s.id.toString() === selectedSkillId);
         if (!skill || selectedSkills.find(s => s.id === skill.id)) return;
 
@@ -312,10 +333,25 @@ export default function SkillsExperienceStep({
                                     </div>
                                 )}
                                 
-                                {/* No results message */}
+                                {/* No results message with option to add custom skill */}
                                 {showSkillSuggestions && skillSearch && filteredSkills.length === 0 && (
-                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-sm text-gray-500">
-                                        No skills found matching "{skillSearch}"
+                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                                        <div className="p-3">
+                                            <p className="text-sm text-gray-500 mb-2">
+                                                No skills found matching "{skillSearch}"
+                                            </p>
+                                            <button
+                                                onClick={() => {
+                                                    setShowSkillSuggestions(false);
+                                                    // The Add Skill button will handle adding the custom skill
+                                                }}
+                                                className="w-full px-3 py-2 text-sm text-left rounded-md cursor-pointer hover:bg-blue-50 transition-colors"
+                                                style={{ color: '#10B3D6' }}
+                                            >
+                                                <Plus className="h-4 w-4 inline mr-2" />
+                                                Add "{skillSearch}" as a custom skill
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -326,7 +362,7 @@ export default function SkillsExperienceStep({
                                 setSkillSearch('');
                                 setSelectedSkillId('');
                             }}
-                            disabled={!selectedSkillId || selectedSkills.length >= MAX_SKILLS}
+                            disabled={(!selectedSkillId && !skillSearch.trim()) || selectedSkills.length >= MAX_SKILLS}
                             className={`text-white ${selectedSkills.length >= MAX_SKILLS ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             style={{backgroundColor: '#10B3D6', height: '2.7em'}}
                             title={selectedSkills.length >= MAX_SKILLS ? `Maximum of ${MAX_SKILLS} skills allowed` : 'Add skill to your profile'}
@@ -359,6 +395,11 @@ export default function SkillsExperienceStep({
                                                 {skill.is_primary && (
                                                     <Badge className="text-xs px-2 py-0.5" style={{backgroundColor: '#10B3D6', color: 'white'}}>
                                                         Main Skill
+                                                    </Badge>
+                                                )}
+                                                {skill.is_custom && (
+                                                    <Badge className="text-xs px-2 py-0.5 bg-green-100 text-green-700 border-green-300">
+                                                        Custom
                                                     </Badge>
                                                 )}
                                             </div>
