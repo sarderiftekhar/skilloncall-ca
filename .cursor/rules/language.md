@@ -1,0 +1,1 @@
+Eery page in this project should be in both French and English. hen you are developing or creating a page make sure to give option to the user for both langiages with proper translations.

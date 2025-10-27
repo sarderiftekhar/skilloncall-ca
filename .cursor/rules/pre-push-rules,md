@@ -1,0 +1,860 @@
+# Pre-Push Validation & Testing Checklist
+
+**Complete guide for code quality, testing, and validation before pushing changes**
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Automated Checks](#automated-checks)
+- [Manual Validation Steps](#manual-validation-steps)
+- [Testing Requirements](#testing-requirements)
+- [Code Quality Checks](#code-quality-checks)
+- [Build Validation](#build-validation)
+- [Quick Commands Reference](#quick-commands-reference)
+- [Troubleshooting](#troubleshooting)
+- [CI/CD Pipeline Checks](#cicd-pipeline-checks)
+
+---
+
+## Overview
+
+This document outlines all testing, compilation, and code validation steps that must pass before pushing code changes to the repository. These checks ensure code quality, prevent bugs, and maintain project standards.
+
+### Validation Levels
+
+1. **Pre-Commit** (Automatic) - Runs on `git commit`
+2. **Pre-Push** (Automatic) - Runs on `git push`
+3. **Manual** - Should be run before committing/pushing
+4. **CI/CD** - Runs on the server after push
+
+---
+
+## Automated Checks
+
+### Pre-Commit Hook (Runs on `git commit`)
+
+The pre-commit hook automatically runs `lint-staged` which executes the following:
+
+#### JavaScript/TypeScript Files (*.js, *.jsx, *.ts, *.tsx)
+```bash
+# 1. ESLint with auto-fix
+eslint --fix
+
+# 2. Prettier formatting
+prettier --write
+```
+
+**What it checks:**
+- React hooks rules (rules-of-hooks, exhaustive-deps)
+- TypeScript recommended rules
+- React best practices
+- Code formatting (indentation, quotes, semicolons)
+- Import organization
+
+#### JSON & CSS Files (*.json, *.css)
+```bash
+# Prettier formatting
+prettier --write
+```
+
+#### PHP Files (*.php)
+```bash
+# Laravel Pint style checking
+composer run-script format-check
+```
+
+**What it checks:**
+- PSR-12 coding standards
+- Laravel coding style
+- Code formatting and spacing
+- Proper indentation
+
+### Commit Message Hook (Runs on `git commit`)
+
+```bash
+# Validate commit message format
+npx commitlint --edit
+```
+
+**Required Format:**
+```
+PROJECT-123: type: description
+
+Examples:
+IAD-789: feat: Add user management interface
+IAD-790: fix: Resolve dashboard chart rendering
+IAD-791: docs: Update API documentation
+```
+
+**Valid Types:**
+- `feat` - New feature
+- `fix` - Bug fix
+- `docs` - Documentation changes
+- `style` - Formatting, missing semicolons, etc.
+- `refactor` - Code restructuring
+- `perf` - Performance improvements
+- `test` - Adding tests
+- `build` - Build system changes
+- `ci` - CI/CD changes
+- `chore` - Maintenance tasks
+- `revert` - Revert previous commit
+
+**Rules:**
+- Subject must start with uppercase letter
+- Subject must not end with period
+- Header max length: 120 characters
+- Must include Jira ticket number (PROJECT-123 format)
+
+### Pre-Push Hook (Runs on `git push`)
+
+```bash
+# 1. TypeScript type checking
+npm run types
+
+# 2. PHP tests (Pest)
+php artisan test
+```
+
+**What it checks:**
+- TypeScript compilation errors
+- Type safety issues
+- All PHP unit tests
+- All PHP feature tests
+- Database migrations
+- API endpoint tests
+- Authentication tests
+- Authorization tests
+
+---
+
+## Manual Validation Steps
+
+### 1. Full Quality Check
+
+Run the complete quality check suite:
+
+```bash
+# Complete quality check (Frontend + Backend)
+npm run quality
+```
+
+This executes:
+1. TypeScript type checking (`npm run types`)
+2. ESLint checking (`npm run lint:check`)
+3. PHP Pint formatting check (`composer format-check`)
+4. PHP tests (`php artisan test`)
+
+### 2. Individual Frontend Checks
+
+#### TypeScript Type Checking
+```bash
+npm run types
+# or
+npx tsc --noEmit
+```
+
+**What it checks:**
+- Type errors
+- Missing type definitions
+- Incorrect prop types
+- Type mismatches
+- Generic type issues
+
+#### ESLint Check (Without Auto-Fix)
+```bash
+npm run lint:check
+# or
+npx eslint .
+```
+
+#### ESLint with Auto-Fix
+```bash
+npm run lint
+# or
+npx eslint . --fix
+```
+
+#### Prettier Check (Without Auto-Fix)
+```bash
+npm run format:check
+# or
+npx prettier --check resources/
+```
+
+#### Prettier with Auto-Fix
+```bash
+npm run format
+# or
+npx prettier --write resources/
+```
+
+### 3. Backend Validation
+
+#### Laravel Pint Formatting Check
+```bash
+composer format-check
+# or
+vendor/bin/pint --test
+```
+
+#### Laravel Pint Auto-Format
+```bash
+composer format
+# or
+vendor/bin/pint
+```
+
+#### PHP Tests (Pest)
+```bash
+# Run all tests
+php artisan test
+
+# Run specific test suite
+php artisan test --testsuite=Feature
+php artisan test --testsuite=Unit
+
+# Run specific test file
+php artisan test tests/Feature/Auth/LoginTest.php
+
+# Run with coverage (requires Xdebug or PCOV)
+php artisan test --coverage
+
+# Run specific test method
+php artisan test --filter test_user_can_login
+```
+
+---
+
+## Testing Requirements
+
+### Backend Tests (PHP/Laravel)
+
+#### Test Structure
+```
+tests/
+├── Feature/              # Integration/Feature tests
+│   ├── Auth/            # Authentication tests
+│   ├── Admin/           # Admin feature tests
+│   ├── SuperAdmin/      # Super admin tests
+│   └── Client/          # Client tests
+├── Unit/                # Unit tests
+└── TestCase.php         # Base test case
+```
+
+#### What to Test
+
+**Feature Tests (tests/Feature/):**
+- HTTP endpoints (GET, POST, PUT, DELETE)
+- Authentication/Authorization
+- Form validation
+- Database operations
+- Inertia responses
+- Permissions and roles
+- Email sending
+- File uploads
+- API responses
+
+**Unit Tests (tests/Unit/):**
+- Service methods
+- Model methods
+- Helper functions
+- Enum values
+- Business logic
+
+#### Test Example
+```php
+<?php
+
+use App\Models\User;
+use function Pest\Laravel\{actingAs, get, post};
+
+it('allows authenticated users to view dashboard', function () {
+    $user = User::factory()->create();
+    
+    actingAs($user)
+        ->get('/dashboard')
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('domains/super-admin/Dashboard')
+            ->has('stats')
+        );
+});
+
+it('validates user creation request', function () {
+    $admin = User::factory()->create()->assignRole('super-admin');
+    
+    actingAs($admin)
+        ->post('/super-admin/users', [
+            'name' => '',
+            'email' => 'invalid-email',
+        ])
+        ->assertSessionHasErrors(['name', 'email']);
+});
+```
+
+#### Running Tests
+```bash
+# All tests
+php artisan test
+
+# With output
+php artisan test --verbose
+
+# Stop on first failure
+php artisan test --stop-on-failure
+
+# Parallel testing (faster)
+php artisan test --parallel
+
+# With coverage
+php artisan test --coverage --min=80
+```
+
+### Frontend Tests (TypeScript/React)
+
+#### TypeScript Compilation
+```bash
+# Type check all files
+npm run types
+
+# Watch mode
+npx tsc --noEmit --watch
+```
+
+#### Common Type Errors to Check
+- Missing interface definitions
+- Incorrect prop types
+- Unused imports
+- Any types (avoid using `any`)
+- Null/undefined handling
+- Promise return types
+
+---
+
+## Code Quality Checks
+
+### Code Style Standards
+
+#### PHP Standards (PSR-12 + Laravel)
+- Use 4 spaces for indentation
+- Opening braces on same line for methods
+- One blank line between methods
+- Type hints for parameters and return types
+- DocBlocks for complex methods
+- No trailing whitespace
+
+#### TypeScript/React Standards
+- Use 2 or 4 spaces for indentation (consistent)
+- PascalCase for components
+- camelCase for functions/variables
+- Interfaces for all props
+- Export components as default
+- Named exports for utilities
+
+### Linting Rules
+
+#### ESLint Rules (Enforced)
+```javascript
+// React
+- react/react-in-jsx-scope: off (React 17+)
+- react/prop-types: off (using TypeScript)
+- react-hooks/rules-of-hooks: error
+- react-hooks/exhaustive-deps: warn
+
+// TypeScript
+- @typescript-eslint/no-explicit-any: warn
+- @typescript-eslint/no-unused-vars: error
+```
+
+### Static Analysis
+
+#### PHP Static Analysis (Optional but Recommended)
+```bash
+# If PHPStan is installed
+vendor/bin/phpstan analyse
+
+# If Psalm is installed
+vendor/bin/psalm
+```
+
+---
+
+## Build Validation
+
+### Development Build
+```bash
+# Start development server (includes build)
+npm run dev
+
+# Or with Laravel
+composer run dev
+```
+
+### Production Build
+```bash
+# Build for production
+npm run build
+
+# Build with SSR
+npm run build:ssr
+```
+
+**What to check:**
+- No build errors
+- No TypeScript errors
+- No dependency issues
+- Build completes successfully
+- Assets compiled correctly
+
+### Build Output Verification
+```bash
+# Check build output
+ls -la public/build/
+
+# Verify manifest
+cat public/build/manifest.json
+```
+
+---
+
+## Quick Commands Reference
+
+### Pre-Push Complete Checklist
+
+Run these commands in order before pushing:
+
+```bash
+# 1. Format all code
+npm run format
+composer format
+
+# 2. Run quality checks
+npm run quality
+
+# 3. Type check
+npm run types
+
+# 4. Lint check
+npm run lint:check
+
+# 5. Run tests
+php artisan test
+
+# 6. Build check (optional but recommended)
+npm run build
+
+# 7. Check git status
+git status
+
+# 8. Stage changes
+git add .
+
+# 9. Commit (hooks run automatically)
+git commit -m "IAD-123: feat: Your feature description"
+
+# 10. Push (pre-push hook runs automatically)
+git push origin your-branch
+```
+
+### Quick Validation Scripts
+
+```bash
+# Full quality check
+npm run quality
+
+# Frontend only
+npm run test:js
+
+# Backend only
+php artisan test
+
+# Format everything
+npm run format && composer format
+
+# Check everything without fixing
+npm run lint:check && npm run format:check && composer format-check
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. Pre-Commit Hook Fails
+
+**ESLint Errors:**
+```bash
+# Auto-fix lint errors
+npm run lint
+
+# Check what's wrong
+npm run lint:check
+
+# Manual fix if needed
+npx eslint path/to/file.tsx --fix
+```
+
+**Prettier Errors:**
+```bash
+# Format all files
+npm run format
+
+# Format specific file
+npx prettier --write path/to/file.tsx
+```
+
+**PHP Pint Errors:**
+```bash
+# Auto-fix PHP style
+composer format
+
+# Check specific file
+vendor/bin/pint path/to/file.php
+```
+
+#### 2. Pre-Push Hook Fails
+
+**TypeScript Errors:**
+```bash
+# Check types
+npm run types
+
+# Common fixes:
+# - Add missing type definitions
+# - Fix type mismatches
+# - Add interface for props
+# - Remove unused imports
+```
+
+**Test Failures:**
+```bash
+# Run tests verbosely to see details
+php artisan test --verbose
+
+# Run specific failing test
+php artisan test --filter test_name
+
+# Clear cache and retry
+php artisan cache:clear
+php artisan config:clear
+php artisan test
+```
+
+#### 3. Commit Message Rejected
+
+```bash
+# Wrong format
+git commit -m "Add feature"
+# ❌ Missing project ID and type
+
+# Correct format
+git commit -m "IAD-123: feat: Add user management feature"
+# ✅ Includes PROJECT-123, type, and description
+```
+
+#### 4. Build Failures
+
+```bash
+# Clear node modules and reinstall
+rm -rf node_modules
+npm install
+
+# Clear Vite cache
+rm -rf node_modules/.vite
+
+# Clear build
+rm -rf public/build
+
+# Rebuild
+npm run build
+```
+
+#### 5. Database Test Failures
+
+```bash
+# Ensure test database is fresh
+php artisan config:clear
+
+# Check migrations
+php artisan migrate:status
+
+# Run tests with fresh database
+php artisan test --env=testing
+```
+
+### Bypassing Hooks (Emergency Only)
+
+```bash
+# Skip pre-commit and commit-msg hooks
+git commit --no-verify -m "message"
+
+# Skip pre-push hook
+git push --no-verify
+
+# ⚠️ WARNING: Only use in emergencies!
+# You must fix issues in a follow-up commit immediately!
+```
+
+---
+
+## CI/CD Pipeline Checks
+
+### Automated Server-Side Checks
+
+When code is pushed to the repository, the CI/CD pipeline should run:
+
+#### 1. Dependency Installation
+```bash
+composer install --no-dev --optimize-autoloader
+npm ci --production
+```
+
+#### 2. Code Quality
+```bash
+# PHP linting
+composer format-check
+
+# JavaScript linting
+npm run lint:check
+
+# TypeScript compilation
+npm run types
+```
+
+#### 3. Testing
+```bash
+# Backend tests
+php artisan test --parallel --coverage
+
+# Minimum coverage threshold
+# Should be at least 70% (adjust as needed)
+```
+
+#### 4. Build
+```bash
+# Production build
+npm run build
+
+# Verify build output
+ls -la public/build/
+```
+
+#### 5. Security Checks
+```bash
+# PHP dependencies security check
+composer audit
+
+# NPM dependencies security check
+npm audit --audit-level=moderate
+```
+
+#### 6. Database Validation
+```bash
+# Check migrations can run
+php artisan migrate:status
+
+# Dry-run migrations
+php artisan migrate --pretend
+```
+
+---
+
+## Best Practices
+
+### Before Committing
+
+- [ ] Code is tested locally
+- [ ] No `console.log()` or debug code
+- [ ] No commented-out code (unless documented)
+- [ ] Imports are organized
+- [ ] No unused imports or variables
+- [ ] TypeScript types are defined
+- [ ] Commit message follows convention
+- [ ] Files are properly formatted
+
+### Before Pushing
+
+- [ ] All commits follow naming convention
+- [ ] Branch is up to date with main/staging
+- [ ] All tests pass locally
+- [ ] No merge conflicts
+- [ ] Branch name follows convention
+- [ ] Code reviewed (if possible)
+- [ ] Documentation updated (if needed)
+
+### Code Review Checklist
+
+- [ ] Code follows project standards
+- [ ] Tests are included for new features
+- [ ] No security vulnerabilities
+- [ ] Performance is acceptable
+- [ ] No breaking changes (or documented)
+- [ ] Error handling is proper
+- [ ] Logging is appropriate
+- [ ] Comments explain complex logic
+
+---
+
+## Environment-Specific Validation
+
+### Local Development
+```bash
+# Ensure environment is set up
+composer install
+npm install
+
+# Database is ready
+php artisan migrate
+
+# Cache is clear
+php artisan cache:clear
+php artisan config:clear
+
+# Run full validation
+npm run quality
+```
+
+### Staging Environment
+```bash
+# All production checks plus:
+# - Seed data validation
+# - Migration testing
+# - Integration tests
+# - Performance testing
+```
+
+### Production Environment
+```bash
+# Never run destructive commands:
+# ❌ php artisan migrate:fresh
+# ❌ php artisan migrate:refresh
+# ❌ php artisan migrate:reset
+# ❌ php artisan db:seed (unless approved)
+
+# Safe commands:
+# ✅ php artisan migrate
+# ✅ php artisan cache:clear
+# ✅ php artisan config:cache
+# ✅ php artisan route:cache
+# ✅ php artisan view:cache
+```
+
+---
+
+## Git Workflow Integration
+
+### Complete Workflow
+
+```bash
+# 1. Create feature branch
+git checkout -b feature/user-management
+
+# 2. Make changes
+# ... code changes ...
+
+# 3. Run manual validation
+npm run quality
+
+# 4. Stage changes
+git add .
+
+# 5. Commit (pre-commit hook runs)
+git commit -m "IAD-123: feat: Add user management"
+
+# 6. Push (pre-push hook runs)
+git push origin feature/user-management
+
+# 7. Create Pull Request
+# - CI/CD pipeline runs on server
+# - Code review by team
+# - Merge to staging/main
+```
+
+---
+
+## Configuration Files Reference
+
+### Key Configuration Files
+
+```
+Project Root
+├── .husky/                          # Git hooks
+│   ├── pre-commit                  # Lint-staged
+│   ├── commit-msg                  # Commitlint
+│   └── pre-push                    # Types + Tests
+├── .lintstagedrc.json              # Lint-staged config
+├── commitlint.config.js            # Commit message rules
+├── eslint.config.js                # ESLint configuration
+├── tsconfig.json                   # TypeScript config
+├── phpunit.xml                     # PHP testing config
+├── vite.config.ts                  # Build configuration
+├── composer.json                   # PHP dependencies & scripts
+└── package.json                    # JS dependencies & scripts
+```
+
+### Modifying Validation Rules
+
+To customize validation:
+
+1. **ESLint rules:** Edit `eslint.config.js`
+2. **Prettier rules:** Edit `.prettierrc` (if exists) or add to `package.json`
+3. **PHP Pint rules:** Edit `pint.json` (if exists) or use defaults
+4. **Commit message rules:** Edit `commitlint.config.js`
+5. **Git hooks:** Edit files in `.husky/` directory
+
+---
+
+## Summary
+
+### Automatic Validation (No Action Required)
+
+✅ **On Commit:**
+- ESLint auto-fix
+- Prettier formatting
+- PHP Pint check
+- Commit message validation
+
+✅ **On Push:**
+- TypeScript type checking
+- All PHP tests
+
+### Manual Validation (Run Before Push)
+
+📋 **Recommended:**
+```bash
+npm run quality        # Complete quality check
+npm run types         # TypeScript check
+npm run lint:check    # Lint check
+php artisan test      # Run tests
+```
+
+---
+
+## Additional Resources
+
+- **Project Guide:** `documentation/developer-guide.md`
+- **Git Workflow:** `documentation/git-workflow-guide.md`
+- **Quick Reference:** `documentation/git-workflow-quick-reference.md`
+- **Design Guide:** `documentation/design-guide.md`
+
+---
+
+**Version:** 1.0.0  
+**Last Updated:** October 23, 2025  
+**Maintained By:** Development Team
+
+---
+
+## Need Help?
+
+1. Check this guide first
+2. Review error messages carefully
+3. Run `git status` to see current state
+4. Run `npm run quality` to identify issues
+5. Check project documentation
+6. Ask team lead or senior developer
+
+**Remember:** These checks exist to maintain code quality and prevent bugs. While they may seem strict, they save time in the long run by catching issues early!
