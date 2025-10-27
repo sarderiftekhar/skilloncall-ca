@@ -281,7 +281,6 @@ export default function SkillsExperienceStep({
                                                                 }}
                                                             >
                                                                 {skill.name}
-                                                                {skill.requires_certification && <span className="text-xs text-orange-600 ml-1">(License Required)</span>}
                                                             </div>
                                                         );
                                                     })}
@@ -305,7 +304,6 @@ export default function SkillsExperienceStep({
                                                             }}
                                                         >
                                                             {skill.name}
-                                                            {skill.requires_certification && <span className="text-xs text-orange-600 ml-1">(License Required)</span>}
                                                         </div>
                                                     ))}
                                                 </div>
