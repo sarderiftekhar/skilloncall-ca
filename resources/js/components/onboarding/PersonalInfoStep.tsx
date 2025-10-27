@@ -37,299 +37,51 @@ const CANADIAN_PROVINCES = [
     { value: 'YT', label: 'Yukon' },
 ];
 
-const CANADIAN_CITIES = [
-    // Ontario
-    { value: 'toronto', label: 'Toronto, ON' },
-    { value: 'ottawa', label: 'Ottawa, ON' },
-    { value: 'hamilton', label: 'Hamilton, ON' },
-    { value: 'london', label: 'London, ON' },
-    { value: 'kitchener', label: 'Kitchener, ON' },
-    { value: 'windsor', label: 'Windsor, ON' },
-    { value: 'oshawa', label: 'Oshawa, ON' },
-    { value: 'barrie', label: 'Barrie, ON' },
-    { value: 'guelph', label: 'Guelph, ON' },
-    { value: 'kingston', label: 'Kingston, ON' },
-    { value: 'thunder-bay', label: 'Thunder Bay, ON' },
-    { value: 'sudbury', label: 'Sudbury, ON' },
-    { value: 'waterloo', label: 'Waterloo, ON' },
-    { value: 'cambridge', label: 'Cambridge, ON' },
-    { value: 'sarnia', label: 'Sarnia, ON' },
-    { value: 'peterborough', label: 'Peterborough, ON' },
-    { value: 'belleville', label: 'Belleville, ON' },
-    { value: 'sault-ste-marie', label: 'Sault Ste. Marie, ON' },
-    { value: 'north-bay', label: 'North Bay, ON' },
-    { value: 'cornwall', label: 'Cornwall, ON' },
 
-    // Quebec
-    { value: 'montreal', label: 'Montreal, QC' },
-    { value: 'quebec-city', label: 'Quebec City, QC' },
-    { value: 'laval', label: 'Laval, QC' },
-    { value: 'gatineau', label: 'Gatineau, QC' },
-    { value: 'longueuil', label: 'Longueuil, QC' },
-    { value: 'sherbrooke', label: 'Sherbrooke, QC' },
-    { value: 'trois-rivieres', label: 'Trois-Rivières, QC' },
-    { value: 'saguenay', label: 'Saguenay, QC' },
-    { value: 'levis', label: 'Lévis, QC' },
-    { value: 'terrebonne', label: 'Terrebonne, QC' },
-    { value: 'saint-jean-sur-richelieu', label: 'Saint-Jean-sur-Richelieu, QC' },
-    { value: 'brossard', label: 'Brossard, QC' },
-    { value: 'drummondville', label: 'Drummondville, QC' },
-    { value: 'saint-jerome', label: 'Saint-Jérôme, QC' },
-    { value: 'granby', label: 'Granby, QC' },
-    { value: 'saint-hyacinthe', label: 'Saint-Hyacinthe, QC' },
-    { value: 'shawinigan', label: 'Shawinigan, QC' },
-    { value: 'dollard-des-ormeaux', label: 'Dollard-des-Ormeaux, QC' },
-    { value: 'blainville', label: 'Blainville, QC' },
-    { value: 'chateauguay', label: 'Châteauguay, QC' },
-
-    // British Columbia
-    { value: 'vancouver', label: 'Vancouver, BC' },
-    { value: 'surrey', label: 'Surrey, BC' },
-    { value: 'burnaby', label: 'Burnaby, BC' },
-    { value: 'richmond', label: 'Richmond, BC' },
-    { value: 'abbotsford', label: 'Abbotsford, BC' },
-    { value: 'coquitlam', label: 'Coquitlam, BC' },
-    { value: 'saanich', label: 'Saanich, BC' },
-    { value: 'delta', label: 'Delta, BC' },
-    { value: 'kelowna', label: 'Kelowna, BC' },
-    { value: 'langley', label: 'Langley, BC' },
-    { value: 'kamloops', label: 'Kamloops, BC' },
-    { value: 'nanaimo', label: 'Nanaimo, BC' },
-    { value: 'chilliwack', label: 'Chilliwack, BC' },
-    { value: 'north-vancouver', label: 'North Vancouver, BC' },
-    { value: 'west-vancouver', label: 'West Vancouver, BC' },
-    { value: 'new-westminster', label: 'New Westminster, BC' },
-    { value: 'port-coquitlam', label: 'Port Coquitlam, BC' },
-    { value: 'maple-ridge', label: 'Maple Ridge, BC' },
-    { value: 'white-rock', label: 'White Rock, BC' },
-    { value: 'port-moody', label: 'Port Moody, BC' },
-
-    // Alberta
-    { value: 'calgary', label: 'Calgary, AB' },
-    { value: 'edmonton', label: 'Edmonton, AB' },
-    { value: 'red-deer', label: 'Red Deer, AB' },
-    { value: 'lethbridge', label: 'Lethbridge, AB' },
-    { value: 'medicine-hat', label: 'Medicine Hat, AB' },
-    { value: 'grande-prairie', label: 'Grande Prairie, AB' },
-    { value: 'airdrie', label: 'Airdrie, AB' },
-    { value: 'spruce-grove', label: 'Spruce Grove, AB' },
-    { value: 'lethbridge', label: 'Lethbridge, AB' },
-    { value: 'fort-mcmurray', label: 'Fort McMurray, AB' },
-    { value: 'sherwood-park', label: 'Sherwood Park, AB' },
-    { value: 'st-albert', label: 'St. Albert, AB' },
-    { value: 'brooks', label: 'Brooks, AB' },
-    { value: 'camrose', label: 'Camrose, AB' },
-    { value: 'cold-lake', label: 'Cold Lake, AB' },
-    { value: 'drumheller', label: 'Drumheller, AB' },
-    { value: 'grande-cache', label: 'Grande Cache, AB' },
-    { value: 'hinton', label: 'Hinton, AB' },
-    { value: 'lloydminster', label: 'Lloydminster, AB' },
-    { value: 'wetaskiwin', label: 'Wetaskiwin, AB' },
-
-    // Manitoba
-    { value: 'winnipeg', label: 'Winnipeg, MB' },
-    { value: 'brandon', label: 'Brandon, MB' },
-    { value: 'steinbach', label: 'Steinbach, MB' },
-    { value: 'thompson', label: 'Thompson, MB' },
-    { value: 'portage-la-prairie', label: 'Portage la Prairie, MB' },
-    { value: 'winkler', label: 'Winkler, MB' },
-    { value: 'selkirk', label: 'Selkirk, MB' },
-    { value: 'morden', label: 'Morden, MB' },
-    { value: 'flin-flon', label: 'Flin Flon, MB' },
-    { value: 'dauphin', label: 'Dauphin, MB' },
-    { value: 'the-pas', label: 'The Pas, MB' },
-    { value: 'swan-river', label: 'Swan River, MB' },
-    { value: 'gimli', label: 'Gimli, MB' },
-    { value: 'stonewall', label: 'Stonewall, MB' },
-    { value: 'altona', label: 'Altona, MB' },
-    { value: 'beausejour', label: 'Beausejour, MB' },
-    { value: 'carberry', label: 'Carberry, MB' },
-    { value: 'churchill', label: 'Churchill, MB' },
-    { value: 'dauphin', label: 'Dauphin, MB' },
-    { value: 'gimli', label: 'Gimli, MB' },
-
-    // Saskatchewan
-    { value: 'saskatoon', label: 'Saskatoon, SK' },
-    { value: 'regina', label: 'Regina, SK' },
-    { value: 'prince-albert', label: 'Prince Albert, SK' },
-    { value: 'moose-jaw', label: 'Moose Jaw, SK' },
-    { value: 'swift-current', label: 'Swift Current, SK' },
-    { value: 'yorkton', label: 'Yorkton, SK' },
-    { value: 'north-battleford', label: 'North Battleford, SK' },
-    { value: 'estevan', label: 'Estevan, SK' },
-    { value: 'weyburn', label: 'Weyburn, SK' },
-    { value: 'lloydminster', label: 'Lloydminster, SK' },
-    { value: 'martensville', label: 'Martensville, SK' },
-    { value: 'humboldt', label: 'Humboldt, SK' },
-    { value: 'melfort', label: 'Melfort, SK' },
-    { value: 'battleford', label: 'Battleford, SK' },
-    { value: 'kindersley', label: 'Kindersley, SK' },
-    { value: 'meadow-lake', label: 'Meadow Lake, SK' },
-    { value: 'melville', label: 'Melville, SK' },
-    { value: 'north-battleford', label: 'North Battleford, SK' },
-    { value: 'prince-albert', label: 'Prince Albert, SK' },
-    { value: 'swift-current', label: 'Swift Current, SK' },
-
-    // Nova Scotia
-    { value: 'halifax', label: 'Halifax, NS' },
-    { value: 'sydney', label: 'Sydney, NS' },
-    { value: 'dartmouth', label: 'Dartmouth, NS' },
-    { value: 'truro', label: 'Truro, NS' },
-    { value: 'new-glasgow', label: 'New Glasgow, NS' },
-    { value: 'glace-bay', label: 'Glace Bay, NS' },
-    { value: 'amherst', label: 'Amherst, NS' },
-    { value: 'kentville', label: 'Kentville, NS' },
-    { value: 'bridgewater', label: 'Bridgewater, NS' },
-    { value: 'yarmouth', label: 'Yarmouth, NS' },
-    { value: 'antigonish', label: 'Antigonish, NS' },
-    { value: 'wolfville', label: 'Wolfville, NS' },
-    { value: 'lunenburg', label: 'Lunenburg, NS' },
-    { value: 'berwick', label: 'Berwick, NS' },
-    { value: 'digby', label: 'Digby, NS' },
-    { value: 'liverpool', label: 'Liverpool, NS' },
-    { value: 'shelburne', label: 'Shelburne, NS' },
-    { value: 'windsor', label: 'Windsor, NS' },
-    { value: 'annapolis-royal', label: 'Annapolis Royal, NS' },
-    { value: 'chester', label: 'Chester, NS' },
-
-    // New Brunswick
-    { value: 'moncton', label: 'Moncton, NB' },
-    { value: 'saint-john', label: 'Saint John, NB' },
-    { value: 'fredericton', label: 'Fredericton, NB' },
-    { value: 'dieppe', label: 'Dieppe, NB' },
-    { value: 'riverview', label: 'Riverview, NB' },
-    { value: 'quispamsis', label: 'Quispamsis, NB' },
-    { value: 'bathurst', label: 'Bathurst, NB' },
-    { value: 'miramichi', label: 'Miramichi, NB' },
-    { value: 'edmundston', label: 'Edmundston, NB' },
-    { value: 'campbellton', label: 'Campbellton, NB' },
-    { value: 'sackville', label: 'Sackville, NB' },
-    { value: 'shediac', label: 'Shediac, NB' },
-    { value: 'grand-falls', label: 'Grand Falls, NB' },
-    { value: 'woodstock', label: 'Woodstock, NB' },
-    { value: 'caraquet', label: 'Caraquet, NB' },
-    { value: 'belledune', label: 'Belledune, NB' },
-    { value: 'dalhousie', label: 'Dalhousie, NB' },
-    { value: 'florenceville-bristol', label: 'Florenceville-Bristol, NB' },
-    { value: 'grand-bay-westfield', label: 'Grand Bay-Westfield, NB' },
-    { value: 'hampton', label: 'Hampton, NB' },
-
-    // Newfoundland and Labrador
-    { value: 'st-johns', label: "St. John's, NL" },
-    { value: 'mount-pearl', label: 'Mount Pearl, NL' },
-    { value: 'corner-brook', label: 'Corner Brook, NL' },
-    { value: 'conception-bay-south', label: 'Conception Bay South, NL' },
-    { value: 'grand-falls-windsor', label: 'Grand Falls-Windsor, NL' },
-    { value: 'paradise', label: 'Paradise, NL' },
-    { value: 'gander', label: 'Gander, NL' },
-    { value: 'happy-valley-goose-bay', label: 'Happy Valley-Goose Bay, NL' },
-    { value: 'labrador-city', label: 'Labrador City, NL' },
-    { value: 'stephenville', label: 'Stephenville, NL' },
-    { value: 'marystown', label: 'Marystown, NL' },
-    { value: 'bay-roberts', label: 'Bay Roberts, NL' },
-    { value: 'carbonear', label: 'Carbonear, NL' },
-    { value: 'clarenville', label: 'Clarenville, NL' },
-    { value: 'deer-lake', label: 'Deer Lake, NL' },
-    { value: 'grand-bank', label: 'Grand Bank, NL' },
-    { value: 'lewisporte', label: 'Lewisporte, NL' },
-    { value: 'port-aux-basques', label: 'Port aux Basques, NL' },
-    { value: 'springdale', label: 'Springdale, NL' },
-    { value: 'torbay', label: 'Torbay, NL' },
-
-    // Prince Edward Island
-    { value: 'charlottetown', label: 'Charlottetown, PE' },
-    { value: 'summerside', label: 'Summerside, PE' },
-    { value: 'stratford', label: 'Stratford, PE' },
-    { value: 'cornwall', label: 'Cornwall, PE' },
-    { value: 'montague', label: 'Montague, PE' },
-    { value: 'kensington', label: 'Kensington, PE' },
-    { value: 'alberton', label: 'Alberton, PE' },
-    { value: 'souris', label: 'Souris, PE' },
-    { value: 'georgetown', label: 'Georgetown, PE' },
-    { value: "o'leary", label: "O'Leary, PE" },
-    { value: 'tyne-valley', label: 'Tyne Valley, PE' },
-    { value: 'wellington', label: 'Wellington, PE' },
-    { value: 'alberton', label: 'Alberton, PE' },
-    { value: 'borden-carleton', label: 'Borden-Carleton, PE' },
-    { value: 'cavendish', label: 'Cavendish, PE' },
-    { value: 'crapaud', label: 'Crapaud, PE' },
-    { value: 'elmsdale', label: 'Elmsdale, PE' },
-    { value: 'hunter-river', label: 'Hunter River, PE' },
-    { value: 'miscouche', label: 'Miscouche, PE' },
-    { value: 'north-rustico', label: 'North Rustico, PE' },
-
-    // Northwest Territories
-    { value: 'yellowknife', label: 'Yellowknife, NT' },
-    { value: 'hay-river', label: 'Hay River, NT' },
-    { value: 'inuvik', label: 'Inuvik, NT' },
-    { value: 'fort-smith', label: 'Fort Smith, NT' },
-    { value: 'behchoko', label: 'Behchokò, NT' },
-    { value: 'fort-simpson', label: 'Fort Simpson, NT' },
-    { value: 'norman-wells', label: 'Norman Wells, NT' },
-    { value: 'tuktoyaktuk', label: 'Tuktoyaktuk, NT' },
-    { value: 'arctic-red-river', label: 'Arctic Red River, NT' },
-    { value: 'deline', label: 'Deline, NT' },
-    { value: 'fort-good-hope', label: 'Fort Good Hope, NT' },
-    { value: 'fort-liard', label: 'Fort Liard, NT' },
-    { value: 'fort-mcpherson', label: 'Fort McPherson, NT' },
-    { value: 'fort-providence', label: 'Fort Providence, NT' },
-    { value: 'fort-resolution', label: 'Fort Resolution, NT' },
-    { value: 'kakisa', label: 'Kakisa, NT' },
-    { value: "lutselk'e", label: "Lutselk'e, NT" },
-    { value: 'nahanni-butte', label: 'Nahanni Butte, NT' },
-    { value: 'paulatuk', label: 'Paulatuk, NT' },
-    { value: 'sachs-harbour', label: 'Sachs Harbour, NT' },
-
-    // Yukon
-    { value: 'whitehorse', label: 'Whitehorse, YT' },
-    { value: 'dawson-city', label: 'Dawson City, YT' },
-    { value: 'watson-lake', label: 'Watson Lake, YT' },
-    { value: 'haines-junction', label: 'Haines Junction, YT' },
-    { value: 'carmacks', label: 'Carmacks, YT' },
-    { value: 'mayo', label: 'Mayo, YT' },
-    { value: 'ross-river', label: 'Ross River, YT' },
-    { value: 'teslin', label: 'Teslin, YT' },
-    { value: 'old-crow', label: 'Old Crow, YT' },
-    { value: 'beaver-creek', label: 'Beaver Creek, YT' },
-    { value: 'burwash-landing', label: 'Burwash Landing, YT' },
-    { value: 'carcross', label: 'Carcross, YT' },
-    { value: 'champagne', label: 'Champagne, YT' },
-    { value: 'eliza-lake', label: 'Eliza Lake, YT' },
-    { value: 'faro', label: 'Faro, YT' },
-    { value: 'keno-city', label: 'Keno City, YT' },
-    { value: 'marsh-lake', label: 'Marsh Lake, YT' },
-    { value: 'mount-lorne', label: 'Mount Lorne, YT' },
-    { value: 'pelly-crossing', label: 'Pelly Crossing, YT' },
-    { value: 'tagish', label: 'Tagish, YT' },
-
-    // Nunavut
-    { value: 'iqaluit', label: 'Iqaluit, NU' },
-    { value: 'rankin-inlet', label: 'Rankin Inlet, NU' },
-    { value: 'arviat', label: 'Arviat, NU' },
-    { value: 'baker-lake', label: 'Baker Lake, NU' },
-    { value: 'cambridge-bay', label: 'Cambridge Bay, NU' },
-    { value: 'chesterfield-inlet', label: 'Chesterfield Inlet, NU' },
-    { value: 'coral-harbour', label: 'Coral Harbour, NU' },
-    { value: 'clyde-river', label: 'Clyde River, NU' },
-    { value: 'gjoa-haven', label: 'Gjoa Haven, NU' },
-    { value: 'hall-beach', label: 'Hall Beach, NU' },
-    { value: 'igloolik', label: 'Igloolik, NU' },
-    { value: 'kimmirut', label: 'Kimmirut, NU' },
-    { value: 'kugaaruk', label: 'Kugaaruk, NU' },
-    { value: 'kugluktuk', label: 'Kugluktuk, NU' },
-    { value: 'pangnirtung', label: 'Pangnirtung, NU' },
-    { value: 'pond-inlet', label: 'Pond Inlet, NU' },
-    { value: 'repose-bay', label: 'Repulse Bay, NU' },
-    { value: 'resolute-bay', label: 'Resolute Bay, NU' },
-    { value: 'sanikiluaq', label: 'Sanikiluaq, NU' },
-    { value: 'taloyoak', label: 'Taloyoak, NU' },
-];
+interface City {
+    id: number;
+    name: string;
+    global_province_id: number;
+}
 
 export default function PersonalInfoStep({ formData, updateFormData, validationErrors }: PersonalInfoStepProps) {
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [citySearch, setCitySearch] = useState<string>('');
     const [showCitySuggestions, setShowCitySuggestions] = useState<boolean>(false);
+    const [cities, setCities] = useState<City[]>([]);
+    const [loadingCities, setLoadingCities] = useState<boolean>(false);
     const cityInputRef = React.useRef<HTMLDivElement>(null);
+
+    // Fetch cities from API when province changes or when user searches
+    React.useEffect(() => {
+        if (!formData.province) {
+            setCities([]);
+            return;
+        }
+
+        const fetchCities = async () => {
+            setLoadingCities(true);
+            try {
+                const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
+                const response = await fetch(`/worker/api/provinces/code/${formData.province}/cities${searchParam}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setCities(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch cities:', error);
+            } finally {
+                setLoadingCities(false);
+            }
+        };
+
+        // Debounce the search
+        const timer = setTimeout(() => {
+            fetchCities();
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [formData.province, citySearch]);
 
     // Close suggestions when clicking outside
     React.useEffect(() => {
@@ -345,50 +97,19 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
     // Clear city when province changes
     React.useEffect(() => {
         if (formData.province && formData.city) {
-            const selectedCity = CANADIAN_CITIES.find((city) => city.value === formData.city);
-            if (selectedCity && !selectedCity.label.endsWith(`, ${formData.province}`)) {
-                // City doesn't match the province, clear it
-                handleInputChange('city', '');
-                setCitySearch('');
-            }
+            // Clear city when province changes as cities will be refetched
+            handleInputChange('city', '');
+            setCitySearch('');
         }
     }, [formData.province]);
 
-    // Initialize citySearch with the selected city label
+    // Initialize citySearch with the selected city name
     React.useEffect(() => {
         if (formData.city && !citySearch) {
-            // First try to find by value
-            let selectedCity = CANADIAN_CITIES.find((city) => city.value === formData.city);
-            
-            // If not found, try to find by label (for backward compatibility with old data)
-            if (!selectedCity) {
-                selectedCity = CANADIAN_CITIES.find((city) => city.label === formData.city);
-                // If found by label, update formData to use the proper value
-                if (selectedCity) {
-                    updateFormData({ city: selectedCity.value });
-                }
-            }
-            
-            if (selectedCity) {
-                setCitySearch(selectedCity.label);
-            } else {
-                // If still not found, extract city name without province suffix for display
-                const cityWithoutProvince = formData.city.replace(/, [A-Z]{2}$/, '');
-                setCitySearch(cityWithoutProvince);
-            }
+            // Just display the city name from formData
+            setCitySearch(formData.city);
         }
     }, [formData.city, citySearch]);
-
-    // Filter cities based on selected province and search
-    const filteredCities = CANADIAN_CITIES.filter((city) => {
-        // First filter by province if one is selected
-        if (formData.province) {
-            const provinceMatch = city.label.endsWith(`, ${formData.province}`);
-            if (!provinceMatch) return false;
-        }
-        // Then filter by search text
-        return city.label.toLowerCase().includes(citySearch.toLowerCase());
-    }).slice(0, 10); // Show max 10 results
 
     const handleInputChange = (field: string, value: unknown) => {
         updateFormData({ [field]: value });
@@ -672,26 +393,33 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                 />
 
                                 {/* Suggestions dropdown */}
-                                {showCitySuggestions && filteredCities.length > 0 && (
+                                {showCitySuggestions && cities.length > 0 && (
                                     <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
-                                        {filteredCities.map((city) => (
+                                        {cities.map((city) => (
                                             <div
-                                                key={city.value}
+                                                key={city.id}
                                                 className="cursor-pointer px-3 py-2 font-medium text-gray-900 hover:bg-gray-100"
                                                 onClick={() => {
-                                                    handleInputChange('city', city.value);
-                                                    setCitySearch(city.label);
+                                                    handleInputChange('city', city.name);
+                                                    setCitySearch(city.name);
                                                     setShowCitySuggestions(false);
                                                 }}
                                             >
-                                                {city.label}
+                                                {city.name}
                                             </div>
                                         ))}
                                     </div>
                                 )}
 
+                                {/* Loading message */}
+                                {showCitySuggestions && loadingCities && (
+                                    <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
+                                        Loading cities...
+                                    </div>
+                                )}
+
                                 {/* No results message */}
-                                {showCitySuggestions && citySearch && filteredCities.length === 0 && (
+                                {showCitySuggestions && !loadingCities && citySearch && cities.length === 0 && (
                                     <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
                                         No cities found matching "{citySearch}"
                                     </div>
