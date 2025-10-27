@@ -10,6 +10,9 @@ class GlobalSkillsSeeder extends Seeder
 {
     public function run(): void
     {
+        // Clear existing data to prevent duplicates
+        DB::table('global_skills')->truncate();
+        
         $now = Carbon::now();
         
         $skills = [

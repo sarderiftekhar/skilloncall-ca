@@ -10,6 +10,9 @@ class GlobalIndustriesSeeder extends Seeder
 {
     public function run(): void
     {
+        // Clear existing data to prevent duplicates
+        DB::table('global_industries')->truncate();
+        
         $now = Carbon::now();
         
         $industries = [
