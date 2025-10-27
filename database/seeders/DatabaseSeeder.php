@@ -45,7 +45,6 @@ class DatabaseSeeder extends Seeder
 
         // Seed reference data first
         $this->call([
-            GlobalProvincesAndCitiesSeeder::class, // Add this first so provinces/cities are available
             GlobalSkillsSeeder::class,
             GlobalIndustriesSeeder::class,
             GlobalLanguagesSeeder::class,

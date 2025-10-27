@@ -4,6 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Briefcase, Camera, CheckCircle, FileText, Globe, MapPin, User } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Import step components (we'll create these next)
 import FeedbackModal from '@/components/feedback-modal';
@@ -28,51 +29,6 @@ interface OnboardingProps {
     globalCertifications: any[];
 }
 
-const OnboardingSteps = [
-    {
-        id: 1,
-        title: 'Personal Info',
-        icon: User,
-        description: 'Basic information and photo',
-        mobileTitle: 'About You',
-    },
-    {
-        id: 2,
-        title: 'Skills & Experience',
-        icon: Briefcase,
-        description: 'Your skills and experience level',
-        mobileTitle: 'Your Skills',
-    },
-    {
-        id: 3,
-        title: 'Work History',
-        icon: FileText,
-        description: 'Current and previous jobs',
-        mobileTitle: 'Work History',
-    },
-    {
-        id: 4,
-        title: 'Location & Rates',
-        icon: MapPin,
-        description: 'Where you work and your rates',
-        mobileTitle: 'Location & Rates',
-    },
-    {
-        id: 5,
-        title: 'Languages & Schedule',
-        icon: Globe,
-        description: 'Languages and availability',
-        mobileTitle: 'Languages & Time',
-    },
-    {
-        id: 6,
-        title: 'Portfolio & Complete',
-        icon: Camera,
-        description: 'Work samples and finalize',
-        mobileTitle: 'Portfolio & Done',
-    },
-];
-
 export default function WorkerOnboarding({
     currentStep,
     profileData,
@@ -81,6 +37,7 @@ export default function WorkerOnboarding({
     globalLanguages = [],
     globalCertifications = [],
 }: OnboardingProps) {
+    const { t, locale } = useTranslations();
     const [step, setStep] = useState(currentStep || 1);
     const [formData, setFormData] = useState(profileData || {});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,6 +48,60 @@ export default function WorkerOnboarding({
     const [modalMessage, setModalMessage] = useState('');
     const [modalType, setModalType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
     const [modalDetails, setModalDetails] = useState<string | string[] | undefined>(undefined);
+
+    // Language switcher function
+    const switchLang = (next: 'en' | 'fr') => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', next);
+        window.location.href = url.toString();
+    };
+
+    const queryLang = `?lang=${locale}`;
+
+    const OnboardingSteps = [
+        {
+            id: 1,
+            title: t('steps.personal_info.title', 'Personal Info'),
+            icon: User,
+            description: t('steps.personal_info.description', 'Basic information and photo'),
+            mobileTitle: t('steps.personal_info.mobile', 'About You'),
+        },
+        {
+            id: 2,
+            title: t('steps.skills.title', 'Skills & Experience'),
+            icon: Briefcase,
+            description: t('steps.skills.description', 'Your skills and experience level'),
+            mobileTitle: t('steps.skills.mobile', 'Your Skills'),
+        },
+        {
+            id: 3,
+            title: t('steps.work_history.title', 'Work History'),
+            icon: FileText,
+            description: t('steps.work_history.description', 'Current and previous jobs'),
+            mobileTitle: t('steps.work_history.mobile', 'Work History'),
+        },
+        {
+            id: 4,
+            title: t('steps.location.title', 'Location & Rates'),
+            icon: MapPin,
+            description: t('steps.location.description', 'Where you work and your rates'),
+            mobileTitle: t('steps.location.mobile', 'Location & Rates'),
+        },
+        {
+            id: 5,
+            title: t('steps.languages.title', 'Languages & Schedule'),
+            icon: Globe,
+            description: t('steps.languages.description', 'Languages and availability'),
+            mobileTitle: t('steps.languages.mobile', 'Languages & Time'),
+        },
+        {
+            id: 6,
+            title: t('steps.portfolio.title', 'Portfolio & Complete'),
+            icon: Camera,
+            description: t('steps.portfolio.description', 'Work samples and finalize'),
+            mobileTitle: t('steps.portfolio.mobile', 'Portfolio & Done'),
+        },
+    ];
 
     const progress = (step / OnboardingSteps.length) * 100;
     const currentStepInfo = OnboardingSteps.find((s) => s.id === step);
@@ -256,8 +267,8 @@ export default function WorkerOnboarding({
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const errorList = Object.entries(errors || {}).map(([key, value]: [string, any]) => `${key}: ${String(value)}`);
                         setModalType('error');
-                        setModalTitle('Please fix the highlighted fields');
-                        setModalMessage('There were some issues with your input.');
+                        setModalTitle(t('modal.error.title', 'Please fix the highlighted fields'));
+                        setModalMessage(t('modal.error.message', 'There were some issues with your input.'));
                         setModalDetails(errorList.slice(0, 10));
                         setModalOpen(true);
                         // Scroll to first field with an error slowly
@@ -274,8 +285,8 @@ export default function WorkerOnboarding({
             } catch (error) {
                 console.error('Error saving step:', error);
                 setModalType('error');
-                setModalTitle('Save failed');
-                setModalMessage('An unexpected error occurred while saving this step. Please try again.');
+                setModalTitle(t('modal.save_failed.title', 'Save failed'));
+                setModalMessage(t('modal.save_failed.message', 'An unexpected error occurred while saving this step. Please try again.'));
                 setModalOpen(true);
             } finally {
                 setIsSubmitting(false);
@@ -314,15 +325,15 @@ export default function WorkerOnboarding({
 
             if (response.ok && json?.success) {
                 setModalType('success');
-                setModalTitle('Profile completed');
-                setModalMessage(json?.message || 'Your profile is now complete.');
+                setModalTitle(t('modal.complete.title', 'Profile completed'));
+                setModalMessage(json?.message || t('modal.complete.message', 'Your profile is now complete.'));
                 setModalDetails(undefined);
                 setModalOpen(true);
             } else {
-                const message = json?.message || 'An error occurred while completing your profile.';
+                const message = json?.message || t('modal.complete_error.message', 'An error occurred while completing your profile.');
                 const details = json?.error ? [String(json.error)] : undefined;
                 setModalType('error');
-                setModalTitle('Unable to complete setup');
+                setModalTitle(t('modal.complete_error.title', 'Unable to complete setup'));
                 setModalMessage(message);
                 setModalDetails(details);
                 setModalOpen(true);
@@ -330,8 +341,8 @@ export default function WorkerOnboarding({
         } catch (error) {
             console.error('Error completing onboarding:', error);
             setModalType('error');
-            setModalTitle('Unexpected error');
-            setModalMessage('Something went wrong while completing your profile. Please try again.');
+            setModalTitle(t('modal.unexpected.title', 'Unexpected error'));
+            setModalMessage(t('modal.unexpected.message', 'Something went wrong while completing your profile. Please try again.'));
             setModalOpen(true);
         } finally {
             setIsSubmitting(false);
@@ -370,7 +381,32 @@ export default function WorkerOnboarding({
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
-            <Head title={`Worker Setup - Step ${step} of ${OnboardingSteps.length}`} />
+            <Head title={`${t('title', 'Worker Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
+            
+            {/* Language Switcher - Fixed at top right */}
+            <div className="fixed top-4 right-4 z-50 flex items-center space-x-1 border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
+                <button 
+                    onClick={() => switchLang('en')} 
+                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
+                        locale === 'en' 
+                            ? 'bg-[#10B3D6] text-white' 
+                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                    EN
+                </button>
+                <button 
+                    onClick={() => switchLang('fr')} 
+                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
+                        locale === 'fr' 
+                            ? 'bg-[#10B3D6] text-white' 
+                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
+                    }`}
+                >
+                    FR
+                </button>
+            </div>
+
             <FeedbackModal
                 isOpen={modalOpen}
                 onClose={() => {
@@ -383,7 +419,7 @@ export default function WorkerOnboarding({
                 message={modalMessage}
                 type={modalType}
                 details={modalDetails}
-                primaryAction={modalType === 'success' ? { label: 'Go to dashboard', onClick: () => router.visit('/worker/dashboard') } : undefined}
+                primaryAction={modalType === 'success' ? { label: t('modal.action.dashboard', 'Go to dashboard'), onClick: () => router.visit('/worker/dashboard') } : undefined}
             />
 
             {/* Responsive container */}
@@ -391,19 +427,33 @@ export default function WorkerOnboarding({
                 {/* Progress Section */}
                 <div className="mb-6 rounded-xl bg-white p-4 shadow-sm md:p-6" style={{ border: '0.05px solid #10B3D6' }}>
                     <div className="mb-4 flex items-center justify-between">
-                        <div className="flex items-center">
+                        <div className="flex items-center gap-4">
                             <div className="flex items-center space-x-2 rounded-full bg-[#10B3D6] px-3 py-2 text-white shadow-sm">
                                 <span className="text-sm font-medium">{currentStepInfo?.mobileTitle}</span>
                             </div>
-                            <div className="ml-3">
+                            <div>
                                 <p className="text-sm text-gray-600">
-                                    Step {step} of {OnboardingSteps.length}
+                                    {t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}
                                 </p>
                             </div>
                         </div>
-                        <div className="text-right">
+                        <div className="flex items-center gap-4">
+                            {/* Cancel Button */}
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.visit(`/${queryLang}`)}
+                                className="border-2 cursor-pointer text-sm font-semibold hover:opacity-90 transition-all"
+                                style={{ 
+                                    borderColor: '#ef4444', 
+                                    color: '#ef4444',
+                                    backgroundColor: 'transparent'
+                                }}
+                            >
+                                {t('nav.cancel', 'Cancel')}
+                            </Button>
                             <div className="text-sm font-medium" style={{ color: '#10B3D6' }}>
-                                {Math.round(progress)}%
+                                {t('progress_percent', ':percent%').replace(':percent', String(Math.round(progress)))}
                             </div>
                         </div>
                     </div>
@@ -460,8 +510,8 @@ export default function WorkerOnboarding({
                         style={{ height: '2.7em' }}
                     >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        <span className="hidden sm:inline">Previous</span>
-                        <span className="sm:hidden">Back</span>
+                        <span className="hidden sm:inline">{t('nav.previous', 'Previous')}</span>
+                        <span className="sm:hidden">{t('nav.back', 'Back')}</span>
                     </Button>
 
                     {step < OnboardingSteps.length ? (
@@ -473,11 +523,11 @@ export default function WorkerOnboarding({
                             }`}
                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                             title={
-                                step === 3 && !canProceedToNextStep() ? 'Please select employment status and add at least one work experience' : ''
+                                step === 3 && !canProceedToNextStep() ? t('validation_required', 'Please select employment status and add at least one work experience') : ''
                             }
                         >
-                            <span className="hidden sm:inline">{isSubmitting ? 'Saving...' : 'Continue'}</span>
-                            <span className="sm:hidden">{isSubmitting ? 'Saving...' : 'Next'}</span>
+                            <span className="hidden sm:inline">{isSubmitting ? t('nav.saving', 'Saving...') : t('nav.continue', 'Continue')}</span>
+                            <span className="sm:hidden">{isSubmitting ? t('nav.saving', 'Saving...') : t('nav.next', 'Next')}</span>
                             {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                         </Button>
                     ) : (
@@ -488,14 +538,14 @@ export default function WorkerOnboarding({
                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                         >
                             <CheckCircle className="mr-2 h-4 w-4" />
-                            {isSubmitting ? 'Finishing...' : 'Complete Setup'}
+                            {isSubmitting ? t('nav.finishing', 'Finishing...') : t('nav.complete', 'Complete Setup')}
                         </Button>
                     )}
                 </div>
 
                 {/* Mobile Help Text */}
                 <div className="mt-6 text-center">
-                    <p className="text-sm text-gray-500">Need help? You can always come back to complete this later.</p>
+                    <p className="text-sm text-gray-500">{t('help_text', 'Need help? You can always come back to complete this later.')}</p>
                 </div>
             </div>
         </div>

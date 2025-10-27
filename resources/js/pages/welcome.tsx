@@ -27,9 +27,11 @@ import {
     Triangle,
     ShoppingCart
 } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 export default function Welcome() {
-    const { auth } = usePage<SharedData>().props;
+    const { auth, isProfileComplete } = usePage<SharedData>().props as any;
+    const { t, locale } = useTranslations();
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -98,10 +100,10 @@ export default function Welcome() {
     ];
 
     const statistics = [
-        { label: 'Active Workers', value: '2,450', change: '+12%', color: 'text-green-600' },
-        { label: 'Jobs Posted', value: '1,230', change: '+8%', color: 'text-blue-600' },
-        { label: 'Successful Matches', value: '980', change: '+15%', color: 'text-purple-600' },
-        { label: 'Verified Employers', value: '340', change: '+5%', color: 'text-orange-600' },
+        { label: t('stats.active_workers', 'Active Workers'), value: '2,450', change: '+12%', color: 'text-green-600' },
+        { label: t('stats.jobs_posted', 'Jobs Posted'), value: '1,230', change: '+8%', color: 'text-blue-600' },
+        { label: t('stats.successful_matches', 'Successful Matches'), value: '980', change: '+15%', color: 'text-purple-600' },
+        { label: t('stats.verified_employers', 'Verified Employers'), value: '340', change: '+5%', color: 'text-orange-600' },
     ];
 
     const recentPosts = [
@@ -160,6 +162,14 @@ export default function Welcome() {
         { type: 'dot', color: 'bg-rose-400', size: 'w-4 h-4', position: 'bottom-[8%] right-[8%]' },
     ];
 
+    const switchLang = (next: 'en' | 'fr') => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', next);
+        window.location.href = url.toString();
+    };
+
+    const queryLang = `?lang=${locale}`;
+
     return (
         <>
             <Head title="Welcome to SkillOnCall.ca">
@@ -209,14 +219,37 @@ export default function Welcome() {
 
                             {/* Navigation */}
                             <nav className="hidden md:flex space-x-8">
-                                <a href="#" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Find Workers</a>
-                                <a href="#" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Post Jobs</a>
-                                <a href="#" className="text-gray-300 hover:text-white cursor-pointer transition-colors">How it Works</a>
-                                <a href="#" className="text-gray-300 hover:text-white cursor-pointer transition-colors">Pricing</a>
+                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_workers')}</a>
+                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</a>
+                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</a>
+                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
                             </nav>
 
                             {/* User Menu */}
-                            <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-3 md:space-x-4">
+                                {/* Language Switcher - Always Visible */}
+                                <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
+                                    <button 
+                                        onClick={() => switchLang('en')} 
+                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
+                                            locale === 'en' 
+                                                ? 'bg-white text-gray-900' 
+                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
+                                        }`}
+                                    >
+                                        EN
+                                    </button>
+                                    <button 
+                                        onClick={() => switchLang('fr')} 
+                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
+                                            locale === 'fr' 
+                                                ? 'bg-white text-gray-900' 
+                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
+                                        }`}
+                                    >
+                                        FR
+                                    </button>
+                                </div>
                         {auth.user ? (
                                     <div className="flex items-center space-x-3">
                                         <Bell className="h-5 w-5 text-gray-300 hover:text-white cursor-pointer transition-colors" />
@@ -226,17 +259,23 @@ export default function Welcome() {
                                                 {auth.user.name?.split(' ').map(n => n[0]).join('')}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <Link href="/dashboard">
-                                            <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400">Dashboard</Button>
-                            </Link>
-                                    </div>
+                                        {isProfileComplete ? (
+                                            <Link href={`/dashboard${queryLang}`}>
+                                                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400">{t('auth.dashboard', 'Dashboard')}</Button>
+                                            </Link>
+                                        ) : (
+                                            <Link href={`/worker/onboarding${queryLang}`}>
+                                                <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.complete_profile', 'Complete Profile')}</Button>
+                                            </Link>
+                                        )}
+                            </div>
                                 ) : (
                                     <div className="flex items-center space-x-3">
-                                        <Link href="/login">
-                                            <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">Sign In</Button>
+                                        <Link href={`/login${queryLang}`}>
+                                            <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">{t('auth.sign_in', 'Sign In')}</Button>
                                 </Link>
-                                        <Link href="/register">
-                                            <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">Get Started</Button>
+                                        <Link href={`/register${queryLang}`}>
+                                            <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.get_started', 'Get Started')}</Button>
                                 </Link>
                                     </div>
                         )}
@@ -310,12 +349,11 @@ export default function Welcome() {
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center relative z-20 max-w-4xl mx-auto">
                                 <div className="text-6xl md:text-8xl mb-6">🍁</div>
-                                <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                                    <span style={{color: '#192341'}}>SkillOnCall</span> <span style={{color: '#10B3D6'}}>— Where Skills Meet Opportunity</span>
+                                <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{color: '#192341'}}>
+                                    {t('hero.title', 'SkillOnCall — Where Skills Meet Opportunity')}
                                 </h1>
                                 <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                                    Find answers, ask questions, and connect with our community of skilled workers 
-                                    from around Canada.
+                                    {t('hero.subtitle', 'Find answers, ask questions, and connect with our community of skilled workers from around Canada.')}
                                 </p>
                                 
                                 {/* Prominent Search Bar - KbDoc Style - HIDDEN FOR NOW */}
@@ -367,7 +405,7 @@ export default function Welcome() {
                                             <Users className="h-6 w-6 text-white" />
                                         </div>
                                         <h3 className="text-lg md:text-xl font-bold text-white">
-                                            For Employers
+                                            {t('employers.title', 'For Employers')}
                                         </h3>
                                     </div>
                                     <ul className="space-y-2">
@@ -376,21 +414,21 @@ export default function Welcome() {
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Unlimited job postings</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employers.unlimited_posts', 'Unlimited job postings')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Featured listings & priority placement</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employers.featured', 'Featured listings & priority placement')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Advanced analytics & reporting</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employers.analytics', 'Advanced analytics & reporting')}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -405,7 +443,7 @@ export default function Welcome() {
                                             <Star className="h-6 w-6 text-white" />
                                         </div>
                                         <h3 className="text-lg md:text-xl font-bold text-white">
-                                            For Workers
+                                            {t('workers.title', 'For Workers')}
                                         </h3>
                                     </div>
                                     <ul className="space-y-2">
@@ -414,21 +452,21 @@ export default function Welcome() {
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Unlimited job applications</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.unlimited_apps', 'Unlimited job applications')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Featured profile & priority visibility</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.featured', 'Featured profile & priority visibility')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">Advanced portfolio tools</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.portfolio', 'Advanced portfolio tools')}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -437,13 +475,13 @@ export default function Welcome() {
                         
                         {/* CTA Buttons */}
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                            <Link href="/subscriptions" className="w-full sm:w-auto">
+                            <Link href={`/subscriptions${queryLang}`} className="w-full sm:w-auto">
                                 <Button 
                                     size="lg" 
                                     className="w-full sm:w-auto text-white hover:opacity-90 px-10 py-6 text-base font-semibold cursor-pointer transition-all shadow-lg hover:shadow-xl"
                                     style={{backgroundColor: '#10B3D6', height: '2.7em'}}
                                 >
-                                    View Subscription Plans
+                                    {t('cta.view_plans', 'View Subscription Plans')}
                                 </Button>
                             </Link>
                             <Button 
@@ -452,7 +490,7 @@ export default function Welcome() {
                                 className="w-full sm:w-auto border-2 bg-white/10 hover:bg-white/20 px-10 py-6 text-base font-medium cursor-pointer transition-all"
                                 style={{borderColor: '#10B3D6', color: 'white', height: '2.7em'}}
                             >
-                                Learn More
+                                {t('cta.learn_more', 'Learn More')}
                             </Button>
                         </div>
                         
@@ -470,7 +508,7 @@ export default function Welcome() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-8">
                             <h2 className="text-3xl font-bold mb-4" style={{color: '#192341'}}>
-                                Find your employment sector
+                                {t('sections.find_sector', 'Find your employment sector')}
                             </h2>
                         </div>
 
@@ -498,7 +536,7 @@ export default function Welcome() {
 
                         <div className="text-center mt-8">
                             <Button size="lg" className="text-white hover:opacity-90 cursor-pointer" style={{backgroundColor: '#10B3D6'}}>
-                                View All Categories
+                                {t('cta.view_all_categories', 'View All Categories')}
                             </Button>
                         </div>
                     </div>
@@ -509,10 +547,10 @@ export default function Welcome() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl font-bold mb-4" style={{color: '#192341'}}>
-                                Platform Performance
+                                {t('sections.platform_performance', 'Platform Performance')}
                             </h2>
                             <p className="text-lg text-gray-600">
-                                Trusted by businesses and workers across Canada
+                                {t('sections.trusted', 'Trusted by businesses and workers across Canada')}
                             </p>
                         </div>
 
@@ -555,10 +593,10 @@ export default function Welcome() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl font-bold mb-4" style={{color: '#192341'}}>
-                                Latest Job Opportunities
+                                {t('sections.latest_jobs', 'Latest Job Opportunities')}
                             </h2>
                             <p className="text-lg text-gray-600">
-                                Recent postings from employers across Canada
+                                {t('sections.recent_postings', 'Recent postings from employers across Canada')}
                             </p>
                         </div>
 
@@ -615,7 +653,7 @@ export default function Welcome() {
 
                         <div className="text-center mt-8">
                             <Button size="lg" className="text-white hover:opacity-90 cursor-pointer" style={{backgroundColor: '#10B3D6'}}>
-                                View All Job Posts
+                                {t('cta.view_all_jobs', 'View All Job Posts')}
                             </Button>
                         </div>
                     </div>
@@ -665,12 +703,12 @@ export default function Welcome() {
                                     Built for Canadians, by Canadians.
                                 </p>
                                 <div>
-                                    <h3 className="text-lg font-semibold mb-4">📧 Newsletter Signup</h3>
-                                    <p className="text-gray-200 text-sm mb-3">Get updates on new jobs, platform features, and industry news</p>
+                                    <h3 className="text-lg font-semibold mb-4">📧 {t('footer.newsletter', 'Newsletter Signup')}</h3>
+                                    <p className="text-gray-200 text-sm mb-3">{t('footer.newsletter_hint', 'Get updates on new jobs, platform features, and industry news')}</p>
                                     <div className="flex space-x-3">
                                         <Input 
                                             type="email" 
-                                            placeholder="Enter your email" 
+                                            placeholder={t('footer.enter_email', 'Enter your email')} 
                                             className="flex-1 text-gray-900" 
                                             style={{backgroundColor: '#FFFFFF', borderColor: '#F6FBFD'}}
                                             value={email}
@@ -686,10 +724,10 @@ export default function Welcome() {
                                             {isSubscribing ? (
                                                 <>
                                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-                                                    Subscribing...
+                                                    {t('footer.subscribing', 'Subscribing...')}
                                                 </>
                                             ) : (
-                                                'Subscribe'
+                                                t('footer.subscribe', 'Subscribe')
                                             )}
                                         </Button>
                                     </div>
@@ -697,17 +735,17 @@ export default function Welcome() {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-4">For Employers</h3>
+                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_employers', 'For Employers')}</h3>
                                 <ul className="space-y-2 text-gray-100">
                                     <li><a href="#" className="hover:text-white cursor-pointer">Post Jobs</a></li>
                                     <li><a href="#" className="hover:text-white cursor-pointer">Find Workers</a></li>
-                                    <li><Link href="/subscriptions" className="hover:text-white cursor-pointer font-semibold text-yellow-300">💎 Subscription Plans</Link></li>
+                                    <li><Link href={`/subscriptions${queryLang}`} className="hover:text-white cursor-pointer font-semibold text-yellow-300">💎 {t('cta.view_plans', 'Subscription Plans')}</Link></li>
                                     <li><a href="#" className="hover:text-white cursor-pointer">Success Stories</a></li>
                             </ul>
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-4">For Workers</h3>
+                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_workers', 'For Workers')}</h3>
                                 <ul className="space-y-2 text-gray-100">
                                     <li><a href="#" className="hover:text-white cursor-pointer">Create Profile</a></li>
                                     <li><a href="#" className="hover:text-white cursor-pointer">Browse Jobs</a></li>
@@ -720,26 +758,26 @@ export default function Welcome() {
                         <div className="mt-8 pt-8" style={{borderTop: '1px solid #FFFFFF'}}>
                             <div className="flex flex-col md:flex-row justify-between items-center">
                                 <p className="text-gray-100 text-sm">
-                                    © 2025 SkillOnCall.ca. All rights reserved. Made with 🍁 in Canada.
+                                    © 2025 SkillOnCall.ca. {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
                                 </p>
                                 <div className="flex space-x-6 mt-4 md:mt-0">
                                     <button 
                                         onClick={() => setShowContactModal(true)}
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
                                     >
-                                        Contact
+                                        {t('footer.contact', 'Contact')}
                                     </button>
                                     <button 
                                         onClick={() => setShowPrivacyModal(true)}
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
                                     >
-                                        Privacy
+                                        {t('footer.privacy', 'Privacy')}
                                     </button>
                                     <button 
                                         onClick={() => setShowTermsModal(true)}
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
                                     >
-                                        Terms
+                                        {t('footer.terms', 'Terms')}
                                     </button>
                                 </div>
                             </div>
@@ -761,14 +799,14 @@ export default function Welcome() {
                                 </p>
                                 
                                 <div className="space-y-3">
-                                    <Link href="/register" className="block">
+                                    <Link href={`/register${queryLang}`} className="block">
                                         <Button className="w-full text-white hover:opacity-90" style={{backgroundColor: '#10B3D6'}}>
                                             Create Free Account
                                         </Button>
                                     </Link>
-                                    <Link href="/login" className="block">
+                                    <Link href={`/login${queryLang}`} className="block">
                                         <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50">
-                                            Sign In
+                                            {t('auth.sign_in', 'Sign In')}
                                         </Button>
                                     </Link>
                                 </div>

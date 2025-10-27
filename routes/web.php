@@ -3,8 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('welcome');
+Route::get('/', function (Illuminate\Http\Request $request) {
+    $user = $request->user();
+    $isProfileComplete = false;
+    
+    if ($user && $user->role === 'worker') {
+        $workerProfile = \App\Models\WorkerProfile::where('user_id', $user->id)->first();
+        $isProfileComplete = $workerProfile && $workerProfile->is_profile_complete;
+    }
+    
+    return Inertia::render('welcome', [
+        'translations' => trans('welcome'),
+        'isProfileComplete' => $isProfileComplete,
+    ]);
 })->name('home');
 
 // Contact form route

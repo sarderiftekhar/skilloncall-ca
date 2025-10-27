@@ -100,6 +100,7 @@ class OnboardingController extends Controller
         return Inertia::render('worker/onboarding', array_merge([
             'currentStep' => $currentStep,
             'profileData' => $profileData,
+            'translations' => trans('onboarding'),
         ], $globalData));
     }
 

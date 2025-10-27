@@ -5,6 +5,7 @@ use App\Http\Middleware\EmployerMiddleware;
 use App\Http\Middleware\EnsureWorkerProfileComplete;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\LocaleFromQuery;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Middleware\WorkerMiddleware;
 use Illuminate\Foundation\Application;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
+            LocaleFromQuery::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,

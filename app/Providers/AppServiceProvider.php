@@ -17,6 +17,7 @@ use App\Policies\PaymentPolicy;
 use App\Policies\PortfolioPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Inertia\Inertia;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,5 +45,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Application::class, ApplicationPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Portfolio::class, PortfolioPolicy::class);
+
+        // Share current locale with Inertia
+        Inertia::share('locale', function () {
+            return app()->getLocale();
+        });
     }
 }
