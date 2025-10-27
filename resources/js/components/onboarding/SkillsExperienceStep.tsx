@@ -267,7 +267,7 @@ export default function SkillsExperienceStep({
                                                         return (
                                                             <div
                                                                 key={skill.id}
-                                                                className={`px-3 py-2 text-gray-900 font-medium ${
+                                                                className={`px-3 py-2 text-sm text-gray-900 font-medium ${
                                                                     isDisabled 
                                                                         ? 'opacity-50 cursor-not-allowed bg-gray-50' 
                                                                         : 'cursor-pointer hover:bg-gray-100'
@@ -296,7 +296,7 @@ export default function SkillsExperienceStep({
                                                     {(skills as any[]).map((skill) => (
                                                         <div
                                                             key={skill.id}
-                                                            className="px-3 py-2 cursor-pointer hover:bg-gray-100 text-gray-900 font-medium"
+                                                            className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900 font-medium"
                                                             onClick={() => {
                                                                 setSelectedSkillId(skill.id.toString());
                                                                 setSkillSearch(skill.name);
