@@ -345,9 +345,24 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
     // Initialize citySearch with the selected city label
     React.useEffect(() => {
         if (formData.city && !citySearch) {
-            const selectedCity = CANADIAN_CITIES.find((city) => city.value === formData.city);
+            // First try to find by value
+            let selectedCity = CANADIAN_CITIES.find((city) => city.value === formData.city);
+            
+            // If not found, try to find by label (for backward compatibility with old data)
+            if (!selectedCity) {
+                selectedCity = CANADIAN_CITIES.find((city) => city.label === formData.city);
+                // If found by label, update formData to use the proper value
+                if (selectedCity) {
+                    updateFormData({ city: selectedCity.value });
+                }
+            }
+            
             if (selectedCity) {
                 setCitySearch(selectedCity.label);
+            } else {
+                // If still not found, extract city name without province suffix for display
+                const cityWithoutProvince = formData.city.replace(/, [A-Z]{2}$/, '');
+                setCitySearch(cityWithoutProvince);
             }
         }
     }, [formData.city, citySearch]);
