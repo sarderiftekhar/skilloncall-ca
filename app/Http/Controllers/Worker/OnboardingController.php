@@ -207,10 +207,9 @@ class OnboardingController extends Controller
 
             // Final validation
             if (! $workerProfile->canCompleteOnboarding()) {
-                return response()->json([
-                    'success' => false,
+                return back()->withErrors([
                     'message' => 'Please complete all required sections before finishing setup.',
-                ], 422);
+                ]);
             }
 
             // Save final portfolio data if provided
@@ -225,7 +224,7 @@ class OnboardingController extends Controller
 
             DB::commit();
 
-            return response()->json([
+            return back()->with([
                 'success' => true,
                 'message' => 'Congratulations! Your profile is now complete.',
             ]);
@@ -233,11 +232,10 @@ class OnboardingController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
 
-            return response()->json([
-                'success' => false,
+            return back()->withErrors([
                 'message' => 'An error occurred while completing your profile.',
                 'error' => config('app.debug') ? $e->getMessage() : null,
-            ], 422);
+            ]);
         }
     }
 

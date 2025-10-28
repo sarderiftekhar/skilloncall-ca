@@ -306,46 +306,48 @@ export default function WorkerOnboarding({
         setIsSubmitting(true);
 
         try {
-            // Use fetch so we can handle JSON and show a modal consistently
-            const tokenMeta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
-            const csrf = tokenMeta?.content ?? '';
-
-            const response = await fetch('/worker/onboarding/complete', {
-                method: 'POST',
-                headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': csrf,
-                },
-                body: JSON.stringify({ data: formData }),
-                credentials: 'same-origin',
-            });
-
-            const json = await response.json();
-
-            if (response.ok && json?.success) {
-                setModalType('success');
-                setModalTitle(t('modal.complete.title', 'Profile completed'));
-                setModalMessage(json?.message || t('modal.complete.message', 'Your profile is now complete.'));
-                setModalDetails(undefined);
-                setModalOpen(true);
-            } else {
-                const message = json?.message || t('modal.complete_error.message', 'An error occurred while completing your profile.');
-                const details = json?.error ? [String(json.error)] : undefined;
-                setModalType('error');
-                setModalTitle(t('modal.complete_error.title', 'Unable to complete setup'));
-                setModalMessage(message);
-                setModalDetails(details);
-                setModalOpen(true);
-            }
+            // Use Inertia router to handle CSRF automatically
+            router.post('/worker/onboarding/complete', 
+                { data: formData }, 
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                    onSuccess: (page) => {
+                        // Check if the response is successful
+                        const props = page.props as any;
+                        if (props?.flash?.success || props?.success) {
+                            setModalType('success');
+                            setModalTitle(t('modal.complete.title', 'Profile completed'));
+                            setModalMessage(props?.flash?.message || props?.message || t('modal.complete.message', 'Your profile is now complete.'));
+                            setModalDetails(undefined);
+                            setModalOpen(true);
+                        }
+                        setIsSubmitting(false);
+                    },
+                    onError: (errors) => {
+                        console.error('Completion errors:', errors);
+                        const errorMessage = errors?.message || (typeof errors === 'string' ? errors : t('modal.complete_error.message', 'An error occurred while completing your profile.'));
+                        const details = errors && typeof errors === 'object' && !errors?.message 
+                            ? Object.entries(errors).map(([key, value]) => `${key}: ${String(value)}`)
+                            : (errors?.error ? [String(errors.error)] : undefined);
+                        setModalType('error');
+                        setModalTitle(t('modal.complete_error.title', 'Unable to complete setup'));
+                        setModalMessage(errorMessage);
+                        setModalDetails(details);
+                        setModalOpen(true);
+                        setIsSubmitting(false);
+                    },
+                    onFinish: () => {
+                        setIsSubmitting(false);
+                    },
+                }
+            );
         } catch (error) {
             console.error('Error completing onboarding:', error);
             setModalType('error');
             setModalTitle(t('modal.unexpected.title', 'Unexpected error'));
             setModalMessage(t('modal.unexpected.message', 'Something went wrong while completing your profile. Please try again.'));
             setModalOpen(true);
-        } finally {
             setIsSubmitting(false);
         }
     };
