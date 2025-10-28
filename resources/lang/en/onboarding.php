@@ -22,6 +22,9 @@ return [
     'steps.location.mobile' => 'Location & Rates',
     'steps.location.description' => 'Where you work and your rates',
     
+    // Common
+    'step1.optional' => 'Optional',
+    
     'steps.schedule.title' => 'Your Schedule',
     'steps.schedule.mobile' => 'Schedule',
     'steps.schedule.description' => 'When you are available to work',

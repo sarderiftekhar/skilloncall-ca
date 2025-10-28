@@ -466,7 +466,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
             {/* Emergency Contact */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">{t('step1.emergency.title', 'Emergency Contact')}</CardTitle>
+                    <CardTitle className="text-lg">{t('step1.emergency.title', 'Emergency Contact')} ({t('step1.optional', 'Optional')})</CardTitle>
                     <p className="text-sm text-gray-600">{t('step1.emergency.subtitle', "Someone we can contact if there's an emergency while you're working")}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -478,7 +478,6 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                             value={formData.emergency_contact_name || ''}
                             onChange={(value) => handleInputChange('emergency_contact_name', value)}
                             error={validationErrors.emergency_contact_name}
-                            required
                             placeholder={t('step1.emergency.name_placeholder', 'Full name')}
                         />
 
@@ -489,7 +488,6 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                             value={formData.emergency_contact_relationship || ''}
                             onChange={(value) => handleInputChange('emergency_contact_relationship', value)}
                             error={validationErrors.emergency_contact_relationship}
-                            required
                             placeholder={t('step1.emergency.relationship_placeholder', 'Parent, Spouse, Sibling, Friend')}
                         />
                     </div>
@@ -501,7 +499,6 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                         value={formData.emergency_contact_phone || ''}
                         onChange={(value) => handleInputChange('emergency_contact_phone', value)}
                         error={validationErrors.emergency_contact_phone}
-                        required
                         placeholder="(416) 555-0123"
                     />
                 </CardContent>

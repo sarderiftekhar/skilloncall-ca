@@ -398,27 +398,22 @@ export function validateFormData(formData: any): Record<string, string> {
     }
   }
 
-  if (!formData.emergency_contact_name?.trim()) {
-    errors.emergency_contact_name = 'Emergency contact name is required';
-  } else {
+  // Emergency contact fields are now optional - only validate if provided
+  if (formData.emergency_contact_name?.trim()) {
     const nameValidation = validateName(formData.emergency_contact_name, 'Emergency contact name');
     if (!nameValidation.isValid) {
       errors.emergency_contact_name = nameValidation.message!;
     }
   }
 
-  if (!formData.emergency_contact_relationship?.trim()) {
-    errors.emergency_contact_relationship = 'Emergency contact relationship is required';
-  } else {
+  if (formData.emergency_contact_relationship?.trim()) {
     const nameValidation = validateName(formData.emergency_contact_relationship, 'Emergency contact relationship');
     if (!nameValidation.isValid) {
       errors.emergency_contact_relationship = nameValidation.message!;
     }
   }
 
-  if (!formData.emergency_contact_phone?.trim()) {
-    errors.emergency_contact_phone = 'Emergency contact phone number is required';
-  } else {
+  if (formData.emergency_contact_phone?.trim()) {
     const phoneValidation = validatePhone(formData.emergency_contact_phone);
     if (!phoneValidation.isValid) {
       errors.emergency_contact_phone = phoneValidation.message!;

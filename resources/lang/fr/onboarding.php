@@ -22,6 +22,9 @@ return [
     'steps.location.mobile' => 'Lieu et tarifs',
     'steps.location.description' => 'Où vous travaillez et vos tarifs',
     
+    // Common
+    'step1.optional' => 'Optionnel',
+    
     'steps.schedule.title' => 'Votre horaire',
     'steps.schedule.mobile' => 'Horaire',
     'steps.schedule.description' => 'Quand vous êtes disponible pour travailler',
