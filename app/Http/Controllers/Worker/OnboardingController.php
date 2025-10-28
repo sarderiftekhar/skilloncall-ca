@@ -416,7 +416,7 @@ class OnboardingController extends Controller
         $validated = validator($data, [
             'has_vehicle' => 'required|boolean',
             'has_tools_equipment' => 'required|boolean',
-            'travel_distance_max' => 'required|integer|min:1|max:999',
+            'travel_distance_max' => 'nullable|integer|min:1|max:999',
             'hourly_rate_min' => 'required|numeric|min:15|max:200',
             'hourly_rate_max' => 'nullable|numeric|min:15|max:500|gte:hourly_rate_min',
             'is_insured' => 'nullable|boolean',
