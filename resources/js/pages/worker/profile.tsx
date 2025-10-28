@@ -108,7 +108,10 @@ export default function WorkerProfilePage(props: PageProps) {
         });
       }
 
-      await router.put('/worker/profile', data, {
+      await router.post('/worker/profile', {
+        _method: 'PUT',
+        ...data
+      }, {
         forceFormData: hasFile, // Use FormData for file uploads
         onError: (e) => {
           console.error('Profile update error:', e);

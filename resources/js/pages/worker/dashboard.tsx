@@ -880,7 +880,7 @@ export default function WorkerDashboard({
                                                         variant="outline" 
                                                         className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
                                                         style={{height: '2.7em'}}
-                                                        onClick={() => window.location.href = '/worker/availability'}
+                                                        onClick={() => router.visit('/worker/availability')}
                                                     >
                                                         Manage Availability
                                                     </Button>

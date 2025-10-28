@@ -411,7 +411,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
 
                             {/* Address Fields */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-900">Address</h4>
+                                <h4 className="font-medium" style={{ color: '#192341' }}>Address</h4>
                                 <div>
                                     <Label className="text-sm font-medium">
                                         Street Address <span className="text-red-500">*</span>
@@ -582,7 +582,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
 
                             {/* Emergency Contact */}
                             <div className="space-y-4">
-                                <h4 className="font-medium text-gray-900">Emergency Contact</h4>
+                                <h4 className="font-medium" style={{ color: '#192341' }}>Emergency Contact</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <Label className="text-sm font-medium">
@@ -657,7 +657,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                         <div className="space-y-6">
                             {/* View Mode - Personal Details */}
                             <div>
-                                <h4 className="font-medium text-gray-900 mb-4">Personal Details</h4>
+                                <h4 className="font-medium mb-4" style={{ color: '#192341' }}>Personal Details</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-4">
                                         <div className="flex items-center space-x-3">
@@ -715,7 +715,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
 
                             {/* Current Address Section */}
                             <div>
-                                <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+                                <h4 className="font-medium mb-4 flex items-center" style={{ color: '#192341' }}>
                                     <MapPin className="w-5 h-5 text-gray-400 mr-2" />
                                     Current Address
                                 </h4>
@@ -751,7 +751,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                             {/* Bio */}
                             {profile?.bio && (
                                 <div>
-                                    <h4 className="font-medium text-gray-900 mb-2">About Me</h4>
+                                    <h4 className="font-medium mb-2" style={{ color: '#192341' }}>About Me</h4>
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <p className="text-gray-900">{profile.bio}</p>
                                     </div>

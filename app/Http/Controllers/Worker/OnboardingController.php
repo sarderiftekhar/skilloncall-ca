@@ -134,6 +134,11 @@ class OnboardingController extends Controller
         $step = (int) $request->input('step');
         $data = $request->input('data', []);
 
+        // Check if profile photo is uploaded directly (not nested in data)
+        if ($request->hasFile('data.profile_photo')) {
+            $data['profile_photo'] = $request->file('data.profile_photo');
+        }
+
         // Comprehensive debugging logging
         Log::info('Onboarding save attempt', [
             'user_id' => $user->id,
@@ -142,7 +147,8 @@ class OnboardingController extends Controller
             'data_types' => array_map('gettype', $data),
             'request_method' => $request->method(),
             'request_content_type' => $request->header('Content-Type'),
-            'has_files' => $request->hasFile('profile_photo'),
+            'has_files' => $request->hasFile('data.profile_photo'),
+            'all_files' => array_keys($request->allFiles()),
             'timestamp' => now()->toISOString(),
         ]);
 
@@ -158,6 +164,7 @@ class OnboardingController extends Controller
                 'province' => $data['province'] ?? 'missing',
                 'postal_code' => $data['postal_code'] ?? 'missing',
                 'profile_photo_type' => isset($data['profile_photo']) ? gettype($data['profile_photo']) : 'missing',
+                'profile_photo_is_file' => isset($data['profile_photo']) && $data['profile_photo'] instanceof \Illuminate\Http\UploadedFile ? 'yes' : 'no',
             ]);
         }
 
