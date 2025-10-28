@@ -207,7 +207,37 @@ class WorkerProfile extends Model
 
     public function canCompleteOnboarding(): bool
     {
-        return $this->calculateProfileCompletion() >= 80;
+        // Check for essential fields that are actually captured in onboarding
+        $essentialFields = [
+            'first_name',
+            'last_name', 
+            'phone',
+            'address_line_1',
+            'city',
+            'province',
+            'postal_code',
+            'work_authorization',
+            'hourly_rate_min',
+            'travel_distance_max',
+        ];
+        
+        // Check all essential fields are present
+        foreach ($essentialFields as $field) {
+            if (empty($this->$field)) {
+                return false;
+            }
+        }
+        
+        // Check for at least one skill and availability
+        if ($this->skills()->count() === 0) {
+            return false;
+        }
+        
+        if ($this->availability()->where('is_available', true)->count() === 0) {
+            return false;
+        }
+        
+        return true;
     }
 
     public function getPrimarySkill()
