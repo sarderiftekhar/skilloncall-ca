@@ -83,13 +83,22 @@ class GlobalLanguagesSeeder extends Seeder
             ['name' => 'Swahili', 'code' => 'sw', 'is_official_canada' => false, 'sort_order' => 47],
         ];
 
+        // Use updateOrCreate to prevent duplicates when seeder runs multiple times
         foreach ($languages as $language) {
-            $language['created_at'] = $now;
-            $language['updated_at'] = $now;
-            $language['is_active'] = true;
+            DB::table('global_languages')->updateOrInsert(
+                [
+                    'name' => $language['name'],
+                    'is_official_canada' => $language['is_official_canada']
+                ],
+                [
+                    'code' => $language['code'],
+                    'sort_order' => $language['sort_order'],
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-
-        DB::table('global_languages')->insert($languages);
     }
 }
 

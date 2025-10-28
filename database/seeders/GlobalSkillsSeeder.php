@@ -496,15 +496,20 @@ class GlobalSkillsSeeder extends Seeder
             return strcmp($a['name'], $b['name']);
         });
 
-        // Add timestamps, active status, and sort_order after sorting
+        // Use updateOrInsert to prevent duplicates when seeder runs multiple times
         foreach ($skills as $index => $skill) {
-            $skills[$index]['created_at'] = $now;
-            $skills[$index]['updated_at'] = $now;
-            $skills[$index]['is_active'] = true;
-            $skills[$index]['sort_order'] = $index + 1;
+            DB::table('global_skills')->updateOrInsert(
+                ['name' => $skill['name'], 'category' => $skill['category']],
+                [
+                    'description' => $skill['description'] ?? null,
+                    'requires_certification' => $skill['requires_certification'],
+                    'is_active' => true,
+                    'sort_order' => $index + 1,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-
-        DB::table('global_skills')->insert($skills);
     }
 }
 

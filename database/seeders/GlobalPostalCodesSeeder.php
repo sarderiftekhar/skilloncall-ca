@@ -97,14 +97,24 @@ class GlobalPostalCodesSeeder extends Seeder
             ['postal_code' => 'X0A', 'city' => 'Iqaluit', 'province' => 'NU', 'latitude' => 63.7467, 'longitude' => -68.5170],
         ];
 
+        // Use updateOrInsert to prevent duplicates when seeder runs multiple times
         foreach ($postalCodes as $postalCode) {
-            $postalCode['country'] = 'Canada';
-            $postalCode['created_at'] = $now;
-            $postalCode['updated_at'] = $now;
-            $postalCode['is_active'] = true;
+            DB::table('global_postal_codes')->updateOrInsert(
+                [
+                    'postal_code' => $postalCode['postal_code'],
+                    'province' => $postalCode['province']
+                ],
+                [
+                    'city' => $postalCode['city'],
+                    'country' => 'Canada',
+                    'latitude' => $postalCode['latitude'],
+                    'longitude' => $postalCode['longitude'],
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-
-        DB::table('global_postal_codes')->insert($postalCodes);
     }
 }
 

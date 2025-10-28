@@ -125,13 +125,19 @@ class GlobalIndustriesSeeder extends Seeder
             ['name' => 'Laundromat', 'category' => 'Other Services', 'sort_order' => 80],
         ];
 
+        // Use updateOrInsert to prevent duplicates when seeder runs multiple times
         foreach ($industries as $industry) {
-            $industry['created_at'] = $now;
-            $industry['updated_at'] = $now;
-            $industry['is_active'] = true;
+            DB::table('global_industries')->updateOrInsert(
+                ['name' => $industry['name'], 'category' => $industry['category']],
+                [
+                    'description' => $industry['description'] ?? null,
+                    'sort_order' => $industry['sort_order'],
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-
-        DB::table('global_industries')->insert($industries);
     }
 }
 

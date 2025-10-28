@@ -255,13 +255,25 @@ class GlobalCertificationsSeeder extends Seeder
             ],
         ];
 
+        // Use updateOrInsert to prevent duplicates when seeder runs multiple times
         foreach ($certifications as $certification) {
-            $certification['created_at'] = $now;
-            $certification['updated_at'] = $now;
-            $certification['is_active'] = true;
+            DB::table('global_certifications')->updateOrInsert(
+                [
+                    'name' => $certification['name'],
+                    'issuing_authority' => $certification['issuing_authority'],
+                    'province' => $certification['province']
+                ],
+                [
+                    'skill_category' => $certification['skill_category'],
+                    'is_required' => $certification['is_required'],
+                    'has_expiry' => $certification['has_expiry'],
+                    'validity_years' => $certification['validity_years'],
+                    'is_active' => true,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]
+            );
         }
-
-        DB::table('global_certifications')->insert($certifications);
     }
 }
 
