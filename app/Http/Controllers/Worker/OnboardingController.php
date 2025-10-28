@@ -158,7 +158,7 @@ class OnboardingController extends Controller
                     $this->saveLocationPreferences($workerProfile, $data);
                     break;
                 case 5:
-                    $this->saveLanguagesAvailability($workerProfile, $data);
+                    $this->saveAvailability($workerProfile, $data);
                     break;
                 case 6:
                     $this->savePortfolio($workerProfile, $data);
@@ -450,13 +450,9 @@ class OnboardingController extends Controller
         }
     }
 
-    private function saveLanguagesAvailability(WorkerProfile $profile, array $data)
+    private function saveAvailability(WorkerProfile $profile, array $data)
     {
         $validated = validator($data, [
-            'selected_languages' => 'required|array|min:1',
-            'selected_languages.*.id' => 'required|exists:global_languages,id',
-            'selected_languages.*.proficiency_level' => 'required|in:basic,conversational,fluent,native',
-            'selected_languages.*.is_primary_language' => 'boolean',
             'availability_by_month' => 'required|array|min:1|max:2',
             'availability_by_month.*.month' => 'required|date_format:Y-m',
             'availability_by_month.*.availability' => 'required|array',
@@ -466,16 +462,6 @@ class OnboardingController extends Controller
             'availability_by_month.*.availability.*.is_available' => 'boolean',
             'availability_by_month.*.availability.*.rate_multiplier' => 'numeric|min:1|max:3',
         ])->validate();
-
-        // Sync languages
-        $languagesData = [];
-        foreach ($validated['selected_languages'] as $language) {
-            $languagesData[$language['id']] = [
-                'proficiency_level' => $language['proficiency_level'],
-                'is_primary_language' => $language['is_primary_language'] ?? false,
-            ];
-        }
-        $profile->languages()->sync($languagesData);
 
         // Delete existing availability for the months being updated
         $monthsToUpdate = array_column($validated['availability_by_month'], 'month');
