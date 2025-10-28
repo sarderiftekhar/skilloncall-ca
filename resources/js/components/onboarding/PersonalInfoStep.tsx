@@ -51,38 +51,44 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
     const [showCitySuggestions, setShowCitySuggestions] = useState<boolean>(false);
     const [cities, setCities] = useState<City[]>([]);
     const [loadingCities, setLoadingCities] = useState<boolean>(false);
+    const [citiesLoaded, setCitiesLoaded] = useState<boolean>(false);
+    const [previousProvince, setPreviousProvince] = useState<string | null>(null);
     const cityInputRef = React.useRef<HTMLDivElement>(null);
 
-    // Fetch cities from API when province changes or when user searches
-    React.useEffect(() => {
+    // Fetch cities from API only when user interacts with city field
+    const fetchCities = async () => {
         if (!formData.province) {
-            setCities([]);
             return;
         }
 
-        const fetchCities = async () => {
-            setLoadingCities(true);
-            try {
-                const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-                const response = await fetch(`/worker/api/provinces/code/${formData.province}/cities${searchParam}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setCities(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch cities:', error);
-            } finally {
-                setLoadingCities(false);
+        setLoadingCities(true);
+        try {
+            const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
+            const response = await fetch(`/worker/api/provinces/code/${formData.province}/cities${searchParam}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCities(data);
+                setCitiesLoaded(true);
             }
-        };
+        } catch (error) {
+            console.error('Failed to fetch cities:', error);
+        } finally {
+            setLoadingCities(false);
+        }
+    };
 
-        // Debounce the search
+    // Debounce city search when user types
+    React.useEffect(() => {
+        if (!formData.province || !citiesLoaded) {
+            return;
+        }
+
         const timer = setTimeout(() => {
             fetchCities();
         }, 300);
 
         return () => clearTimeout(timer);
-    }, [formData.province, citySearch]);
+    }, [citySearch]);
 
     // Close suggestions when clicking outside
     React.useEffect(() => {
@@ -95,13 +101,16 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Clear city when province changes
+    // Clear city when province changes (but not on initial mount)
     React.useEffect(() => {
-        if (formData.province && formData.city) {
-            // Clear city when province changes as cities will be refetched
+        if (previousProvince !== null && formData.province !== previousProvince) {
+            // Clear city, cities list, and reset loaded state when province actually changes
             handleInputChange('city', '');
             setCitySearch('');
+            setCities([]);
+            setCitiesLoaded(false);
         }
+        setPreviousProvince(formData.province as string);
     }, [formData.province]);
 
     // Initialize citySearch with the selected city name
@@ -384,9 +393,21 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                             handleInputChange('city', '');
                                         }
                                     }}
-                                    onFocus={() => setShowCitySuggestions(true)}
-                                    placeholder={t('step1.address.city_placeholder', 'Type to search cities...')}
+                                    onFocus={() => {
+                                        if (formData.province && !citiesLoaded) {
+                                            // Load cities on first focus when province is selected
+                                            fetchCities();
+                                        }
+                                        setShowCitySuggestions(true);
+                                    }}
+                                    placeholder={
+                                        formData.province 
+                                            ? t('step1.address.city_placeholder', 'Type to search cities...') 
+                                            : t('step1.address.city_placeholder_disabled', 'Select a province first')
+                                    }
                                     className={validationErrors.city ? 'border-red-500' : ''}
+                                    disabled={!formData.province}
+                                    style={{ cursor: formData.province ? 'text' : 'not-allowed' }}
                                 />
 
                                 {/* Suggestions dropdown */}
@@ -422,6 +443,9 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                     </div>
                                 )}
                             </div>
+                            {!formData.province && (
+                                <p className="mt-1 text-sm text-gray-500">{t('step1.address.city_placeholder_disabled', 'Select a province first')}</p>
+                            )}
                             {validationErrors.city && <p className="mt-1 text-sm text-red-600">{validationErrors.city}</p>}
                         </div>
 

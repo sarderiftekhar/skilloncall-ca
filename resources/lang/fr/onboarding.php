@@ -119,6 +119,7 @@ return [
     'step1.address.province_placeholder' => 'Sélectionner',
     'step1.address.city' => 'Ville',
     'step1.address.city_placeholder' => 'Tapez pour rechercher des villes...',
+    'step1.address.city_placeholder_disabled' => 'Sélectionnez d\'abord une province',
     'step1.address.loading_cities' => 'Chargement des villes...',
     'step1.address.no_cities' => 'Aucune ville trouvée correspondant à',
     'step1.address.postal_code' => 'Code postal',
