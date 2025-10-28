@@ -12,16 +12,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Drop the old unique constraint if it exists
-        try {
-            DB::statement('ALTER TABLE worker_availability DROP INDEX worker_avail_profile_day_time_unique');
-        } catch (\Exception $e) {
-            // Index might not exist, that's okay
-        }
+        Schema::table('worker_availability', function (Blueprint $table) {
+            // Drop the old unique constraint if it exists
+            $table->dropUnique('worker_avail_profile_day_time_unique');
+        });
         
         Schema::table('worker_availability', function (Blueprint $table) {
             // Add effective_month column to track which month the availability applies to
-            $table->string('effective_month', 7)->after('worker_profile_id')->nullable();
+            $table->string('effective_month', 7)->nullable();
         });
 
         // Set default effective_month for existing records to current month

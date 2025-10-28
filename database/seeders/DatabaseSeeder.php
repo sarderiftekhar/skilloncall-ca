@@ -49,7 +49,9 @@ class DatabaseSeeder extends Seeder
             GlobalIndustriesSeeder::class,
             GlobalLanguagesSeeder::class,
             GlobalCertificationsSeeder::class,
+            GlobalProvincesAndCitiesSeeder::class,
             GlobalPostalCodesSeeder::class,
+            SubscriptionPlanSeeder::class,
             JobSeeder::class,
         ]);
     }

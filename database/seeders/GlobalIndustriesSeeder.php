@@ -11,7 +11,13 @@ class GlobalIndustriesSeeder extends Seeder
     public function run(): void
     {
         // Clear existing data to prevent duplicates
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        }
         DB::table('global_industries')->truncate();
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
         
         $now = Carbon::now();
         
