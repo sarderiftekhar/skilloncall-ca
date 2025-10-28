@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useEffect, useState } from 'react';
-import { CheckCircle, Clock } from 'react-feather';
+import { useEffect, useMemo, useState } from 'react';
+import { CheckCircle, Clock, Copy } from 'react-feather';
 
 interface GlobeAvailabilityStepProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,6 +21,11 @@ interface AvailabilitySlot {
     end_time: string;
     is_available: boolean;
     rate_multiplier: number;
+}
+
+interface MonthAvailability {
+    month: string; // 'YYYY-MM'
+    availability: AvailabilitySlot[];
 }
 
 const DAYS_OF_WEEK = [
@@ -54,10 +59,30 @@ const TIME_SLOTS = [
 ];
 
 export default function GlobeAvailabilityStep({ formData, updateFormData, validationErrors }: GlobeAvailabilityStepProps) {
-    const [availability, setAvailability] = useState<AvailabilitySlot[]>(() => {
-        if (formData.availability && formData.availability.length > 0) {
-            return formData.availability;
-        }
+    // Helper functions for month calculations
+    const getCurrentMonth = (): string => {
+        const now = new Date();
+        return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    };
+
+    const getNextMonth = (): string => {
+        const now = new Date();
+        const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`;
+    };
+
+    const formatMonthDisplay = (month: string): string => {
+        const [year, monthNum] = month.split('-');
+        const date = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
+        return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    };
+
+    // Initialize months
+    const currentMonth = useMemo(() => getCurrentMonth(), []);
+    const nextMonth = useMemo(() => getNextMonth(), []);
+
+    // Initialize default availability for a month
+    const getDefaultAvailability = (): AvailabilitySlot[] => {
         return DAYS_OF_WEEK.map((day) => ({
             day_of_week: day.value,
             start_time: '09:00',
@@ -65,45 +90,73 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
             is_available: day.value >= 1 && day.value <= 5, // Weekdays default available
             rate_multiplier: day.value === 0 || day.value === 6 ? 1.25 : 1.0, // Weekend premium
         }));
-    });
-    const [quickSchedule, setQuickSchedule] = useState<string>('');
+    };
 
-    // Sync availability with form data and ensure it's initialized
-    useEffect(() => {
-        if (formData.availability && formData.availability.length > 0) {
-            setAvailability(formData.availability);
-        } else if (!formData.availability || formData.availability.length === 0) {
-            // Initialize with default availability if not set
-            const defaultAvailability = DAYS_OF_WEEK.map((day) => ({
-                day_of_week: day.value,
-                start_time: '09:00',
-                end_time: '17:00',
-                is_available: day.value >= 1 && day.value <= 5, // Weekdays default available
-                rate_multiplier: day.value === 0 || day.value === 6 ? 1.25 : 1.0, // Weekend premium
-            }));
-            setAvailability(defaultAvailability);
-            updateFormData({ availability: defaultAvailability });
+    // State for availability by month
+    const [availabilityByMonth, setAvailabilityByMonth] = useState<MonthAvailability[]>(() => {
+        if (formData.availability_by_month && formData.availability_by_month.length > 0) {
+            return formData.availability_by_month;
         }
-    }, [formData.availability, updateFormData]);
+        // Initialize with default availability for current and next month
+        return [
+            { month: currentMonth, availability: getDefaultAvailability() },
+            { month: nextMonth, availability: getDefaultAvailability() },
+        ];
+    });
 
-    // Availability Management
+    const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth);
+    const [quickSchedule, setQuickSchedule] = useState<string>('');
+    const [isCopying, setIsCopying] = useState(false);
+
+    // Sync with formData
+    useEffect(() => {
+        if (formData.availability_by_month && formData.availability_by_month.length > 0) {
+            setAvailabilityByMonth(formData.availability_by_month);
+        } else {
+            // Initialize with defaults
+            const defaults = [
+                { month: currentMonth, availability: getDefaultAvailability() },
+                { month: nextMonth, availability: getDefaultAvailability() },
+            ];
+            setAvailabilityByMonth(defaults);
+            updateFormData({ availability_by_month: defaults });
+        }
+    }, [formData.availability_by_month, currentMonth, nextMonth, updateFormData]);
+
+    // Get availability for the selected month
+    const currentAvailability = useMemo(() => {
+        const monthData = availabilityByMonth.find((m) => m.month === selectedMonth);
+        return monthData?.availability || getDefaultAvailability();
+    }, [availabilityByMonth, selectedMonth]);
+
+    // Update availability for a specific month and day
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateAvailability = (dayOfWeek: number, field: string, value: any) => {
-        const updatedAvailability = availability.map((slot) => (slot.day_of_week === dayOfWeek ? { ...slot, [field]: value } : slot));
-        setAvailability(updatedAvailability);
-        updateFormData({ availability: updatedAvailability });
+    const updateMonthAvailability = (month: string, dayOfWeek: number, field: string, value: any) => {
+        const updatedByMonth = availabilityByMonth.map((monthData) => {
+            if (monthData.month !== month) return monthData;
+
+            const updatedAvailability = monthData.availability.map((slot) =>
+                slot.day_of_week === dayOfWeek ? { ...slot, [field]: value } : slot
+            );
+
+            return { ...monthData, availability: updatedAvailability };
+        });
+
+        setAvailabilityByMonth(updatedByMonth);
+        updateFormData({ availability_by_month: updatedByMonth });
     };
 
     const toggleDayAvailability = (dayOfWeek: number) => {
-        updateAvailability(dayOfWeek, 'is_available', !availability.find((a) => a.day_of_week === dayOfWeek)?.is_available);
+        const currentSlot = currentAvailability.find((a) => a.day_of_week === dayOfWeek);
+        updateMonthAvailability(selectedMonth, dayOfWeek, 'is_available', !currentSlot?.is_available);
     };
 
     const handleQuickSchedule = (schedule: string) => {
-        let updatedAvailability;
+        let updatedAvailability: AvailabilitySlot[];
 
         switch (schedule) {
             case 'weekdays':
-                updatedAvailability = availability.map((slot) => ({
+                updatedAvailability = currentAvailability.map((slot) => ({
                     ...slot,
                     is_available: slot.day_of_week >= 1 && slot.day_of_week <= 5,
                     start_time: '09:00',
@@ -111,7 +164,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                 }));
                 break;
             case 'evenings':
-                updatedAvailability = availability.map((slot) => ({
+                updatedAvailability = currentAvailability.map((slot) => ({
                     ...slot,
                     is_available: true,
                     start_time: '18:00',
@@ -119,7 +172,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                 }));
                 break;
             case 'weekends':
-                updatedAvailability = availability.map((slot) => ({
+                updatedAvailability = currentAvailability.map((slot) => ({
                     ...slot,
                     is_available: slot.day_of_week === 0 || slot.day_of_week === 6,
                     start_time: '10:00',
@@ -127,7 +180,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                 }));
                 break;
             case 'flexible':
-                updatedAvailability = availability.map((slot) => ({
+                updatedAvailability = currentAvailability.map((slot) => ({
                     ...slot,
                     is_available: true,
                     start_time: '08:00',
@@ -138,12 +191,39 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                 return;
         }
 
-        setAvailability(updatedAvailability);
-        updateFormData({ availability: updatedAvailability });
+        const updatedByMonth = availabilityByMonth.map((monthData) =>
+            monthData.month === selectedMonth ? { ...monthData, availability: updatedAvailability } : monthData
+        );
+
+        setAvailabilityByMonth(updatedByMonth);
+        updateFormData({ availability_by_month: updatedByMonth });
         setQuickSchedule(schedule);
     };
 
-    const getAvailableHours = () => {
+    const copyToNextMonth = () => {
+        setIsCopying(true);
+        
+        // Copy current month's availability to next month
+        const currentMonthData = availabilityByMonth.find((m) => m.month === currentMonth);
+        if (!currentMonthData) return;
+
+        const updatedByMonth = availabilityByMonth.map((monthData) => {
+            if (monthData.month === nextMonth) {
+                return { ...monthData, availability: [...currentMonthData.availability] };
+            }
+            return monthData;
+        });
+
+        setAvailabilityByMonth(updatedByMonth);
+        updateFormData({ availability_by_month: updatedByMonth });
+
+        // Show success message briefly
+        setTimeout(() => {
+            setIsCopying(false);
+        }, 1000);
+    };
+
+    const getAvailableHours = (availability: AvailabilitySlot[]) => {
         const availableSlots = availability.filter((slot) => slot.is_available);
         const totalHours = availableSlots.reduce((total, slot) => {
             const start = new Date(`2000-01-01 ${slot.start_time}`);
@@ -153,6 +233,12 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
         }, 0);
 
         return totalHours;
+    };
+
+    const hasAvailability = (month: string) => {
+        const monthData = availabilityByMonth.find((m) => m.month === month);
+        if (!monthData) return false;
+        return monthData.availability.some((slot) => slot.is_available);
     };
 
     return (
@@ -165,18 +251,53 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                 <h2 className="mb-2 text-xl font-bold" style={{ color: '#192341' }}>
                     Your Schedule
                 </h2>
-                <p className="text-sm text-gray-600">Tell us when you're available to work.</p>
+                <p className="text-sm text-gray-600">Tell us when you are available to work for the next 2 months.</p>
             </div>
 
+            {/* Month Tabs */}
+            <div className="mb-6">
+                <div className="flex space-x-2 border-b border-gray-200">
+                    <button
+                        type="button"
+                        onClick={() => setSelectedMonth(currentMonth)}
+                        className={`cursor-pointer flex-1 pb-3 pt-2 text-center text-sm font-medium transition-all ${
+                            selectedMonth === currentMonth
+                                ? 'border-b-2 text-[#10B3D6]'
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                        style={selectedMonth === currentMonth ? { borderColor: '#10B3D6' } : {}}
+                    >
+                        <div>{formatMonthDisplay(currentMonth)}</div>
+                        {hasAvailability(currentMonth) && (
+                            <CheckCircle className="mx-auto mt-1 h-4 w-4 text-green-600" />
+                        )}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setSelectedMonth(nextMonth)}
+                        className={`cursor-pointer flex-1 pb-3 pt-2 text-center text-sm font-medium transition-all ${
+                            selectedMonth === nextMonth
+                                ? 'border-b-2 text-[#10B3D6]'
+                                : 'text-gray-500 hover:text-gray-700'
+                        }`}
+                        style={selectedMonth === nextMonth ? { borderColor: '#10B3D6' } : {}}
+                    >
+                        <div>{formatMonthDisplay(nextMonth)}</div>
+                        {hasAvailability(nextMonth) && (
+                            <CheckCircle className="mx-auto mt-1 h-4 w-4 text-green-600" />
+                        )}
+                    </button>
+                </div>
+            </div>
 
             {/* Availability Schedule */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-lg">
                         <Clock className="mr-2 h-5 w-5" style={{ color: '#10B3D6' }} />
-                        When Are You Available?
+                        {formatMonthDisplay(selectedMonth)} Availability
                     </CardTitle>
-                    <p className="text-sm text-gray-600">Set your general availability. You can always negotiate specific times with employers.</p>
+                    <p className="text-sm text-gray-600">Set your availability for {formatMonthDisplay(selectedMonth)}. You can always negotiate specific times with employers.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Quick Schedule Options */}
@@ -184,6 +305,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                         <Label className="mb-3 block text-sm font-medium">Quick Schedule Options</Label>
                         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                             <Button
+                                type="button"
                                 variant="outline"
                                 onClick={() => handleQuickSchedule('weekdays')}
                                 className={`h-auto cursor-pointer py-3 text-sm ${quickSchedule === 'weekdays' ? 'border-[#10B3D6] bg-blue-50' : ''}`}
@@ -194,6 +316,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                                 </div>
                             </Button>
                             <Button
+                                type="button"
                                 variant="outline"
                                 onClick={() => handleQuickSchedule('evenings')}
                                 className={`h-auto cursor-pointer py-3 text-sm ${quickSchedule === 'evenings' ? 'border-[#10B3D6] bg-blue-50' : ''}`}
@@ -204,6 +327,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                                 </div>
                             </Button>
                             <Button
+                                type="button"
                                 variant="outline"
                                 onClick={() => handleQuickSchedule('weekends')}
                                 className={`h-auto cursor-pointer py-3 text-sm ${quickSchedule === 'weekends' ? 'border-[#10B3D6] bg-blue-50' : ''}`}
@@ -214,6 +338,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                                 </div>
                             </Button>
                             <Button
+                                type="button"
                                 variant="outline"
                                 onClick={() => handleQuickSchedule('flexible')}
                                 className={`h-auto cursor-pointer py-3 text-sm ${quickSchedule === 'flexible' ? 'border-[#10B3D6] bg-blue-50' : ''}`}
@@ -231,7 +356,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                         <Label className="mb-3 block text-sm font-medium">Custom Schedule (Tap days to toggle availability)</Label>
                         <div className="space-y-3">
                             {DAYS_OF_WEEK.map((day) => {
-                                const daySchedule = availability.find((a) => a.day_of_week === day.value) || {
+                                const daySchedule = currentAvailability.find((a) => a.day_of_week === day.value) || {
                                     day_of_week: day.value,
                                     start_time: '09:00',
                                     end_time: '17:00',
@@ -276,7 +401,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                                                     <Label className="text-xs text-gray-600">Start Time</Label>
                                                     <Select
                                                         value={daySchedule.start_time}
-                                                        onValueChange={(value) => updateAvailability(day.value, 'start_time', value)}
+                                                        onValueChange={(value) => updateMonthAvailability(selectedMonth, day.value, 'start_time', value)}
                                                     >
                                                         <SelectTrigger className="h-8 text-sm">
                                                             <SelectValue />
@@ -294,7 +419,7 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                                                     <Label className="text-xs text-gray-600">End Time</Label>
                                                     <Select
                                                         value={daySchedule.end_time}
-                                                        onValueChange={(value) => updateAvailability(day.value, 'end_time', value)}
+                                                        onValueChange={(value) => updateMonthAvailability(selectedMonth, day.value, 'end_time', value)}
                                                     >
                                                         <SelectTrigger className="h-8 text-sm">
                                                             <SelectValue />
@@ -320,18 +445,36 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                             <div className="flex items-center space-x-3">
                                 <Clock className="h-5 w-5 text-blue-600" />
                                 <div>
-                                    <p className="font-medium text-blue-800">Your Availability: {getAvailableHours()} hours per week</p>
+                                    <p className="font-medium text-blue-800">
+                                        {formatMonthDisplay(selectedMonth)}: {getAvailableHours(currentAvailability)} hours per week
+                                    </p>
                                     <p className="mt-1 text-sm text-blue-700">
-                                        Available {availability.filter((a) => a.is_available).length} days per week
+                                        Available {currentAvailability.filter((a) => a.is_available).length} days per week
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {validationErrors.availability && <p className="text-sm text-red-600">{validationErrors.availability}</p>}
+                        {validationErrors.availability_by_month && <p className="text-sm text-red-600">{validationErrors.availability_by_month}</p>}
                     </div>
                 </CardContent>
             </Card>
+
+            {/* Copy to Next Month Button */}
+            {selectedMonth === currentMonth && (
+                <div className="flex justify-center">
+                    <Button
+                        type="button"
+                        onClick={copyToNextMonth}
+                        disabled={isCopying}
+                        className="cursor-pointer"
+                        style={{ backgroundColor: '#10B3D6', color: 'white' }}
+                    >
+                        <Copy className="mr-2 h-4 w-4" />
+                        {isCopying ? 'Copied!' : `Copy to ${formatMonthDisplay(nextMonth)}`}
+                    </Button>
+                </div>
+            )}
 
             {/* Schedule Tips */}
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
@@ -340,6 +483,8 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                     <div className="text-sm">
                         <p className="mb-1 font-medium text-yellow-800">Schedule Tips</p>
                         <p className="text-xs text-yellow-700">
+                            • Set your availability for both months to get more opportunities
+                            <br />
                             • More availability = more job opportunities
                             <br />
                             • Weekend and evening work often pays more
