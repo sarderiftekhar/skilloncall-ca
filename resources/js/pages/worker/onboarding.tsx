@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Briefcase, Camera, CheckCircle, FileText, Globe, MapPin, User } from 'react-feather';
+import { ArrowLeft, ArrowRight, Briefcase, Camera, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Import step components (we'll create these next)
@@ -89,10 +89,10 @@ export default function WorkerOnboarding({
         },
         {
             id: 5,
-            title: t('steps.languages.title', 'Languages & Schedule'),
-            icon: Globe,
-            description: t('steps.languages.description', 'Languages and availability'),
-            mobileTitle: t('steps.languages.mobile', 'Languages & Time'),
+            title: t('steps.schedule.title', 'Your Schedule'),
+            icon: Clock,
+            description: t('steps.schedule.description', 'When you are available to work'),
+            mobileTitle: t('steps.schedule.mobile', 'Schedule'),
         },
         {
             id: 6,
@@ -301,6 +301,15 @@ export default function WorkerOnboarding({
         }
     };
 
+    const goToStep = (targetStep: number) => {
+        // Allow navigation to any previous step or the current step
+        // Don't allow skipping ahead to future steps
+        if (targetStep <= step && targetStep >= 1) {
+            setStep(targetStep);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
     const completeOnboarding = async () => {
         setIsSubmitting(true);
 
@@ -469,9 +478,10 @@ export default function WorkerOnboarding({
                             <div key={stepInfo.id} className="flex min-w-0 flex-1 items-center">
                                 {/* Compact Step Indicator */}
                                 <div
+                                    onClick={() => goToStep(stepInfo.id)}
                                     className={`relative flex w-full items-center justify-center space-x-2 rounded-full px-3 py-2 transition-all duration-300 ${
                                         step >= stepInfo.id ? 'bg-[#10B3D6] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                    }`}
+                                    } ${stepInfo.id <= step ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                                 >
                                     {/* Icon */}
                                     <stepInfo.icon className="h-4 w-4 flex-shrink-0" />

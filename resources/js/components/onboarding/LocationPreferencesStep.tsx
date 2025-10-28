@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Plus, X, Truck, Tool, Shield, DollarSign, CheckCircle } from 'react-feather';
+import { MapPin, Plus, X, Truck, Tool, Globe, DollarSign, CheckCircle, Star } from 'react-feather';
 
 interface LocationPreferencesStepProps {
     formData: any;
     updateFormData: (data: any) => void;
     validationErrors: any;
+    globalLanguages: any[];
 }
 
 interface ServiceArea {
@@ -21,6 +22,15 @@ interface ServiceArea {
     travel_time_minutes: number;
     additional_charge: number;
     is_primary_area: boolean;
+}
+
+interface SelectedLanguage {
+    id: number;
+    name: string;
+    code: string;
+    proficiency_level: string;
+    is_primary_language: boolean;
+    is_official_canada: boolean;
 }
 
 const CANADIAN_PROVINCES = [
@@ -39,11 +49,41 @@ const CANADIAN_PROVINCES = [
     { value: 'YT', label: 'Yukon' },
 ];
 
+const PROFICIENCY_LEVELS = [
+    { value: 'basic', label: 'Basic', description: 'Simple conversations' },
+    { value: 'conversational', label: 'Conversational', description: 'Can discuss work topics' },
+    { value: 'fluent', label: 'Fluent', description: 'Speak easily and clearly' },
+    { value: 'native', label: 'Native', description: 'First language' },
+];
+
 export default function LocationPreferencesStep({
     formData,
     updateFormData,
-    validationErrors
+    validationErrors,
+    globalLanguages = []
 }: LocationPreferencesStepProps) {
+    // Deduplicate languages by NAME (not ID) since there are duplicate names in DB
+    const uniqueLanguages = useMemo(() => {
+        const seenNames = new Map();
+        
+        globalLanguages.forEach(lang => {
+            const key = `${lang.name}-${lang.is_official_canada}`;
+            // Keep the first occurrence of each unique name
+            if (!seenNames.has(key)) {
+                seenNames.set(key, lang);
+            }
+        });
+        
+        const unique = Array.from(seenNames.values());
+        
+        console.log('=== DEDUPLICATION DEBUG ===');
+        console.log('Original count:', globalLanguages.length);
+        console.log('After deduplication by name:', unique.length);
+        console.log('Unique languages:', unique.map(l => `${l.name} (${l.is_official_canada ? 'Official' : 'Other'})`));
+        
+        return unique;
+    }, [globalLanguages]);
+
     const [serviceAreas, setServiceAreas] = useState<ServiceArea[]>(
         formData.service_areas || [{
             id: 'primary',
@@ -55,6 +95,9 @@ export default function LocationPreferencesStep({
             is_primary_area: true
         }]
     );
+    
+    const [selectedLanguages, setSelectedLanguages] = useState<SelectedLanguage[]>(formData.selected_languages || []);
+    const [selectedLanguageId, setSelectedLanguageId] = useState<string>('');
 
     const handleBasicFieldChange = (field: string, value: any) => {
         updateFormData({ [field]: value });
@@ -91,6 +134,64 @@ export default function LocationPreferencesStep({
         );
         setServiceAreas(updated);
         updateFormData({ service_areas: updated });
+    };
+
+    // Language Management
+    const addLanguage = () => {
+        if (!selectedLanguageId) return;
+
+        const language = uniqueLanguages.find((l) => l.id.toString() === selectedLanguageId);
+        if (!language || selectedLanguages.find((l) => l.id === language.id)) return;
+
+        const newLanguage: SelectedLanguage = {
+            id: language.id,
+            name: language.name,
+            code: language.code,
+            is_official_canada: language.is_official_canada,
+            proficiency_level: language.is_official_canada ? 'fluent' : 'conversational',
+            is_primary_language: selectedLanguages.length === 0,
+        };
+
+        const updatedLanguages = [...selectedLanguages, newLanguage];
+        setSelectedLanguages(updatedLanguages);
+        updateFormData({ selected_languages: updatedLanguages });
+        setSelectedLanguageId('');
+    };
+
+    const removeLanguage = (languageId: number) => {
+        const updatedLanguages = selectedLanguages.filter((l) => l.id !== languageId);
+
+        if (updatedLanguages.length > 0 && !updatedLanguages.find((l) => l.is_primary_language)) {
+            updatedLanguages[0].is_primary_language = true;
+        }
+
+        setSelectedLanguages(updatedLanguages);
+        updateFormData({ selected_languages: updatedLanguages });
+    };
+
+    const updateLanguageProficiency = (languageId: number, proficiency: string) => {
+        const updatedLanguages = selectedLanguages.map((lang) => (lang.id === languageId ? { ...lang, proficiency_level: proficiency } : lang));
+        setSelectedLanguages(updatedLanguages);
+        updateFormData({ selected_languages: updatedLanguages });
+    };
+
+    const setPrimaryLanguage = (languageId: number) => {
+        const updatedLanguages = selectedLanguages.map((lang) => ({
+            ...lang,
+            is_primary_language: lang.id === languageId,
+        }));
+        setSelectedLanguages(updatedLanguages);
+        updateFormData({ selected_languages: updatedLanguages });
+    };
+
+    const getProficiencyColor = (level: string) => {
+        const colors = {
+            basic: 'bg-yellow-100 text-yellow-800',
+            conversational: 'bg-blue-100 text-blue-800',
+            fluent: 'bg-green-100 text-green-800',
+            native: 'bg-purple-100 text-purple-800',
+        };
+        return colors[level as keyof typeof colors] || 'bg-gray-100 text-gray-800';
     };
 
     return (
@@ -148,7 +249,7 @@ export default function LocationPreferencesStep({
                             
                             <div
                                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_vehicle === false
+                                    formData.has_vehicle === false && formData.has_vehicle !== undefined
                                         ? 'border-[#10B3D6] bg-blue-50'
                                         : 'border-gray-200 hover:border-gray-300'
                                 }`}
@@ -162,7 +263,7 @@ export default function LocationPreferencesStep({
                                             <p className="text-sm text-gray-600">I use public transit or work locally</p>
                                         </div>
                                     </div>
-                                    {formData.has_vehicle === false && (
+                                    {formData.has_vehicle === false && formData.has_vehicle !== undefined && (
                                         <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
                                     )}
                                 </div>
@@ -203,7 +304,7 @@ export default function LocationPreferencesStep({
                             
                             <div
                                 className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_tools_equipment === false
+                                    formData.has_tools_equipment === false && formData.has_tools_equipment !== undefined
                                         ? 'border-[#10B3D6] bg-blue-50'
                                         : 'border-gray-200 hover:border-gray-300'
                                 }`}
@@ -217,7 +318,7 @@ export default function LocationPreferencesStep({
                                             <p className="text-sm text-gray-600">Employer should provide equipment</p>
                                         </div>
                                     </div>
-                                    {formData.has_tools_equipment === false && (
+                                    {formData.has_tools_equipment === false && formData.has_tools_equipment !== undefined && (
                                         <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
                                     )}
                                 </div>
@@ -225,41 +326,6 @@ export default function LocationPreferencesStep({
                         </div>
                         {validationErrors.has_tools_equipment && (
                             <p className="text-red-600 text-sm mt-2">{validationErrors.has_tools_equipment}</p>
-                        )}
-                    </div>
-
-                    {/* Maximum Travel Distance */}
-                    <div>
-                        <Label htmlFor="travel_distance_max" className="text-sm font-medium">
-                            Maximum Travel Distance *
-                        </Label>
-                        <div className="mt-1 relative">
-                            <Select
-                                value={formData.travel_distance_max?.toString() || ''}
-                                onValueChange={(value) => handleBasicFieldChange('travel_distance_max', parseInt(value))}
-                            >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="How far will you travel?" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="5">Within 5 km</SelectItem>
-                                    <SelectItem value="10">Within 10 km</SelectItem>
-                                    <SelectItem value="15">Within 15 km</SelectItem>
-                                    <SelectItem value="25">Within 25 km</SelectItem>
-                                    <SelectItem value="50">Within 50 km</SelectItem>
-                                    <SelectItem value="100">Within 100 km</SelectItem>
-                                    <SelectItem value="999">Anywhere in the province</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">
-                            {formData.has_vehicle === false ? 
-                                'Consider public transit limits when setting distance' : 
-                                'Distance from your home address'
-                            }
-                        </p>
-                        {validationErrors.travel_distance_max && (
-                            <p className="text-red-600 text-sm mt-1">{validationErrors.travel_distance_max}</p>
                         )}
                     </div>
                 </CardContent>
@@ -319,27 +385,6 @@ export default function LocationPreferencesStep({
                                 {/* Location Details */}
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                     <div>
-                                        <Label className="text-sm font-medium">Postal Code *</Label>
-                                        <Input
-                                            value={area.postal_code}
-                                            onChange={(e) => updateServiceArea(area.id, 'postal_code', e.target.value.toUpperCase())}
-                                            placeholder="K1A 0A6"
-                                            className="mt-1"
-                                            maxLength={7}
-                                            disabled={area.is_primary_area}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Label className="text-sm font-medium">City *</Label>
-                                        <Input
-                                            value={area.city}
-                                            onChange={(e) => updateServiceArea(area.id, 'city', e.target.value)}
-                                            placeholder="Toronto"
-                                            className="mt-1"
-                                            disabled={area.is_primary_area}
-                                        />
-                                    </div>
-                                    <div>
                                         <Label className="text-sm font-medium">Province *</Label>
                                         <Select
                                             value={area.province}
@@ -357,6 +402,27 @@ export default function LocationPreferencesStep({
                                                 ))}
                                             </SelectContent>
                                         </Select>
+                                    </div>
+                                    <div>
+                                        <Label className="text-sm font-medium">City *</Label>
+                                        <Input
+                                            value={area.city}
+                                            onChange={(e) => updateServiceArea(area.id, 'city', e.target.value)}
+                                            placeholder="Toronto"
+                                            className="mt-1"
+                                            disabled={area.is_primary_area}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="text-sm font-medium">Postal Code *</Label>
+                                        <Input
+                                            value={area.postal_code}
+                                            onChange={(e) => updateServiceArea(area.id, 'postal_code', e.target.value.toUpperCase())}
+                                            placeholder="K1A 0A6"
+                                            className="mt-1"
+                                            maxLength={7}
+                                            disabled={area.is_primary_area}
+                                        />
                                     </div>
                                 </div>
 
@@ -488,209 +554,175 @@ export default function LocationPreferencesStep({
                 </CardContent>
               </Card>
 
-            {/* Insurance & Safety */}
+
+            {/* Languages Section */}
             <Card className="border" style={{borderColor: '#10B3D6', borderWidth: '0.05px'}}>
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg flex items-center">
-                        <Shield className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                        Insurance & Safety
+                    <CardTitle className="flex items-center text-lg">
+                        <Globe className="mr-2 h-5 w-5" style={{color: '#10B3D6'}} />
+                        Languages You Speak
                     </CardTitle>
-                    <p className="text-sm text-gray-600">
-                        These help build trust with employers and may be required for certain jobs
-                    </p>
+                    <p className="text-sm text-gray-600">Speaking multiple languages helps you work with more employers and clients.</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {/* Liability Insurance */}
-                    <div>
-                        <Label className="text-sm font-medium mb-3 block">
-                            Do you have liability insurance?
-                        </Label>
-                        <div className="grid grid-cols-1 gap-3">
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.is_insured === true
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('is_insured', true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <Shield className="h-5 w-5 mr-3" style={{color: '#10B3D6'}} />
-                                        <div>
-                                            <p className="font-medium text-gray-900">Yes, I have insurance</p>
-                                            <p className="text-sm text-gray-600">Liability coverage for my work</p>
-                                        </div>
-                                    </div>
-                                    {formData.is_insured === true && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
-                                </div>
-                            </div>
-                            
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.is_insured === false
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('is_insured', false)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <Shield className="h-5 w-5 mr-3 text-gray-400" />
-                                        <div>
-                                            <p className="font-medium text-gray-900">No insurance yet</p>
-                                            <p className="text-sm text-gray-600">I plan to get coverage later</p>
-                                        </div>
-                                    </div>
-                                    {formData.is_insured === false && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
-                                </div>
-                            </div>
+                    {/* Add Language */}
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                        <div className="flex-1">
+                            <Select value={selectedLanguageId} onValueChange={setSelectedLanguageId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose a language to add" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {/* Official Canadian Languages First */}
+                                    <div className="bg-gray-50 px-2 py-1 text-sm font-medium text-gray-500">Official Canadian Languages</div>
+                                    {uniqueLanguages
+                                        .filter((lang) => lang.is_official_canada)
+                                        .map((language) => (
+                                            <SelectItem
+                                                key={language.id}
+                                                value={language.id.toString()}
+                                                disabled={!!selectedLanguages.find((l) => l.id === language.id)}
+                                            >
+                                                {language.name} (Official)
+                                            </SelectItem>
+                                        ))}
+
+                                    <div className="bg-gray-50 px-2 py-1 text-sm font-medium text-gray-500">Other Languages</div>
+                                    {uniqueLanguages
+                                        .filter((lang) => !lang.is_official_canada)
+                                        .map((language) => (
+                                            <SelectItem
+                                                key={language.id}
+                                                value={language.id.toString()}
+                                                disabled={!!selectedLanguages.find((l) => l.id === language.id)}
+                                            >
+                                                {language.name}
+                                            </SelectItem>
+                                        ))}
+                                </SelectContent>
+                            </Select>
                         </div>
+                        <Button
+                            onClick={addLanguage}
+                            disabled={!selectedLanguageId}
+                            className="cursor-pointer text-white"
+                            style={{backgroundColor: '#10B3D6', height: '2.7em'}}
+                        >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Add Language
+                        </Button>
                     </div>
 
-                    {/* WCB Coverage */}
-                    <div>
-                        <Label className="text-sm font-medium mb-3 block">
-                            Do you have Workers' Compensation coverage?
-                        </Label>
-                        <div className="grid grid-cols-1 gap-3">
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_wcb_coverage === true
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('has_wcb_coverage', true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <Shield className="h-5 w-5 mr-3" style={{color: '#10B3D6'}} />
-                                        <div>
-                                            <p className="font-medium text-gray-900">Yes, I have WCB coverage</p>
-                                            <p className="text-sm text-gray-600">Registered with provincial WCB</p>
-                                        </div>
-                                    </div>
-                                    {formData.has_wcb_coverage === true && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
-                                </div>
+                    {/* Selected Languages */}
+                    <div className="space-y-3">
+                        {selectedLanguages.length === 0 ? (
+                            <div className="py-8 text-center text-gray-500">
+                                <Globe className="mx-auto mb-3 h-12 w-12 text-gray-300" />
+                                <p>No languages added yet</p>
+                                <p className="text-sm">Add at least English or French to continue</p>
                             </div>
-                            
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_wcb_coverage === false
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('has_wcb_coverage', false)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <Shield className="h-5 w-5 mr-3 text-gray-400" />
-                                        <div>
-                                            <p className="font-medium text-gray-900">No WCB coverage</p>
-                                            <p className="text-sm text-gray-600">Not registered yet</p>
+                        ) : (
+                            selectedLanguages.map((language) => (
+                                <div
+                                    key={language.id}
+                                    className={`rounded-lg border-2 p-4 ${
+                                        language.is_primary_language ? 'border-[#10B3D6] bg-blue-50' : 'border-gray-200'
+                                    }`}
+                                >
+                                    <div className="mb-3 flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <div className="mb-1 flex items-center gap-2">
+                                                <h4 className="font-medium text-gray-900">{language.name}</h4>
+                                                {language.is_official_canada && (
+                                                    <Badge className="px-2 py-0.5 text-xs" style={{backgroundColor: '#10B3D6', color: 'white'}}>
+                                                        Official
+                                                    </Badge>
+                                                )}
+                                                {language.is_primary_language && (
+                                                    <Badge className="px-2 py-0.5 text-xs" style={{backgroundColor: '#10B3D6', color: 'white'}}>
+                                                        Primary
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <Badge className={`px-2 py-1 text-xs ${getProficiencyColor(language.proficiency_level)}`}>
+                                                {PROFICIENCY_LEVELS.find((p) => p.value === language.proficiency_level)?.label}
+                                            </Badge>
                                         </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => removeLanguage(language.id)}
+                                            className="cursor-pointer text-gray-400 hover:text-red-500"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
                                     </div>
-                                    {formData.has_wcb_coverage === false && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
+
+                                    <div className="space-y-3">
+                                        {/* Proficiency Level */}
+                                        <div>
+                                            <Label className="mb-2 block text-sm font-medium">How well do you speak {language.name}?</Label>
+                                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                                {PROFICIENCY_LEVELS.map((level) => (
+                                                    <button
+                                                        key={level.value}
+                                                        type="button"
+                                                        onClick={() => updateLanguageProficiency(language.id, level.value)}
+                                                        className={`rounded-lg border-2 p-2 text-sm transition-all duration-200 ${
+                                                            language.proficiency_level === level.value
+                                                                ? 'border-[#10B3D6] bg-blue-50 font-medium text-[#10B3D6]'
+                                                                : 'border-gray-200 text-gray-700 hover:border-gray-300'
+                                                        }`}
+                                                        title={level.description}
+                                                    >
+                                                        {level.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Set as Primary Language */}
+                                        {!language.is_primary_language && selectedLanguages.length > 1 && (
+                                            <div>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => setPrimaryLanguage(language.id)}
+                                                    className="cursor-pointer text-sm"
+                                                >
+                                                    <Star className="mr-1 h-4 w-4" />
+                                                    Make Primary Language
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            ))
+                        )}
                     </div>
 
-                    {/* Background Check */}
-                    <div>
-                        <Label className="text-sm font-medium mb-3 block">
-                            Do you have a current criminal background check?
-                        </Label>
-                        <div className="grid grid-cols-1 gap-3">
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_criminal_background_check === true
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('has_criminal_background_check', true)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <CheckCircle className="h-5 w-5 mr-3" style={{color: '#10B3D6'}} />
-                                        <div>
-                                            <p className="font-medium text-gray-900">Yes, I have background check</p>
-                                            <p className="text-sm text-gray-600">Current police clearance</p>
-                                        </div>
-                                    </div>
-                                    {formData.has_criminal_background_check === true && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
-                                </div>
-                            </div>
-                            
-                            <div
-                                className={`p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                                    formData.has_criminal_background_check === false
-                                        ? 'border-[#10B3D6] bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                                onClick={() => handleBasicFieldChange('has_criminal_background_check', false)}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center">
-                                        <X className="h-5 w-5 mr-3 text-gray-400" />
-                                        <div>
-                                            <p className="font-medium text-gray-900">No background check</p>
-                                            <p className="text-sm text-gray-600">I can get one if needed</p>
-                                        </div>
-                                    </div>
-                                    {formData.has_criminal_background_check === false && (
-                                        <CheckCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {validationErrors.selected_languages && <p className="text-sm text-red-600">{validationErrors.selected_languages}</p>}
 
-                    {/* Background Check Date */}
-                    {formData.has_criminal_background_check && (
-                        <div>
-                            <Label htmlFor="background_check_date" className="text-sm font-medium">
-                                When did you get your background check?
-                            </Label>
-                            <Input
-                                id="background_check_date"
-                                type="date"
-                                value={formData.background_check_date || ''}
-                                onChange={(e) => handleBasicFieldChange('background_check_date', e.target.value)}
-                                className="mt-1"
-                                max={new Date().toISOString().split('T')[0]}
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                                Most employers want checks less than 1 year old
-                            </p>
+                    {/* Language Help */}
+                    {selectedLanguages.length > 0 && (
+                        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
+                            <div className="flex items-start space-x-3">
+                                <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600" />
+                                <div className="text-sm">
+                                    <p className="mb-1 font-medium text-green-800">
+                                        Great! You speak {selectedLanguages.length} language{selectedLanguages.length > 1 ? 's' : ''}
+                                    </p>
+                                    <p className="text-xs text-green-700">
+                                        {selectedLanguages.find((l) => l.is_official_canada)
+                                            ? 'Speaking an official Canadian language opens up more job opportunities.'
+                                            : 'Consider adding English or French to reach more employers.'}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </CardContent>
-              </Card>
-
-            {/* Insurance Help */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                    <Shield className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm">
-                        <p className="font-medium text-yellow-800 mb-1">About Insurance & Coverage</p>
-                        <p className="text-yellow-700 text-xs">
-                            While not always required, having insurance and background checks makes you more attractive to employers. 
-                            Many jobs in people's homes require background checks for safety.
-                        </p>
-                    </div>
-                </div>
-            </div>
+            </Card>
         </div>
     );
 }

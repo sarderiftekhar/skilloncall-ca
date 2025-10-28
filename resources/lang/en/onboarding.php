@@ -22,6 +22,10 @@ return [
     'steps.location.mobile' => 'Location & Rates',
     'steps.location.description' => 'Where you work and your rates',
     
+    'steps.schedule.title' => 'Your Schedule',
+    'steps.schedule.mobile' => 'Schedule',
+    'steps.schedule.description' => 'When you are available to work',
+    
     'steps.languages.title' => 'Languages & Schedule',
     'steps.languages.mobile' => 'Languages & Time',
     'steps.languages.description' => 'Languages and availability',
@@ -56,5 +60,84 @@ return [
     'modal.unexpected.title' => 'Unexpected error',
     'modal.unexpected.message' => 'Something went wrong while completing your profile. Please try again.',
     'modal.action.dashboard' => 'Go to dashboard',
+
+    // Step 1: Personal Information
+    'step1.welcome_title' => 'Welcome to SkillOnCall!',
+    'step1.welcome_subtitle' => "Let's start by getting to know you better. This information helps employers find and trust you.",
+    
+    // Profile Photo
+    'step1.profile_photo.title' => 'Profile Photo',
+    'step1.profile_photo.upload' => 'Upload Photo',
+    'step1.profile_photo.change' => 'Change Photo',
+    'step1.profile_photo.helper' => 'Clear photos get better job opportunities',
+    
+    // Basic Information
+    'step1.basic_info.title' => 'Basic Information',
+    'step1.basic_info.first_name' => 'First Name',
+    'step1.basic_info.first_name_placeholder' => 'Enter your first name',
+    'step1.basic_info.last_name' => 'Last Name',
+    'step1.basic_info.last_name_placeholder' => 'Enter your last name',
+    'step1.basic_info.phone' => 'Phone Number',
+    'step1.basic_info.phone_helper' => 'Employers will use this to contact you',
+    'step1.basic_info.dob' => 'Date of Birth (Optional)',
+    'step1.basic_info.age' => 'Age',
+    'step1.basic_info.years' => 'years',
+    'step1.basic_info.bio' => 'Tell Us About Yourself (Optional)',
+    'step1.basic_info.bio_helper' => 'This helps employers understand your background',
+    'step1.basic_info.bio_placeholder' => 'Briefly describe your experience and what makes you great at your job...',
+    
+    // Work Authorization
+    'step1.work_auth.title' => 'Work Authorization (Required by Canadian Law)',
+    'step1.work_auth.info' => 'Canadian employers are required by law to verify work authorization',
+    'step1.work_auth.privacy' => 'This information is kept secure and only shared with employers when needed',
+    'step1.work_auth.status' => 'Work Authorization Status',
+    'step1.work_auth.placeholder' => 'Select your work status',
+    'step1.work_auth.canadian_citizen' => 'Canadian Citizen',
+    'step1.work_auth.permanent_resident' => 'Permanent Resident',
+    'step1.work_auth.work_permit' => 'Work Permit',
+    'step1.work_auth.student_permit' => 'Student Permit',
+    
+    // Address Information
+    'step1.address.title' => 'Address Information',
+    'step1.address.subtitle' => 'This helps employers find workers in their area',
+    'step1.address.street' => 'Street Address',
+    'step1.address.street_placeholder' => '123 Main Street',
+    'step1.address.unit' => 'Apartment/Unit (Optional)',
+    'step1.address.unit_placeholder' => 'Apt 4B, Unit 101, etc.',
+    'step1.address.province' => 'Province',
+    'step1.address.province_placeholder' => 'Select',
+    'step1.address.city' => 'City',
+    'step1.address.city_placeholder' => 'Type to search cities...',
+    'step1.address.loading_cities' => 'Loading cities...',
+    'step1.address.no_cities' => 'No cities found matching',
+    'step1.address.postal_code' => 'Postal Code',
+    
+    // Emergency Contact
+    'step1.emergency.title' => 'Emergency Contact',
+    'step1.emergency.subtitle' => "Someone we can contact if there's an emergency while you're working",
+    'step1.emergency.name' => 'Contact Name',
+    'step1.emergency.name_placeholder' => 'Full name',
+    'step1.emergency.relationship' => 'Relationship',
+    'step1.emergency.relationship_placeholder' => 'Parent, Spouse, Sibling, Friend',
+    'step1.emergency.phone' => 'Phone Number',
+    
+    // Privacy Notice
+    'step1.privacy.title' => 'Your Privacy is Protected',
+    'step1.privacy.message' => 'We keep your personal information secure and only share necessary details with employers when you apply for jobs. You control what information is visible in your profile.',
+    
+    // Canadian Provinces
+    'provinces.AB' => 'Alberta',
+    'provinces.BC' => 'British Columbia',
+    'provinces.MB' => 'Manitoba',
+    'provinces.NB' => 'New Brunswick',
+    'provinces.NL' => 'Newfoundland and Labrador',
+    'provinces.NS' => 'Nova Scotia',
+    'provinces.NT' => 'Northwest Territories',
+    'provinces.NU' => 'Nunavut',
+    'provinces.ON' => 'Ontario',
+    'provinces.PE' => 'Prince Edward Island',
+    'provinces.QC' => 'Quebec',
+    'provinces.SK' => 'Saskatchewan',
+    'provinces.YT' => 'Yukon',
 ];
 

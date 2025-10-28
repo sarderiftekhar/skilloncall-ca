@@ -334,7 +334,7 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Company Name *</Label>
                                             <Input
-                                                value={experience.company_name}
+                                                value={experience.company_name || ''}
                                                 onChange={(e) => updateWorkExperience(experience.id, 'company_name', e.target.value)}
                                                 placeholder="ABC Company Ltd."
                                                 className="mt-1"
@@ -343,7 +343,7 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Job Title *</Label>
                                             <Input
-                                                value={experience.job_title}
+                                                value={experience.job_title || ''}
                                                 onChange={(e) => updateWorkExperience(experience.id, 'job_title', e.target.value)}
                                                 placeholder="Cook, Server, Cleaner, etc."
                                                 className="mt-1"
@@ -473,7 +473,7 @@ export default function WorkHistoryStep({
                                             <Label className="text-sm font-medium">Start Date *</Label>
                                             <Input
                                                 type="date"
-                                                value={experience.start_date}
+                                                value={experience.start_date || ''}
                                                 onChange={(e) => updateWorkExperience(experience.id, 'start_date', e.target.value)}
                                                 className="mt-1"
                                                 max={new Date().toISOString().split('T')[0]}
@@ -483,10 +483,10 @@ export default function WorkHistoryStep({
                                             <Label className="text-sm font-medium">End Date (Optional)</Label>
                                             <Input
                                                 type="date"
-                                                value={experience.end_date}
+                                                value={experience.end_date || ''}
                                                 onChange={(e) => updateWorkExperience(experience.id, 'end_date', e.target.value)}
                                                 className="mt-1"
-                                                min={experience.start_date}
+                                                min={experience.start_date || ''}
                                                 max={new Date().toISOString().split('T')[0]}
                                                 disabled={experience.is_current}
                                             />
@@ -522,14 +522,14 @@ export default function WorkHistoryStep({
                                     <div>
                                         <Label className="text-sm font-medium">What did you do in this job?</Label>
                                         <Textarea
-                                            value={experience.description}
+                                            value={experience.description || ''}
                                             onChange={(e) => updateWorkExperience(experience.id, 'description', e.target.value)}
                                             className="mt-1 h-20"
                                             placeholder="Describe your main responsibilities and achievements..."
                                             maxLength={300}
                                         />
                                         <p className="text-xs text-gray-400 mt-1">
-                                            {experience.description.length}/300
+                                            {(experience.description || '').length}/300
                                         </p>
                                     </div>
 
@@ -625,7 +625,7 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Full Name *</Label>
                                             <Input
-                                                value={reference.reference_name}
+                                                value={reference.reference_name || ''}
                                                 onChange={(e) => updateReference(reference.id, 'reference_name', e.target.value)}
                                                 placeholder="John Smith"
                                                 className="mt-1"
@@ -634,7 +634,7 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Relationship *</Label>
                                             <Select
-                                                value={reference.relationship}
+                                                value={reference.relationship || ''}
                                                 onValueChange={(value) => updateReference(reference.id, 'relationship', value)}
                                             >
                                                 <SelectTrigger className="mt-1">
@@ -656,7 +656,7 @@ export default function WorkHistoryStep({
                                         <div>
                                             <Label className="text-sm font-medium">Phone Number *</Label>
                                             <Input
-                                                value={reference.reference_phone}
+                                                value={reference.reference_phone || ''}
                                                 onChange={(e) => {
                                                     const formatted = formatCanadianPhone(e.target.value);
                                                     updateReference(reference.id, 'reference_phone', formatted);

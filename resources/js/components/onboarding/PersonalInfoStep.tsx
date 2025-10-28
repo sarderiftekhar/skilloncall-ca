@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ValidatedInput from '@/components/ui/validated-input';
 import ValidatedTextarea from '@/components/ui/validated-textarea';
+import { useTranslations } from '@/hooks/useTranslations';
 import React, { useState } from 'react';
 import { AlertCircle, Camera, Shield, Upload, User } from 'react-feather';
 
@@ -14,30 +15,6 @@ interface PersonalInfoStepProps {
     validationErrors: Record<string, string>;
 }
 
-const WORK_AUTHORIZATION_OPTIONS = [
-    { value: 'canadian_citizen', label: 'Canadian Citizen' },
-    { value: 'permanent_resident', label: 'Permanent Resident' },
-    { value: 'work_permit', label: 'Work Permit' },
-    { value: 'student_permit', label: 'Student Permit' },
-];
-
-const CANADIAN_PROVINCES = [
-    { value: 'AB', label: 'Alberta' },
-    { value: 'BC', label: 'British Columbia' },
-    { value: 'MB', label: 'Manitoba' },
-    { value: 'NB', label: 'New Brunswick' },
-    { value: 'NL', label: 'Newfoundland and Labrador' },
-    { value: 'NS', label: 'Nova Scotia' },
-    { value: 'NT', label: 'Northwest Territories' },
-    { value: 'NU', label: 'Nunavut' },
-    { value: 'ON', label: 'Ontario' },
-    { value: 'PE', label: 'Prince Edward Island' },
-    { value: 'QC', label: 'Quebec' },
-    { value: 'SK', label: 'Saskatchewan' },
-    { value: 'YT', label: 'Yukon' },
-];
-
-
 interface City {
     id: number;
     name: string;
@@ -45,6 +22,30 @@ interface City {
 }
 
 export default function PersonalInfoStep({ formData, updateFormData, validationErrors }: PersonalInfoStepProps) {
+    const { t } = useTranslations();
+
+    const WORK_AUTHORIZATION_OPTIONS = [
+        { value: 'canadian_citizen', label: t('step1.work_auth.canadian_citizen', 'Canadian Citizen') },
+        { value: 'permanent_resident', label: t('step1.work_auth.permanent_resident', 'Permanent Resident') },
+        { value: 'work_permit', label: t('step1.work_auth.work_permit', 'Work Permit') },
+        { value: 'student_permit', label: t('step1.work_auth.student_permit', 'Student Permit') },
+    ];
+
+    const CANADIAN_PROVINCES = [
+        { value: 'AB', label: t('provinces.AB', 'Alberta') },
+        { value: 'BC', label: t('provinces.BC', 'British Columbia') },
+        { value: 'MB', label: t('provinces.MB', 'Manitoba') },
+        { value: 'NB', label: t('provinces.NB', 'New Brunswick') },
+        { value: 'NL', label: t('provinces.NL', 'Newfoundland and Labrador') },
+        { value: 'NS', label: t('provinces.NS', 'Nova Scotia') },
+        { value: 'NT', label: t('provinces.NT', 'Northwest Territories') },
+        { value: 'NU', label: t('provinces.NU', 'Nunavut') },
+        { value: 'ON', label: t('provinces.ON', 'Ontario') },
+        { value: 'PE', label: t('provinces.PE', 'Prince Edward Island') },
+        { value: 'QC', label: t('provinces.QC', 'Quebec') },
+        { value: 'SK', label: t('provinces.SK', 'Saskatchewan') },
+        { value: 'YT', label: t('provinces.YT', 'Yukon') },
+    ];
     const [photoPreview, setPhotoPreview] = useState<string | null>(null);
     const [citySearch, setCitySearch] = useState<string>('');
     const [showCitySuggestions, setShowCitySuggestions] = useState<boolean>(false);
@@ -151,10 +152,10 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                     <User className="h-8 w-8" style={{ color: '#10B3D6' }} />
                 </div>
                 <h2 className="mb-2 text-xl font-bold" style={{ color: '#192341' }}>
-                    Welcome to SkillOnCall!
+                    {t('step1.welcome_title', 'Welcome to SkillOnCall!')}
                 </h2>
                 <p className="text-sm text-gray-600">
-                    Let's start by getting to know you better. This information helps employers find and trust you.
+                    {t('step1.welcome_subtitle', "Let's start by getting to know you better. This information helps employers find and trust you.")}
                 </p>
             </div>
 
@@ -163,7 +164,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-lg">
                         <Camera className="mr-2 h-5 w-5" style={{ color: '#10B3D6' }} />
-                        Profile Photo
+                        {t('step1.profile_photo.title', 'Profile Photo')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -188,11 +189,11 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                 <Button type="button" variant="outline" className="cursor-pointer" asChild style={{ height: '2.7em' }}>
                                     <span className="flex items-center">
                                         <Upload className="mr-2 h-4 w-4" />
-                                        {photoPreview ? 'Change Photo' : 'Upload Photo'}
+                                        {photoPreview ? t('step1.profile_photo.change', 'Change Photo') : t('step1.profile_photo.upload', 'Upload Photo')}
                                     </span>
                                 </Button>
                             </label>
-                            <p className="mt-2 text-xs text-gray-500">Clear photos get better job opportunities</p>
+                            <p className="mt-2 text-xs text-gray-500">{t('step1.profile_photo.helper', 'Clear photos get better job opportunities')}</p>
                         </div>
                     </div>
                     {validationErrors.profile_photo && <p className="mt-2 text-center text-sm text-red-600">{validationErrors.profile_photo}</p>}
@@ -202,31 +203,31 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
             {/* Basic Information */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Basic Information</CardTitle>
+                    <CardTitle className="text-lg">{t('step1.basic_info.title', 'Basic Information')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* First Name & Last Name */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <ValidatedInput
                             id="first_name"
-                            label="First Name"
+                            label={t('step1.basic_info.first_name', 'First Name')}
                             fieldType="name"
                             value={formData.first_name || ''}
                             onChange={(value) => handleInputChange('first_name', value)}
                             error={validationErrors.first_name}
                             required
-                            placeholder="Enter your first name"
+                            placeholder={t('step1.basic_info.first_name_placeholder', 'Enter your first name')}
                         />
 
                         <ValidatedInput
                             id="last_name"
-                            label="Last Name"
+                            label={t('step1.basic_info.last_name', 'Last Name')}
                             fieldType="name"
                             value={formData.last_name || ''}
                             onChange={(value) => handleInputChange('last_name', value)}
                             error={validationErrors.last_name}
                             required
-                            placeholder="Enter your last name"
+                            placeholder={t('step1.basic_info.last_name_placeholder', 'Enter your last name')}
                         />
                     </div>
 
@@ -234,12 +235,12 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <ValidatedInput
                             id="phone"
-                            label="Phone Number"
+                            label={t('step1.basic_info.phone', 'Phone Number')}
                             fieldType="phone"
                             value={formData.phone || ''}
                             onChange={(value) => handleInputChange('phone', value)}
                             error={validationErrors.phone}
-                            helperText="Employers will use this to contact you"
+                            helperText={t('step1.basic_info.phone_helper', 'Employers will use this to contact you')}
                             required
                             placeholder="(416) 555-0123"
                         />
@@ -247,7 +248,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                         <div>
                             <ValidatedInput
                                 id="date_of_birth"
-                                label="Date of Birth (Optional)"
+                                label={t('step1.basic_info.dob', 'Date of Birth (Optional)')}
                                 fieldType="date"
                                 value={formData.date_of_birth || ''}
                                 onChange={(value) => handleInputChange('date_of_birth', value)}
@@ -256,7 +257,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                             />
                             {formData.date_of_birth && (
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Age: {calculateAge(formData.date_of_birth)} years
+                                    {t('step1.basic_info.age', 'Age')}: {calculateAge(formData.date_of_birth)} {t('step1.basic_info.years', 'years')}
                                 </p>
                             )}
                         </div>
@@ -265,14 +266,14 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                     {/* Brief Description */}
                     <ValidatedTextarea
                         id="bio"
-                        label="Tell Us About Yourself (Optional)"
+                        label={t('step1.basic_info.bio', 'Tell Us About Yourself (Optional)')}
                         fieldType="bio"
                         value={formData.bio || ''}
                         onChange={(value) => handleInputChange('bio', value)}
                         error={validationErrors.bio}
-                        helperText="This helps employers understand your background"
+                        helperText={t('step1.basic_info.bio_helper', 'This helps employers understand your background')}
                         className="h-20"
-                        placeholder="Briefly describe your experience and what makes you great at your job..."
+                        placeholder={t('step1.basic_info.bio_placeholder', 'Briefly describe your experience and what makes you great at your job...')}
                     />
                 </CardContent>
             </Card>
@@ -282,25 +283,25 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                 <CardHeader className="pb-3">
                     <CardTitle className="flex items-center text-lg text-orange-800">
                         <Shield className="mr-2 h-5 w-5" />
-                        Work Authorization (Required by Canadian Law)
+                        {t('step1.work_auth.title', 'Work Authorization (Required by Canadian Law)')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="flex items-start space-x-3 rounded-lg bg-orange-100 p-3">
                         <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-600" />
                         <div>
-                            <p className="text-sm font-medium text-orange-800">Canadian employers are required by law to verify work authorization</p>
-                            <p className="mt-1 text-xs text-orange-700">This information is kept secure and only shared with employers when needed</p>
+                            <p className="text-sm font-medium text-orange-800">{t('step1.work_auth.info', 'Canadian employers are required by law to verify work authorization')}</p>
+                            <p className="mt-1 text-xs text-orange-700">{t('step1.work_auth.privacy', 'This information is kept secure and only shared with employers when needed')}</p>
                         </div>
                     </div>
 
                     <div>
                         <Label htmlFor="work_authorization" className="text-sm font-medium">
-                            Work Authorization Status *
+                            {t('step1.work_auth.status', 'Work Authorization Status')} *
                         </Label>
                         <Select value={formData.work_authorization as string | undefined} onValueChange={(value) => handleInputChange('work_authorization', value)}>
                             <SelectTrigger className="mt-1">
-                                <SelectValue placeholder="Select your work status" />
+                                <SelectValue placeholder={t('step1.work_auth.placeholder', 'Select your work status')} />
                             </SelectTrigger>
                             <SelectContent>
                                 {WORK_AUTHORIZATION_OPTIONS.map((option) => (
@@ -318,41 +319,41 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
             {/* Address Information */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Address Information</CardTitle>
-                    <p className="text-sm text-gray-600">This helps employers find workers in their area</p>
+                    <CardTitle className="text-lg">{t('step1.address.title', 'Address Information')}</CardTitle>
+                    <p className="text-sm text-gray-600">{t('step1.address.subtitle', 'This helps employers find workers in their area')}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Street Address */}
                     <ValidatedInput
                         id="address_line_1"
-                        label="Street Address"
+                        label={t('step1.address.street', 'Street Address')}
                         fieldType="address"
                         value={formData.address_line_1 || ''}
                         onChange={(value) => handleInputChange('address_line_1', value)}
                         error={validationErrors.address_line_1}
                         required
-                        placeholder="123 Main Street"
+                        placeholder={t('step1.address.street_placeholder', '123 Main Street')}
                     />
 
                     {/* Apartment/Unit (Optional) */}
                     <ValidatedInput
                         id="address_line_2"
-                        label="Apartment/Unit (Optional)"
+                        label={t('step1.address.unit', 'Apartment/Unit (Optional)')}
                         fieldType="address"
                         value={formData.address_line_2 || ''}
                         onChange={(value) => handleInputChange('address_line_2', value)}
-                        placeholder="Apt 4B, Unit 101, etc."
+                        placeholder={t('step1.address.unit_placeholder', 'Apt 4B, Unit 101, etc.')}
                     />
 
                     {/* Province, City, Postal Code */}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <div>
                             <Label htmlFor="province" className="text-sm font-medium">
-                                Province *
+                                {t('step1.address.province', 'Province')} *
                             </Label>
                             <Select value={formData.province as string | undefined} onValueChange={(value) => handleInputChange('province', value)}>
                                 <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select" />
+                                    <SelectValue placeholder={t('step1.address.province_placeholder', 'Select')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {CANADIAN_PROVINCES.map((province) => (
@@ -367,7 +368,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
 
                         <div ref={cityInputRef} className="relative">
                             <Label htmlFor="city" className="text-sm font-medium">
-                                City *
+                                {t('step1.address.city', 'City')} *
                             </Label>
                             <div className="relative mt-1">
                                 <Input
@@ -384,7 +385,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                         }
                                     }}
                                     onFocus={() => setShowCitySuggestions(true)}
-                                    placeholder="Type to search cities..."
+                                    placeholder={t('step1.address.city_placeholder', 'Type to search cities...')}
                                     className={validationErrors.city ? 'border-red-500' : ''}
                                 />
 
@@ -410,14 +411,14 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                                 {/* Loading message */}
                                 {showCitySuggestions && loadingCities && (
                                     <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
-                                        Loading cities...
+                                        {t('step1.address.loading_cities', 'Loading cities...')}
                                     </div>
                                 )}
 
                                 {/* No results message */}
                                 {showCitySuggestions && !loadingCities && citySearch && cities.length === 0 && (
                                     <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
-                                        No cities found matching "{citySearch}"
+                                        {t('step1.address.no_cities', 'No cities found matching')}{' '}"{citySearch}"
                                     </div>
                                 )}
                             </div>
@@ -426,7 +427,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
 
                         <ValidatedInput
                             id="postal_code"
-                            label="Postal Code"
+                            label={t('step1.address.postal_code', 'Postal Code')}
                             fieldType="postalCode"
                             value={formData.postal_code || ''}
                             onChange={(value) => handleInputChange('postal_code', value.toUpperCase())}
@@ -441,37 +442,37 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
             {/* Emergency Contact */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Emergency Contact</CardTitle>
-                    <p className="text-sm text-gray-600">Someone we can contact if there's an emergency while you're working</p>
+                    <CardTitle className="text-lg">{t('step1.emergency.title', 'Emergency Contact')}</CardTitle>
+                    <p className="text-sm text-gray-600">{t('step1.emergency.subtitle', "Someone we can contact if there's an emergency while you're working")}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <ValidatedInput
                             id="emergency_contact_name"
-                            label="Contact Name"
+                            label={t('step1.emergency.name', 'Contact Name')}
                             fieldType="name"
                             value={formData.emergency_contact_name || ''}
                             onChange={(value) => handleInputChange('emergency_contact_name', value)}
                             error={validationErrors.emergency_contact_name}
                             required
-                            placeholder="Full name"
+                            placeholder={t('step1.emergency.name_placeholder', 'Full name')}
                         />
 
                         <ValidatedInput
                             id="emergency_contact_relationship"
-                            label="Relationship"
+                            label={t('step1.emergency.relationship', 'Relationship')}
                             fieldType="name"
                             value={formData.emergency_contact_relationship || ''}
                             onChange={(value) => handleInputChange('emergency_contact_relationship', value)}
                             error={validationErrors.emergency_contact_relationship}
                             required
-                            placeholder="Parent, Spouse, Sibling, Friend"
+                            placeholder={t('step1.emergency.relationship_placeholder', 'Parent, Spouse, Sibling, Friend')}
                         />
                     </div>
 
                     <ValidatedInput
                         id="emergency_contact_phone"
-                        label="Phone Number"
+                        label={t('step1.emergency.phone', 'Phone Number')}
                         fieldType="phone"
                         value={formData.emergency_contact_phone || ''}
                         onChange={(value) => handleInputChange('emergency_contact_phone', value)}
@@ -487,10 +488,9 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                 <div className="flex items-start space-x-3">
                     <Shield className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
                     <div className="text-sm">
-                        <p className="mb-1 font-medium text-blue-800">Your Privacy is Protected</p>
+                        <p className="mb-1 font-medium text-blue-800">{t('step1.privacy.title', 'Your Privacy is Protected')}</p>
                         <p className="text-xs text-blue-700">
-                            We keep your personal information secure and only share necessary details with employers when you apply for jobs. You
-                            control what information is visible in your profile.
+                            {t('step1.privacy.message', 'We keep your personal information secure and only share necessary details with employers when you apply for jobs. You control what information is visible in your profile.')}
                         </p>
                     </div>
                 </div>

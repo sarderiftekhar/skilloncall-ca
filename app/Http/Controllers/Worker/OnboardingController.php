@@ -44,6 +44,16 @@ class OnboardingController extends Controller
         $profileData = [];
         if ($workerProfile) {
             $profileData = $workerProfile->toArray();
+            
+            // Don't send default false values for boolean fields to avoid pre-selection in the UI
+            // These will only be sent if they have been explicitly set by the user
+            $booleanFields = ['has_vehicle', 'has_tools_equipment', 'is_insured', 'has_wcb_coverage', 'has_criminal_background_check'];
+            foreach ($booleanFields as $field) {
+                // Only include if it's been explicitly set (true), or if we're viewing this step again
+                if ($profileData[$field] === false && $currentStep < 4) {
+                    unset($profileData[$field]);
+                }
+            }
 
             // Load relationships
             $profileData['selected_skills'] = $workerProfile->skills()
