@@ -172,6 +172,14 @@ class WorkerProfileController extends Controller
                 if (!empty($rules)) {
                     $validated = validator($profileData, $rules)->validate();
                     $profile->fill($validated)->save();
+                    
+                    // Sync user.name with worker profile name if first_name or last_name changed
+                    if (isset($validated['first_name']) || isset($validated['last_name'])) {
+                        $fullName = trim(($profile->first_name ?? '') . ' ' . ($profile->last_name ?? ''));
+                        if (!empty($fullName)) {
+                            $user->update(['name' => $fullName]);
+                        }
+                    }
                 }
             }
 

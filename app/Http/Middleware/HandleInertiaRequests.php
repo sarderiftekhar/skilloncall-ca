@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -40,15 +41,30 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->user();
 
-        // Add avatar from worker profile if available
+        // Add avatar and display name from worker profile if available
         if ($user) {
             $avatar = null;
+            $displayName = $user->name; // Default to user's name
 
-            if ($user->role === 'worker' && $user->workerProfile && $user->workerProfile->profile_photo) {
-                $avatar = asset('storage/'.$user->workerProfile->profile_photo);
+            try {
+                if ($user->role === 'worker' && $user->workerProfile) {
+                    // Use worker profile photo if available
+                    if ($user->workerProfile->profile_photo) {
+                        $avatar = asset('storage/'.$user->workerProfile->profile_photo);
+                    }
+                    
+                    // Use worker profile name if available
+                    if ($user->workerProfile->first_name && $user->workerProfile->last_name) {
+                        $displayName = $user->workerProfile->first_name . ' ' . $user->workerProfile->last_name;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Fallback to default values if worker profile access fails
+                Log::warning('Failed to load worker profile in HandleInertiaRequests: ' . $e->getMessage());
             }
 
             $user->avatar = $avatar;
+            $user->display_name = $displayName;
         }
 
         return [

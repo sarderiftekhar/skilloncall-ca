@@ -7,6 +7,7 @@ use App\Services\SubscriptionService;
 use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +20,6 @@ class SubscriptionController extends Controller
     {
         $this->subscriptionService = $subscriptionService;
         $this->emailService = $emailService;
-        $this->middleware('auth');
     }
 
     /**
@@ -27,35 +27,51 @@ class SubscriptionController extends Controller
      */
     public function index(): Response
     {
-        $user = auth()->user();
-        
-        $employerPlans = $this->subscriptionService->getEmployerPlans();
-        $workerPlans = $this->subscriptionService->getWorkerPlans();
-        $currentSubscription = $user->activeSubscription();
+        try {
+            $user = auth()->user();
+            
+            $employerPlans = $this->subscriptionService->getEmployerPlans();
+            $workerPlans = $this->subscriptionService->getWorkerPlans();
+            $currentSubscription = $user->activeSubscription();
 
-        return Inertia::render('subscriptions/index', [
-            'employerPlans' => $employerPlans,
-            'workerPlans' => $workerPlans,
-            'currentSubscription' => $currentSubscription ? [
-                'id' => $currentSubscription->id,
-                'plan' => $currentSubscription->plan,
-                'status' => $currentSubscription->status,
-                'amount' => $currentSubscription->getFormattedAmount(),
-                'billing_interval' => $currentSubscription->billing_interval,
-                'ends_at' => $currentSubscription->ends_at?->format('M j, Y'),
-                'cancelled_at' => $currentSubscription->cancelled_at?->format('M j, Y'),
-                'days_until_expiration' => $currentSubscription->daysUntilExpiration(),
-                'is_cancelled' => $currentSubscription->isCancelled(),
-                'next_billing_date' => $currentSubscription->getNextBillingDate()?->format('M j, Y'),
-            ] : null,
-            'userRole' => $user->role,
-        ]);
+            return Inertia::render('subscriptions/index', [
+                'employerPlans' => $employerPlans,
+                'workerPlans' => $workerPlans,
+                'currentSubscription' => $currentSubscription ? [
+                    'id' => $currentSubscription->id,
+                    'plan' => $currentSubscription->plan,
+                    'status' => $currentSubscription->status,
+                    'amount' => $currentSubscription->getFormattedAmount(),
+                    'billing_interval' => $currentSubscription->billing_interval,
+                    'ends_at' => $currentSubscription->ends_at?->format('M j, Y'),
+                    'cancelled_at' => $currentSubscription->cancelled_at?->format('M j, Y'),
+                    'days_until_expiration' => $currentSubscription->daysUntilExpiration(),
+                    'is_cancelled' => $currentSubscription->isCancelled(),
+                    'next_billing_date' => $currentSubscription->getNextBillingDate()?->format('M j, Y'),
+                ] : null,
+                'userRole' => $user->role,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Subscription index error: ' . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return a simplified view on error
+            return Inertia::render('subscriptions/index', [
+                'employerPlans' => [],
+                'workerPlans' => [],
+                'currentSubscription' => null,
+                'userRole' => auth()->user()->role ?? 'worker',
+                'error' => 'Unable to load subscription data. Please try again.',
+            ]);
+        }
     }
 
     /**
      * Show subscription details
      */
-    public function show(): Response
+    public function show(): Response|\Illuminate\Http\RedirectResponse
     {
         $user = auth()->user();
         $subscription = $user->activeSubscription();

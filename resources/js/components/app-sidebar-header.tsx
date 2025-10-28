@@ -229,9 +229,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                         style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                                     >
                                         {auth.user.avatar ? (
-                                            <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                            <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                         ) : (
-                                            auth.user.name
+                                            auth.user.display_name || auth.user.name
                                                 .split(' ')
                                                 .map((n) => n[0])
                                                 .join('')
@@ -240,7 +240,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">{auth.user.name}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{auth.user.display_name || auth.user.name}</p>
                                         <p className="text-xs text-gray-500">{auth.user.email}</p>
                                     </div>
                                 </div>
@@ -282,9 +282,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                 style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                             >
                                 {auth.user.avatar ? (
-                                    <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                    <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    auth.user.name
+                                    auth.user.display_name || auth.user.name
                                         .split(' ')
                                         .map((n) => n[0])
                                         .join('')
@@ -294,7 +294,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="hidden flex-col items-start text-left sm:flex">
                                 <span className="max-w-20 truncate text-xs font-medium text-gray-900 sm:max-w-24 sm:text-sm dark:text-white">
-                                    {auth.user.name}
+                                    {auth.user.display_name || auth.user.name}
                                 </span>
                             </div>
                             <ChevronDown className="ml-1 hidden size-3 sm:block sm:size-4" />
@@ -307,9 +307,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                 style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                             >
                                 {auth.user.avatar ? (
-                                    <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                    <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    auth.user.name
+                                    auth.user.display_name || auth.user.name
                                         .split(' ')
                                         .map((n) => n[0])
                                         .join('')
@@ -319,7 +319,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-medium text-gray-900 dark:text-white">
-                                    {auth.user.name}
+                                    {auth.user.display_name || auth.user.name}
                                 </span>
                                 <span className="text-sm text-gray-500 dark:text-gray-400">{auth.user.email}</span>
                             </div>

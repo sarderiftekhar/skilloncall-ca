@@ -256,7 +256,7 @@ export default function Welcome() {
                                         <Avatar className="h-8 w-8 cursor-pointer">
                                             <AvatarImage src="" />
                                             <AvatarFallback className="text-white text-xs" style={{backgroundColor: '#10B3D6'}}>
-                                                {auth.user.name?.split(' ').map(n => n[0]).join('')}
+                                                {(auth.user.display_name || auth.user.name)?.split(' ').map(n => n[0]).join('')}
                                             </AvatarFallback>
                                         </Avatar>
                                         {isProfileComplete ? (

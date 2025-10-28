@@ -222,7 +222,7 @@ class OnboardingController extends Controller
             // Log the full exception for debugging
             Log::error('Onboarding save error', [
                 'step' => $step,
-                'user_id' => auth()->id(),
+                'user_id' => $user->id,
                 'data' => $data,
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -433,6 +433,14 @@ class OnboardingController extends Controller
 
         $profile->fill($validated);
         $profile->save();
+        
+        // Sync user.name with worker profile name
+        if (isset($validated['first_name']) && isset($validated['last_name'])) {
+            $fullName = trim($validated['first_name'] . ' ' . $validated['last_name']);
+            if (!empty($fullName)) {
+                $profile->user->update(['name' => $fullName]);
+            }
+        }
     }
 
     private function saveSkillsExperience(WorkerProfile $profile, array $data)

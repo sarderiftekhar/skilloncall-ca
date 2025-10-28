@@ -1,36 +1,35 @@
-import { useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { Check, Star, Zap, Shield, Users, BarChart, Briefcase, User } from 'react-feather';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Head } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { 
+    Check, 
+    Star, 
+    Shield, 
+    Award,
+    CreditCard,
+    Users,
+    Zap,
+    X
+} from 'react-feather';
+import { useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
 
-interface Plan {
+// Define types for the subscription data
+interface SubscriptionPlan {
     id: number;
     name: string;
-    slug: string;
-    description: string;
-    type: 'employer' | 'worker';
-    price: number;
-    yearly_price: number;
-    currency: string;
-    billing_interval: string;
-    job_posts_limit: number | null;
-    job_applications_limit: number | null;
-    featured_jobs_limit: number | null;
-    team_members_limit: number | null;
-    priority_support: boolean;
-    advanced_analytics: boolean;
-    custom_branding: boolean;
-    api_access: boolean;
-    is_popular: boolean;
+    type: string;
+    price_monthly: number;
+    price_yearly: number;
     features: string[];
+    is_popular?: boolean;
 }
 
 interface CurrentSubscription {
     id: number;
-    plan: Plan;
+    plan: SubscriptionPlan;
     status: string;
     amount: string;
     billing_interval: string;
@@ -41,285 +40,416 @@ interface CurrentSubscription {
     next_billing_date: string | null;
 }
 
-interface Props {
-    employerPlans: Plan[];
-    workerPlans: Plan[];
+interface SubscriptionsPageProps {
+    employerPlans: SubscriptionPlan[];
+    workerPlans: SubscriptionPlan[];
     currentSubscription: CurrentSubscription | null;
     userRole: string;
+    error?: string;
 }
 
-export default function SubscriptionsIndex({ employerPlans, workerPlans, currentSubscription, userRole }: Props) {
+// Hardcoded plan data for now (as requested)
+const HARDCODED_WORKER_PLANS = [
+    {
+        id: 1,
+        name: 'Free',
+        type: 'worker',
+        price_monthly: 0,
+        price_yearly: 0,
+        features: [
+            'Basic profile creation',
+            'Browse job listings', 
+            'Apply to 5 jobs per month',
+            'Basic messaging',
+            'Standard customer support'
+        ],
+        is_popular: false
+    },
+    {
+        id: 2,
+        name: 'Pro',
+        type: 'worker',
+        price_monthly: 19.99,
+        price_yearly: 199.99,
+        features: [
+            'Everything in Free',
+            'Apply to unlimited jobs',
+            'Priority in search results',
+            'Advanced messaging features',
+            'Profile analytics',
+            'Resume builder',
+            'Priority customer support',
+            'Featured profile badge'
+        ],
+        is_popular: true
+    },
+    {
+        id: 3,
+        name: 'Premium',
+        type: 'worker',
+        price_monthly: 39.99,
+        price_yearly: 399.99,
+        features: [
+            'Everything in Pro',
+            'Direct employer contact',
+            'Verified professional badge',
+            'Custom portfolio gallery',
+            'Skills verification',
+            'Video profile introduction',
+            'Exclusive job opportunities',
+            '24/7 dedicated support',
+            'LinkedIn integration'
+        ],
+        is_popular: false
+    }
+];
+
+export default function SubscriptionsIndex({ 
+    employerPlans = [], 
+    workerPlans = [], 
+    currentSubscription, 
+    userRole = 'worker',
+    error
+}: SubscriptionsPageProps) {
     const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
-    const [isSubscribing, setIsSubscribing] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [showContent, setShowContent] = useState(false);
+    
+    // Use hardcoded plans for workers, fallback to server data
+    const plansToShow = userRole === 'worker' ? HARDCODED_WORKER_PLANS : workerPlans;
 
-    const plans = userRole === 'admin' ? [...employerPlans, ...workerPlans] : 
-                  userRole === 'employer' ? employerPlans : workerPlans;
+    useEffect(() => {
+        const loadingTimer = setTimeout(() => {
+            setIsLoading(false);
+            setTimeout(() => setShowContent(true), 50);
+        }, 800);
 
-    const handleSubscribe = async (planId: number) => {
-        setIsSubscribing(planId.toString());
+        return () => clearTimeout(loadingTimer);
+    }, []);
+
+    const formatPrice = (plan: any) => {
+        if (plan.name === 'Free') {
+            return 'Free';
+        }
         
-        try {
-            const response = await fetch('/subscriptions/subscribe', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({
-                    plan_id: planId,
-                    billing_interval: billingInterval,
-                }),
-            });
+        const price = billingInterval === 'monthly' ? plan.price_monthly : plan.price_yearly;
+        const interval = billingInterval === 'monthly' ? '/month' : '/year';
+        
+        return `$${price.toFixed(2)}${interval}`;
+    };
 
-            const result = await response.json();
+    const getSavings = (plan: any) => {
+        if (plan.name === 'Free') return null;
+        
+        const monthlyTotal = plan.price_monthly * 12;
+        const yearlyPrice = plan.price_yearly;
+        const savings = ((monthlyTotal - yearlyPrice) / monthlyTotal * 100).toFixed(0);
+        
+        return billingInterval === 'yearly' ? `Save ${savings}%` : null;
+    };
 
-            if (result.success) {
-                alert(result.message + '\n\nA confirmation email has been sent to your inbox!');
-                window.location.reload();
-            } else {
-                alert(result.message);
-            }
-        } catch (error) {
-            console.error('Subscription error:', error);
-            alert('Failed to process subscription. Please try again.');
-        } finally {
-            setIsSubscribing(null);
+    const getPlanIcon = (planName: string) => {
+        switch (planName.toLowerCase()) {
+            case 'free':
+                return <Users className="h-6 w-6" style={{color: '#10B3D6'}} />;
+            case 'pro':
+                return <Zap className="h-6 w-6" style={{color: '#10B3D6'}} />;
+            case 'premium':
+                return <Award className="h-6 w-6" style={{color: '#10B3D6'}} />;
+            default:
+                return <Shield className="h-6 w-6" style={{color: '#10B3D6'}} />;
         }
     };
 
-    const formatPrice = (plan: Plan) => {
-        const price = billingInterval === 'yearly' ? plan.yearly_price : plan.price;
-        if (price === 0) return 'Free';
-        return `$${price.toFixed(2)}/${billingInterval === 'yearly' ? 'year' : 'month'}`;
+    const handleSubscribe = (plan: any) => {
+        // This will be implemented with actual subscription logic
+        console.log('Subscribe to plan:', plan.name, 'with interval:', billingInterval);
+        // For now, just show a placeholder
+        alert(`Subscribing to ${plan.name} plan (${billingInterval}) - This feature will be implemented soon!`);
     };
 
-    const getSavings = (plan: Plan) => {
-        if (!plan.yearly_price || plan.price === 0) return null;
-        const monthlyYearly = plan.price * 12;
-        const savings = monthlyYearly - plan.yearly_price;
-        const percentage = Math.round((savings / monthlyYearly) * 100);
-        return { amount: savings, percentage };
-    };
-
-    const getPlanIcon = (planType: string, planName: string) => {
-        if (planType === 'employer') {
-            if (planName.includes('Enterprise')) return <Shield className="h-8 w-8" style={{color: '#10B3D6'}} />;
-            if (planName.includes('Professional')) return <Briefcase className="h-8 w-8" style={{color: '#10B3D6'}} />;
-            return <Users className="h-8 w-8" style={{color: '#10B3D6'}} />;
-        } else {
-            if (planName.includes('Premium')) return <Star className="h-8 w-8" style={{color: '#10B3D6'}} />;
-            if (planName.includes('Pro')) return <Zap className="h-8 w-8" style={{color: '#10B3D6'}} />;
-            return <User className="h-8 w-8" style={{color: '#10B3D6'}} />;
-        }
+    const isCurrentPlan = (plan: any) => {
+        return currentSubscription?.plan?.name?.toLowerCase() === plan.name.toLowerCase();
     };
 
     return (
         <AppLayout>
             <Head title="Subscription Plans" />
-            
-            <div className="container mx-auto px-4 py-8">
-                {/* Header */}
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                        Select the perfect plan for your needs. Upgrade or downgrade at any time.
-                    </p>
-                </div>
 
-                {/* Current Subscription */}
-                {currentSubscription && (
-                    <div className="mb-12">
-                        <Card className="border-2" style={{borderColor: '#10B3D6'}}>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Check className="h-5 w-5 text-green-600" />
-                                            Current Plan: {currentSubscription.plan.name}
-                                        </CardTitle>
-                                        <CardDescription>
-                                            {currentSubscription.amount} • {currentSubscription.billing_interval}
-                                            {currentSubscription.next_billing_date && (
-                                                <> • Next billing: {currentSubscription.next_billing_date}</>
-                                            )}
-                                        </CardDescription>
-                                    </div>
-                                    <Badge variant={currentSubscription.is_cancelled ? 'destructive' : 'default'}>
-                                        {currentSubscription.status}
-                                    </Badge>
+            <div className="w-full px-4 md:px-6 py-6 md:py-8">
+                <div className="max-w-7xl mx-auto">
+                    {/* Error Message */}
+                    {error && !isLoading && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8">
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <X className="h-5 w-5 text-red-400" />
                                 </div>
-                            </CardHeader>
-                        </Card>
-                    </div>
-                )}
+                                <div className="ml-3">
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-                {/* Billing Toggle */}
-                <div className="flex justify-center mb-12">
-                    <div className="bg-gray-100 p-1 rounded-lg flex">
-                        <button
-                            onClick={() => setBillingInterval('monthly')}
-                            className={`px-6 py-2 rounded-md font-medium transition-all ${
-                                billingInterval === 'monthly'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            onClick={() => setBillingInterval('yearly')}
-                            className={`px-6 py-2 rounded-md font-medium transition-all ${
-                                billingInterval === 'yearly'
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-600 hover:text-gray-900'
-                            }`}
-                        >
-                            Yearly
-                            <Badge className="ml-2 bg-green-100 text-green-800">Save 20%</Badge>
-                        </button>
+                    {/* Header */}
+                    <div className={`text-center mb-8 md:mb-12 transition-all duration-400 ease-out ${
+                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                        {isLoading ? (
+                            <div className="space-y-4">
+                                <div className="h-8 md:h-10 bg-gray-300 rounded w-64 md:w-80 mx-auto animate-pulse"></div>
+                                <div className="h-4 md:h-5 bg-gray-200 rounded w-80 md:w-96 mx-auto animate-pulse"></div>
+                            </div>
+                        ) : (
+                            <>
+                                <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-4" style={{color: '#192341'}}>
+                                    Subscription Plans
+                                </h1>
+                                <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
+                                    Choose the plan that best fits your needs and unlock premium features to enhance your job search experience
+                                </p>
+                            </>
+                        )}
                     </div>
-                </div>
 
-                {/* Plans Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                    {plans.map((plan) => {
-                        const savings = getSavings(plan);
-                        const isCurrentPlan = currentSubscription?.plan.id === plan.id;
-                        
-                        return (
-                            <Card 
-                                key={plan.id} 
-                                className={`relative ${plan.is_popular ? 'border-2 shadow-lg' : 'border'} ${
-                                    isCurrentPlan ? 'ring-2 ring-green-500' : ''
-                                }`}
-                                style={plan.is_popular ? {borderColor: '#10B3D6'} : {}}
-                            >
-                                {plan.is_popular && (
-                                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                                        <Badge className="text-white px-4 py-1" style={{backgroundColor: '#10B3D6'}}>
-                                            Most Popular
-                                        </Badge>
-                                    </div>
-                                )}
-                                
-                                <CardHeader className="text-center pb-4">
-                                    <div className="flex justify-center mb-4">
-                                        {getPlanIcon(plan.type, plan.name)}
-                                    </div>
-                                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
-                                    <CardDescription className="text-sm">{plan.description}</CardDescription>
-                                    
-                                    <div className="mt-4">
-                                        <div className="text-4xl font-bold text-gray-900">
-                                            {formatPrice(plan)}
-                                        </div>
-                                        {billingInterval === 'yearly' && savings && (
-                                            <div className="text-sm text-green-600 font-medium">
-                                                Save ${savings.amount.toFixed(2)} ({savings.percentage}%)
+                    {/* Current Subscription Status */}
+                    {currentSubscription && (
+                        <div className={`mb-8 transition-all duration-400 ease-out ${
+                            showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}>
+                            {isLoading ? (
+                                <Card className="bg-blue-50 border-blue-200 animate-pulse">
+                                    <CardContent className="p-4 md:p-6">
+                                        <div className="flex items-center gap-4">
+                                            <div className="h-8 w-8 bg-blue-300 rounded-full animate-pulse"></div>
+                                            <div className="flex-1 space-y-2">
+                                                <div className="h-5 bg-blue-300 rounded w-48 animate-pulse"></div>
+                                                <div className="h-4 bg-blue-200 rounded w-64 animate-pulse"></div>
                                             </div>
-                                        )}
-                                    </div>
-                                </CardHeader>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ) : (
+                                <Card className="bg-blue-50 border-blue-200">
+                                    <CardContent className="p-4 md:p-6">
+                                        <div className="flex items-center gap-4">
+                                            <Shield className="h-8 w-8 text-blue-600" />
+                                            <div>
+                                                <h3 className="font-semibold text-blue-900">
+                                                    Your Current Plan: {currentSubscription.plan.name}
+                                                </h3>
+                                                <p className="text-blue-700 text-sm">
+                                                    {currentSubscription.is_cancelled 
+                                                        ? `Expires on ${currentSubscription.ends_at}` 
+                                                        : `Next billing: ${currentSubscription.next_billing_date}`
+                                                    }
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+                    )}
 
-                                <CardContent>
-                                    <ul className="space-y-3">
-                                        {/* Limits */}
-                                        {plan.job_posts_limit && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">
-                                                    {plan.job_posts_limit === null ? 'Unlimited' : plan.job_posts_limit} job posts
-                                                </span>
-                                            </li>
-                                        )}
-                                        {plan.job_applications_limit && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">
-                                                    {plan.job_applications_limit === null ? 'Unlimited' : plan.job_applications_limit} applications
-                                                </span>
-                                            </li>
-                                        )}
-                                        {plan.featured_jobs_limit && plan.featured_jobs_limit > 0 && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">{plan.featured_jobs_limit} featured listings</span>
-                                            </li>
-                                        )}
-                                        
-                                        {/* Features */}
-                                        {plan.priority_support && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">Priority support</span>
-                                            </li>
-                                        )}
-                                        {plan.advanced_analytics && (
-                                            <li className="flex items-center gap-2">
-                                                <BarChart className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">Advanced analytics</span>
-                                            </li>
-                                        )}
-                                        {plan.custom_branding && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">Custom branding</span>
-                                            </li>
-                                        )}
-                                        {plan.api_access && (
-                                            <li className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">API access</span>
-                                            </li>
-                                        )}
-                                        
-                                        {/* Additional features from array */}
-                                        {plan.features?.slice(0, 3).map((feature, index) => (
-                                            <li key={index} className="flex items-center gap-2">
-                                                <Check className="h-4 w-4 text-green-600" />
-                                                <span className="text-sm">{feature}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </CardContent>
+                    {/* Billing Toggle */}
+                    <div className={`flex justify-center mb-8 md:mb-12 transition-all duration-400 ease-out ${
+                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                        {isLoading ? (
+                            <div className="h-10 bg-gray-200 rounded-full w-48 animate-pulse"></div>
+                        ) : (
+                            <div className="flex items-center gap-4 p-1 bg-gray-100 rounded-full">
+                                <button
+                                    onClick={() => setBillingInterval('monthly')}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+                                        billingInterval === 'monthly'
+                                            ? 'text-white shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                    style={{
+                                        backgroundColor: billingInterval === 'monthly' ? '#10B3D6' : 'transparent'
+                                    }}
+                                >
+                                    Monthly
+                                </button>
+                                <button
+                                    onClick={() => setBillingInterval('yearly')}
+                                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer ${
+                                        billingInterval === 'yearly'
+                                            ? 'text-white shadow-md'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                    style={{
+                                        backgroundColor: billingInterval === 'yearly' ? '#10B3D6' : 'transparent'
+                                    }}
+                                >
+                                    Yearly
+                                    <Badge className="ml-2 bg-green-100 text-green-800 text-xs">
+                                        Save 17%
+                                    </Badge>
+                                </button>
+                            </div>
+                        )}
+                    </div>
 
-                                <CardFooter>
-                                    {isCurrentPlan ? (
-                                        <Button disabled className="w-full">
-                                            Current Plan
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            onClick={() => handleSubscribe(plan.id)}
-                                            disabled={isSubscribing === plan.id.toString()}
-                                            className="w-full text-white hover:opacity-90"
-                                            style={{backgroundColor: '#10B3D6'}}
-                                        >
-                                            {isSubscribing === plan.id.toString() ? (
-                                                <>
-                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                    Subscribing...
-                                                </>
-                                            ) : (
-                                                `Subscribe to ${plan.name}`
-                                            )}
-                                        </Button>
+                    {/* Plans Grid */}
+                    <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 transition-all duration-400 ease-out ${
+                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                        {isLoading ? (
+                            <>
+                                {[1, 2, 3].map((i) => (
+                                    <Card key={i} className="relative animate-pulse" style={{borderTop: '.5px solid #192341'}}>
+                                        <CardHeader className="text-center p-6">
+                                            <div className="h-6 w-6 bg-gray-300 rounded mx-auto mb-4 animate-pulse"></div>
+                                            <div className="h-6 bg-gray-300 rounded w-20 mx-auto mb-2 animate-pulse"></div>
+                                            <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-4 animate-pulse"></div>
+                                            <div className="h-8 bg-gray-300 rounded w-24 mx-auto animate-pulse"></div>
+                                        </CardHeader>
+                                        <CardContent className="p-6 pt-0">
+                                            <div className="space-y-3 mb-6">
+                                                {[1, 2, 3, 4].map((j) => (
+                                                    <div key={j} className="flex items-center gap-3">
+                                                        <div className="h-4 w-4 bg-gray-300 rounded animate-pulse"></div>
+                                                        <div className="h-4 bg-gray-200 rounded flex-1 animate-pulse"></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <div className="h-12 bg-gray-300 rounded w-full animate-pulse"></div>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </>
+                        ) : (
+                            plansToShow.map((plan, index) => (
+                                <Card 
+                                    key={plan.id} 
+                                    className={`relative transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                                        plan.is_popular 
+                                            ? 'ring-2 ring-[#10B3D6] shadow-[0_12px_28px_rgba(16,179,214,0.15)]' 
+                                            : 'hover:shadow-md'
+                                    } ${
+                                        isCurrentPlan(plan) ? 'bg-blue-50 border-blue-200' : 'bg-white'
+                                    }`}
+                                    style={{borderTop: '.5px solid #192341'}}
+                                >
+                                    {plan.is_popular && (
+                                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                            <Badge className="text-white px-4 py-1" style={{backgroundColor: '#10B3D6'}}>
+                                                <Star className="h-3 w-3 mr-1" />
+                                                Most Popular
+                                            </Badge>
+                                        </div>
                                     )}
-                                </CardFooter>
-                            </Card>
-                        );
-                    })}
-                </div>
+                                    
+                                    {isCurrentPlan(plan) && (
+                                        <div className="absolute -top-3 right-4">
+                                            <Badge className="bg-green-100 text-green-800 px-3 py-1">
+                                                Current Plan
+                                            </Badge>
+                                        </div>
+                                    )}
 
-                {/* FAQ or Additional Info */}
-                <div className="mt-16 text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Need Help Choosing?</h2>
-                    <p className="text-gray-600 mb-6">
-                        Contact our support team for personalized recommendations.
-                    </p>
-                    <Link href="/contact" className="text-blue-600 hover:text-blue-800 font-medium">
-                        Get in Touch →
-                    </Link>
+                                    <CardHeader className="text-center p-6">
+                                        <div className="mb-4">
+                                            {getPlanIcon(plan.name)}
+                                        </div>
+                                        <CardTitle className="text-xl font-bold mb-2" style={{color: '#192341'}}>
+                                            {plan.name}
+                                        </CardTitle>
+                                        <p className="text-gray-600 text-sm mb-4">
+                                            {plan.name === 'Free' && 'Perfect for getting started'}
+                                            {plan.name === 'Pro' && 'Ideal for active job seekers'}
+                                            {plan.name === 'Premium' && 'For professionals who want it all'}
+                                        </p>
+                                        <div className="space-y-1">
+                                            <div className="text-3xl font-bold" style={{color: '#192341'}}>
+                                                {formatPrice(plan)}
+                                            </div>
+                                            {getSavings(plan) && (
+                                                <Badge className="bg-green-100 text-green-800 text-xs">
+                                                    {getSavings(plan)}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </CardHeader>
+
+                                    <CardContent className="p-6 pt-0">
+                                        <ul className="space-y-3 mb-6">
+                                            {plan.features.map((feature, featureIndex) => (
+                                                <li key={featureIndex} className="flex items-start gap-3 text-sm">
+                                                    <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                                                    <span className="text-gray-700">{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        <Button
+                                            className={`w-full cursor-pointer hover:scale-105 transition-all duration-200 ${
+                                                isCurrentPlan(plan) 
+                                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
+                                                    : plan.is_popular
+                                                        ? 'text-white hover:opacity-90'
+                                                        : 'border-2 hover:text-white'
+                                            }`}
+                                            style={{
+                                                height: '2.7em',
+                                                backgroundColor: isCurrentPlan(plan) 
+                                                    ? undefined 
+                                                    : plan.is_popular 
+                                                        ? '#10B3D6' 
+                                                        : 'transparent',
+                                                borderColor: plan.is_popular ? undefined : '#10B3D6',
+                                                color: isCurrentPlan(plan) 
+                                                    ? undefined 
+                                                    : plan.is_popular 
+                                                        ? undefined 
+                                                        : '#10B3D6'
+                                            }}
+                                            onClick={() => handleSubscribe(plan)}
+                                            disabled={isCurrentPlan(plan)}
+                                        >
+                                            {isCurrentPlan(plan) 
+                                                ? 'Current Plan' 
+                                                : plan.name === 'Free' 
+                                                    ? 'Get Started' 
+                                                    : 'Upgrade Now'
+                                            }
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+
+                    {/* Additional Information */}
+                    <div className={`mt-12 text-center transition-all duration-400 ease-out ${
+                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                        {!isLoading && (
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <Check className="h-4 w-4 text-green-500" />
+                                        <span>Cancel anytime</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Shield className="h-4 w-4 text-green-500" />
+                                        <span>Secure payment processing</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <CreditCard className="h-4 w-4 text-green-500" />
+                                        <span>No hidden fees</span>
+                                    </div>
+                                </div>
+                                <p className="text-sm text-gray-500">
+                                    Questions about our plans? <a href="/contact" className="hover:underline cursor-pointer" style={{color: '#10B3D6'}}>Contact our support team</a>
+                                </p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </AppLayout>
