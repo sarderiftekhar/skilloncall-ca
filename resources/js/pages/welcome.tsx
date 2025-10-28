@@ -348,7 +348,13 @@ export default function Welcome() {
                         {/* Main Content - Centered in Upper-Middle Area */}
                         <div className="flex items-center justify-center h-full">
                             <div className="text-center relative z-20 max-w-4xl mx-auto">
-                                <div className="text-6xl md:text-8xl mb-6">🍁</div>
+                                <div className="mb-6 flex justify-center">
+                                    <img 
+                                        src="/images/mapple-leaf.png" 
+                                        alt="Canadian Maple Leaf" 
+                                        className="w-24 h-24 md:w-32 md:h-32 object-contain"
+                                    />
+                                </div>
                                 <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight" style={{color: '#192341'}}>
                                     {t('hero.title', 'SkillOnCall — Where Skills Meet Opportunity')}
                                 </h1>
