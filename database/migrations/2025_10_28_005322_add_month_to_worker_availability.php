@@ -12,6 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Drop the old unique constraint if it exists
+        try {
+            DB::statement('ALTER TABLE worker_availability DROP INDEX worker_avail_profile_day_time_unique');
+        } catch (\Exception $e) {
+            // Index might not exist, that's okay
+        }
+        
         Schema::table('worker_availability', function (Blueprint $table) {
             // Add effective_month column to track which month the availability applies to
             $table->string('effective_month', 7)->after('worker_profile_id')->nullable();
@@ -27,7 +34,7 @@ return new class extends Migration
         Schema::table('worker_availability', function (Blueprint $table) {
             $table->string('effective_month', 7)->nullable(false)->change();
             
-            // Add composite unique index to prevent duplicates
+            // Add new composite unique index that includes effective_month
             $table->unique(['worker_profile_id', 'day_of_week', 'effective_month'], 'worker_availability_unique');
         });
     }
@@ -40,6 +47,9 @@ return new class extends Migration
         Schema::table('worker_availability', function (Blueprint $table) {
             $table->dropUnique('worker_availability_unique');
             $table->dropColumn('effective_month');
+            
+            // Restore the old unique constraint
+            $table->unique(['worker_profile_id', 'day_of_week', 'start_time'], 'worker_avail_profile_day_time_unique');
         });
     }
 };

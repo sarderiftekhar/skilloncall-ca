@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useMemo, useState } from 'react';
-import { Calendar, CheckCircle, Clock, Copy } from 'react-feather';
+import { Calendar, CheckCircle, Clock, Copy, Shield } from 'react-feather';
 
 interface GlobeAvailabilityStepProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -533,6 +533,38 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
                     </div>
                 </div>
             </div>
+
+            {/* Profile Almost Ready Card */}
+            <Card className="border bg-blue-50" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
+                <CardContent className="p-6">
+                    <div className="flex items-start space-x-4">
+                        <Shield className="h-6 w-6 text-blue-600 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <h3 className="font-semibold text-blue-900 mb-2">Your Profile is Almost Ready!</h3>
+                            <div className="text-sm text-blue-800 space-y-2">
+                                <p>
+                                    <strong>What happens next:</strong>
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 text-blue-700 ml-4">
+                                    <li>Your profile will be visible to employers in your area</li>
+                                    <li>You will start receiving job notifications matching your skills</li>
+                                    <li>Employers can contact you for work opportunities</li>
+                                    <li>You can browse and apply for jobs immediately</li>
+                                </ul>
+                                
+                                <div className="bg-blue-100 rounded-lg p-3 mt-3">
+                                    <div className="flex items-center">
+                                        <Clock className="h-4 w-4 mr-2 text-blue-600" />
+                                        <p className="text-xs text-blue-800 font-medium">
+                                            You can update your profile, rates, and availability anytime from your dashboard.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     );
 }

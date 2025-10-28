@@ -160,14 +160,11 @@ class OnboardingController extends Controller
                 case 5:
                     $this->saveAvailability($workerProfile, $data);
                     break;
-                case 6:
-                    $this->savePortfolio($workerProfile, $data);
-                    break;
             }
 
-            // Update onboarding step (do not exceed final step)
+            // Update onboarding step (do not exceed final step - now 5)
             if ($step >= $workerProfile->onboarding_step) {
-                $workerProfile->onboarding_step = min($step + 1, 6);
+                $workerProfile->onboarding_step = min($step + 1, 5);
                 $workerProfile->save();
             }
 
