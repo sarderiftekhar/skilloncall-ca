@@ -9,6 +9,7 @@ use App\Http\Controllers\Worker\WorkerPaymentController;
 use App\Http\Controllers\Worker\WorkerProfileController;
 use App\Http\Controllers\Worker\WorkerProfileController as WorkerProfileCrudController;
 use App\Http\Controllers\Worker\WorkerSkillController;
+use App\Http\Controllers\Worker\WorkerAvailabilityController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -66,6 +67,10 @@ Route::middleware(['auth', 'verified', 'worker', 'ensure.worker.profile.complete
     Route::get('skills', [WorkerSkillController::class, 'index'])->name('skills.index');
     Route::post('skills', [WorkerSkillController::class, 'store'])->name('skills.store');
     Route::delete('skills/{skill}', [WorkerSkillController::class, 'destroy'])->name('skills.destroy');
+
+    // Availability Management
+    Route::get('availability', [WorkerAvailabilityController::class, 'index'])->name('availability.index');
+    Route::put('availability', [WorkerAvailabilityController::class, 'update'])->name('availability.update');
 
     // Payment Management
     Route::get('payments', [WorkerPaymentController::class, 'index'])->name('payments.index');

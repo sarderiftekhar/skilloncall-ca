@@ -41,7 +41,7 @@ class ProfileController extends Controller
     }
 
     /**
-     * Delete the user's account.
+     * Deactivate the user's account.
      */
     public function destroy(Request $request): RedirectResponse
     {
@@ -51,13 +51,15 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // Deactivate the account instead of deleting
+        $user->is_active = false;
+        $user->save();
 
-        $user->delete();
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')->with('status', 'Your account has been deactivated. Contact support@skilloncall.ca to reactivate or permanently delete your account.');
     }
 }

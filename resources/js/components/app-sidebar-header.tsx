@@ -294,7 +294,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="hidden flex-col items-start text-left sm:flex">
                                 <span className="max-w-20 truncate text-xs font-medium text-gray-900 sm:max-w-24 sm:text-sm dark:text-white">
-                                    {auth.user.role === 'admin' ? 'Super Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Worker'}
+                                    {auth.user.name}
                                 </span>
                             </div>
                             <ChevronDown className="ml-1 hidden size-3 sm:block sm:size-4" />
@@ -319,7 +319,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-medium text-gray-900 dark:text-white">
-                                    {auth.user.role === 'admin' ? 'Super Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Worker'}
+                                    {auth.user.name}
                                 </span>
                                 <span className="text-sm text-gray-500 dark:text-gray-400">{auth.user.email}</span>
                             </div>
@@ -327,8 +327,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         <div className="py-1">
                             <DropdownMenuItem asChild>
                                 <Link
-                                    className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    href="/profile/edit"
+                                    className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
+                                    href="/settings/profile"
                                     prefetch
                                 >
                                     <Settings className="mr-3 h-4 w-4" />
@@ -337,7 +337,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                                 <Link
-                                    className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800"
+                                    className="flex items-center px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
                                     href="/logout"
                                     method="post"
                                 >

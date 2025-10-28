@@ -134,6 +134,40 @@ class OnboardingController extends Controller
         $step = (int) $request->input('step');
         $data = $request->input('data', []);
 
+        // Check if profile photo is uploaded directly (not nested in data)
+        if ($request->hasFile('data.profile_photo')) {
+            $data['profile_photo'] = $request->file('data.profile_photo');
+        }
+
+        // Comprehensive debugging logging
+        Log::info('Onboarding save attempt', [
+            'user_id' => $user->id,
+            'step' => $step,
+            'data_keys' => array_keys($data),
+            'data_types' => array_map('gettype', $data),
+            'request_method' => $request->method(),
+            'request_content_type' => $request->header('Content-Type'),
+            'has_files' => $request->hasFile('data.profile_photo'),
+            'all_files' => array_keys($request->allFiles()),
+            'timestamp' => now()->toISOString(),
+        ]);
+
+        // Debug specific data based on step
+        if ($step === 1) {
+            Log::info('Step 1 data details', [
+                'first_name' => $data['first_name'] ?? 'missing',
+                'last_name' => $data['last_name'] ?? 'missing',
+                'phone' => $data['phone'] ?? 'missing',
+                'work_authorization' => $data['work_authorization'] ?? 'missing',
+                'address_line_1' => $data['address_line_1'] ?? 'missing',
+                'city' => $data['city'] ?? 'missing',
+                'province' => $data['province'] ?? 'missing',
+                'postal_code' => $data['postal_code'] ?? 'missing',
+                'profile_photo_type' => isset($data['profile_photo']) ? gettype($data['profile_photo']) : 'missing',
+                'profile_photo_is_file' => isset($data['profile_photo']) && $data['profile_photo'] instanceof \Illuminate\Http\UploadedFile ? 'yes' : 'no',
+            ]);
+        }
+
         try {
             DB::beginTransaction();
 
@@ -155,7 +189,7 @@ class OnboardingController extends Controller
                     $this->saveWorkHistory($workerProfile, $data);
                     break;
                 case 4:
-                    $this->saveLocationPreferences($workerProfile, $data);
+                    $this->saveLanguagesAvailability($workerProfile, $data);
                     break;
                 case 5:
                     $this->saveAvailability($workerProfile, $data);
@@ -184,12 +218,28 @@ class OnboardingController extends Controller
             throw $e;
         } catch (\Throwable $e) {
             DB::rollBack();
+            
             // Log the full exception for debugging
             Log::error('Onboarding save error', [
                 'step' => $step,
+                'user_id' => auth()->id(),
+                'data' => $data,
                 'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // In development, show detailed error information
+            if (config('app.debug')) {
+                return back()->withErrors([
+                    'form' => 'Development Error: ' . $e->getMessage(),
+                    'debug_file' => $e->getFile(),
+                    'debug_line' => 'Line: ' . $e->getLine(),
+                    'debug_step' => 'Step: ' . $step,
+                    'debug_data' => 'Data keys: ' . implode(', ', array_keys($data)),
+                ]);
+            }
 
             return back()->withErrors(['form' => 'An unexpected error occurred. Please try again.']);
         }
@@ -200,19 +250,88 @@ class OnboardingController extends Controller
         $user = $request->user();
         $data = $request->input('data', []);
 
+        // Debug logging for completion attempt
+        Log::info('Onboarding completion attempt', [
+            'user_id' => $user->id,
+            'data' => $data,
+        ]);
+
         try {
             DB::beginTransaction();
 
             $workerProfile = WorkerProfile::where('user_id', $user->id)->firstOrFail();
+            
+            // Ensure final step data is saved before validation
+            if (!empty($data)) {
+                // If there's availability data, make sure it's saved first
+                if (!empty($data['availability_by_month'])) {
+                    Log::info('Pre-completion availability save', [
+                        'user_id' => $user->id,
+                        'current_availability_count' => $workerProfile->availability()->count(),
+                    ]);
+                    $this->saveAvailability($workerProfile, $data);
+                }
+                
+                // Refresh the profile to get updated relationships
+                $workerProfile->refresh();
+            }
 
-            // Final validation
-            if (! $workerProfile->canCompleteOnboarding()) {
+            // Debug profile completeness
+            $completionPercentage = $workerProfile->calculateProfileCompletion();
+            Log::info('Profile completion check', [
+                'user_id' => $user->id,
+                'completion_percentage' => $completionPercentage,
+                'can_complete' => $workerProfile->canCompleteOnboarding(),
+                'profile_data' => [
+                    'first_name' => $workerProfile->first_name,
+                    'last_name' => $workerProfile->last_name,
+                    'phone' => $workerProfile->phone,
+                    'date_of_birth' => $workerProfile->date_of_birth,
+                    'emergency_contact_name' => $workerProfile->emergency_contact_name,
+                    'skills_count' => $workerProfile->skills()->count(),
+                    'languages_count' => $workerProfile->languages()->count(),
+                    'work_experiences_count' => $workerProfile->workExperiences()->count(),
+                    'availability_count' => $workerProfile->availability()->where('is_available', true)->count(),
+                ]
+            ]);
+
+            // Final validation - check if profile can be completed
+            $canComplete = $workerProfile->canCompleteOnboarding();
+            if (! $canComplete) {
+                // Get detailed validation info
+                $missingFields = [];
+                
+                $essentialFields = ['first_name', 'last_name', 'phone', 'address_line_1', 'city', 'province', 'postal_code', 'work_authorization', 'hourly_rate_min', 'travel_distance_max'];
+                foreach ($essentialFields as $field) {
+                    if (empty($workerProfile->$field)) {
+                        $missingFields[] = $field;
+                    }
+                }
+                
+                if ($workerProfile->skills()->count() === 0) {
+                    $missingFields[] = 'skills (need at least 1)';
+                }
+                
+                if ($workerProfile->availability()->where('is_available', true)->count() === 0) {
+                    $missingFields[] = 'availability (need at least 1 available slot)';
+                }
+                
+                Log::warning('Profile completion blocked - detailed', [
+                    'user_id' => $user->id,
+                    'completion_percentage' => $completionPercentage,
+                    'missing_fields' => $missingFields,
+                    'skills_count' => $workerProfile->skills()->count(),
+                    'availability_count' => $workerProfile->availability()->where('is_available', true)->count(),
+                ]);
+                
                 return back()->withErrors([
-                    'message' => 'Please complete all required sections before finishing setup.',
+                    'message' => "Profile incomplete. Missing: " . implode(', ', $missingFields),
+                    'missing_fields' => $missingFields,
+                    'completion_percentage' => $completionPercentage,
                 ]);
             }
 
-            // Save final portfolio data if provided
+            // Save final portfolio data if provided (availability already saved above)
             if (! empty($data)) {
                 $this->savePortfolio($workerProfile, $data);
             }
@@ -241,6 +360,45 @@ class OnboardingController extends Controller
 
     private function savePersonalInfo(WorkerProfile $profile, array $data)
     {
+        // Pre-validation debugging
+        Log::info('savePersonalInfo called', [
+            'profile_exists' => $profile->exists,
+            'profile_id' => $profile->id,
+            'data_count' => count($data),
+            'required_fields_present' => [
+                'first_name' => isset($data['first_name']),
+                'last_name' => isset($data['last_name']),
+                'phone' => isset($data['phone']),
+                'address_line_1' => isset($data['address_line_1']),
+                'city' => isset($data['city']),
+                'province' => isset($data['province']),
+                'postal_code' => isset($data['postal_code']),
+                'work_authorization' => isset($data['work_authorization']),
+            ]
+        ]);
+        
+        // Check for common data issues that might cause unexpected errors
+        $issues = [];
+        
+        if (empty($data)) {
+            $issues[] = 'Data array is empty';
+        }
+        
+        if (isset($data['postal_code']) && !is_string($data['postal_code'])) {
+            $issues[] = 'Postal code is not a string: ' . gettype($data['postal_code']);
+        }
+        
+        if (isset($data['province']) && strlen($data['province']) !== 2) {
+            $issues[] = 'Province is not 2 characters: ' . strlen($data['province']) . ' chars';
+        }
+        
+        if (!empty($issues)) {
+            Log::warning('Pre-validation issues detected', [
+                'issues' => $issues,
+                'data' => $data
+            ]);
+        }
+
         $validated = validator($data, [
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
@@ -445,8 +603,62 @@ class OnboardingController extends Controller
         }
     }
 
+    private function saveLanguagesAvailability(WorkerProfile $profile, array $data)
+    {
+        // Save languages if provided
+        if (!empty($data['selected_languages'])) {
+            $languageData = [];
+            foreach ($data['selected_languages'] as $language) {
+                if (isset($language['id'])) {
+                    $languageData[$language['id']] = [
+                        'proficiency_level' => $language['proficiency_level'] ?? 'conversational',
+                        'is_primary_language' => ($language['is_primary_language'] ?? false) || ($language['is_primary'] ?? false),
+                    ];
+                }
+            }
+            
+            Log::info('Saving languages', [
+                'user_id' => $profile->user_id,
+                'language_data' => $languageData,
+                'languages_count' => count($languageData),
+            ]);
+            
+            $profile->languages()->sync($languageData);
+        }
+
+        // Also save any location preferences and rates if provided
+        $locationFields = array_intersect_key($data, array_flip([
+            'has_vehicle', 'has_tools_equipment', 'travel_distance_max', 'hourly_rate_min', 
+            'hourly_rate_max', 'is_insured', 'has_wcb_coverage', 'has_criminal_background_check'
+        ]));
+        
+        if (!empty($locationFields)) {
+            $validated = validator($locationFields, [
+                'has_vehicle' => 'nullable|boolean',
+                'has_tools_equipment' => 'nullable|boolean', 
+                'travel_distance_max' => 'nullable|integer|min:1|max:999',
+                'hourly_rate_min' => 'nullable|numeric|min:15|max:200',
+                'hourly_rate_max' => 'nullable|numeric|min:15|max:500',
+                'is_insured' => 'nullable|boolean',
+                'has_wcb_coverage' => 'nullable|boolean',
+                'has_criminal_background_check' => 'nullable|boolean',
+            ])->validate();
+
+            $profile->fill($validated);
+            $profile->save();
+        }
+    }
+
     private function saveAvailability(WorkerProfile $profile, array $data)
     {
+        if (empty($data['availability_by_month'])) {
+            Log::warning('No availability data provided for step 5', [
+                'user_id' => $profile->user_id,
+                'data_keys' => array_keys($data),
+            ]);
+            return;
+        }
+
         $validated = validator($data, [
             'availability_by_month' => 'required|array|min:1|max:2',
             'availability_by_month.*.month' => 'required|date_format:Y-m',
@@ -461,6 +673,12 @@ class OnboardingController extends Controller
         // Delete existing availability for the months being updated
         $monthsToUpdate = array_column($validated['availability_by_month'], 'month');
         $profile->availability()->whereIn('effective_month', $monthsToUpdate)->delete();
+
+        Log::info('Saving availability', [
+            'user_id' => $profile->user_id,
+            'months_to_update' => $monthsToUpdate,
+            'availability_slots' => array_sum(array_map(fn($month) => count($month['availability']), $validated['availability_by_month'])),
+        ]);
 
         // Save new availability for each month
         foreach ($validated['availability_by_month'] as $monthData) {

@@ -154,12 +154,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             return redirect()->route('worker.dashboard');
         }
-    })->name('dashboard');
+    })->name('dashboard')->middleware('check.user.active');
 });
 
 // Include role-specific routes
 // Subscription routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'check.user.active'])->group(function () {
     Route::get('/subscriptions', [App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscription', [App\Http\Controllers\SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::post('/subscriptions/subscribe', [App\Http\Controllers\SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');

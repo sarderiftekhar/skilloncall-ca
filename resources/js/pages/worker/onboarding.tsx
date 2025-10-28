@@ -254,17 +254,49 @@ export default function WorkerOnboarding({
                         console.log('Error values:', Object.values(errors));
                         console.log('Stringified errors:', JSON.stringify(errors, null, 2));
                         console.error('Validation errors:', errors);
+                        
+                        // Check for debug info to show detailed development errors
+                        if (errors.debug_file || errors.debug_line || errors.debug_step || errors.debug_data) {
+                            console.group('🐛 DEBUG INFO');
+                            if (errors.debug_file) console.log('File:', errors.debug_file);
+                            if (errors.debug_line) console.log(errors.debug_line);
+                            if (errors.debug_step) console.log(errors.debug_step);
+                            if (errors.debug_data) console.log(errors.debug_data);
+                            console.groupEnd();
+                        }
+                        
+                        // Check for development errors (more detailed error messages)
+                        const isDevelopmentError = errors.form && errors.form.toString().startsWith('Development Error:');
+                        
                         setValidationErrors(errors);
-                        // Also display a modal with a friendly summary
+                        
+                        // Create error list with better formatting
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const errorList = Object.entries(errors || {}).map(([key, value]: [string, any]) => `${key}: ${String(value)}`);
+                        const errorList: string[] = [];
+                        
+                        Object.entries(errors || {}).forEach(([key, value]: [string, any]) => {
+                            if (key.startsWith('debug_')) {
+                                // Format debug info nicely
+                                errorList.push(`${String(value)}`);
+                            } else if (key === 'form' && isDevelopmentError) {
+                                // Show development error prominently
+                                errorList.unshift(`🚨 ${value}`);
+                            } else {
+                                errorList.push(`${key}: ${String(value)}`);
+                            }
+                        });
+                        
                         setModalType('error');
-                        setModalTitle(t('modal.error.title', 'Please fix the highlighted fields'));
-                        setModalMessage(t('modal.error.message', 'There were some issues with your input.'));
-                        setModalDetails(errorList.slice(0, 10));
+                        setModalTitle(isDevelopmentError ? 'Development Error' : t('modal.error.title', 'Please fix the highlighted fields'));
+                        setModalMessage(isDevelopmentError 
+                            ? 'Check console for detailed error information.'
+                            : t('modal.error.message', 'There were some issues with your input.')
+                        );
+                        setModalDetails(errorList.slice(0, 15)); // Show more details in dev mode
                         setModalOpen(true);
+                        
                         // Scroll to first field with an error slowly
-                        const firstKey = Object.keys(errors)[0];
+                        const firstKey = Object.keys(errors).find(key => !key.startsWith('debug_') && key !== 'form') || Object.keys(errors)[0];
                         if (firstKey) {
                             const el = document.getElementById(firstKey);
                             if (el) {
