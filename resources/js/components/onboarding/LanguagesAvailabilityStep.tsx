@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle, Clock, Copy } from 'react-feather';
+import { Calendar, CheckCircle, Clock, Copy } from 'react-feather';
 
 interface GlobeAvailabilityStepProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -255,40 +255,78 @@ export default function GlobeAvailabilityStep({ formData, updateFormData, valida
             </div>
 
             {/* Month Tabs */}
-            <div className="mb-6">
-                <div className="flex space-x-2 border-b border-gray-200">
+            <Card className="mb-6 overflow-hidden border-2" style={{ borderColor: '#10B3D6' }}>
+                <div className="grid grid-cols-2 gap-0">
                     <button
                         type="button"
                         onClick={() => setSelectedMonth(currentMonth)}
-                        className={`cursor-pointer flex-1 pb-3 pt-2 text-center text-sm font-medium transition-all ${
+                        className={`cursor-pointer relative py-4 px-4 text-center font-semibold transition-all duration-200 ${
                             selectedMonth === currentMonth
-                                ? 'border-b-2 text-[#10B3D6]'
-                                : 'text-gray-500 hover:text-gray-700'
+                                ? 'text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
-                        style={selectedMonth === currentMonth ? { borderColor: '#10B3D6' } : {}}
+                        style={selectedMonth === currentMonth ? { backgroundColor: '#10B3D6' } : {}}
                     >
-                        <div>{formatMonthDisplay(currentMonth)}</div>
-                        {hasAvailability(currentMonth) && (
-                            <CheckCircle className="mx-auto mt-1 h-4 w-4 text-green-600" />
+                        <div className="flex flex-col items-center space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Calendar className="h-5 w-5" />
+                                <span className="text-base">{formatMonthDisplay(currentMonth)}</span>
+                            </div>
+                            {hasAvailability(currentMonth) && (
+                                <Badge 
+                                    className="text-xs"
+                                    style={{ 
+                                        backgroundColor: selectedMonth === currentMonth ? 'white' : '#10B3D6',
+                                        color: selectedMonth === currentMonth ? '#10B3D6' : 'white'
+                                    }}
+                                >
+                                    <CheckCircle className="mr-1 h-3 w-3" />
+                                    Set
+                                </Badge>
+                            )}
+                        </div>
+                        {selectedMonth === currentMonth && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: '#FCF2F0' }} />
                         )}
                     </button>
                     <button
                         type="button"
                         onClick={() => setSelectedMonth(nextMonth)}
-                        className={`cursor-pointer flex-1 pb-3 pt-2 text-center text-sm font-medium transition-all ${
+                        className={`cursor-pointer relative py-4 px-4 text-center font-semibold transition-all duration-200 border-l-2 ${
                             selectedMonth === nextMonth
-                                ? 'border-b-2 text-[#10B3D6]'
-                                : 'text-gray-500 hover:text-gray-700'
+                                ? 'text-white'
+                                : 'bg-white text-gray-600 hover:bg-gray-50'
                         }`}
-                        style={selectedMonth === nextMonth ? { borderColor: '#10B3D6' } : {}}
+                        style={
+                            selectedMonth === nextMonth 
+                                ? { backgroundColor: '#10B3D6', borderColor: 'white' } 
+                                : { borderColor: '#E5E7EB' }
+                        }
                     >
-                        <div>{formatMonthDisplay(nextMonth)}</div>
-                        {hasAvailability(nextMonth) && (
-                            <CheckCircle className="mx-auto mt-1 h-4 w-4 text-green-600" />
+                        <div className="flex flex-col items-center space-y-2">
+                            <div className="flex items-center space-x-2">
+                                <Calendar className="h-5 w-5" />
+                                <span className="text-base">{formatMonthDisplay(nextMonth)}</span>
+                            </div>
+                            {hasAvailability(nextMonth) && (
+                                <Badge 
+                                    className="text-xs"
+                                    style={{ 
+                                        backgroundColor: selectedMonth === nextMonth ? 'white' : '#10B3D6',
+                                        color: selectedMonth === nextMonth ? '#10B3D6' : 'white'
+                                    }}
+                                >
+                                    <CheckCircle className="mr-1 h-3 w-3" />
+                                    Set
+                                </Badge>
+                            )}
+                        </div>
+                        {selectedMonth === nextMonth && (
+                            <div className="absolute bottom-0 left-0 right-0 h-1" style={{ backgroundColor: '#FCF2F0' }} />
                         )}
                     </button>
                 </div>
-            </div>
+            </Card>
 
             {/* Availability Schedule */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
