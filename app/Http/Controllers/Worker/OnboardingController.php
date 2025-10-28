@@ -458,7 +458,7 @@ class OnboardingController extends Controller
             'availability_by_month.*.availability' => 'required|array',
             'availability_by_month.*.availability.*.day_of_week' => 'required|integer|between:0,6',
             'availability_by_month.*.availability.*.start_time' => 'required|date_format:H:i',
-            'availability_by_month.*.availability.*.end_time' => 'required|date_format:H:i|after:availability_by_month.*.availability.*.start_time',
+            'availability_by_month.*.availability.*.end_time' => 'required|date_format:H:i',
             'availability_by_month.*.availability.*.is_available' => 'boolean',
             'availability_by_month.*.availability.*.rate_multiplier' => 'numeric|min:1|max:3',
         ])->validate();
@@ -470,6 +470,13 @@ class OnboardingController extends Controller
         // Save new availability for each month
         foreach ($validated['availability_by_month'] as $monthData) {
             foreach ($monthData['availability'] as $slot) {
+                // Validate end_time is after start_time
+                if (strtotime($slot['end_time']) <= strtotime($slot['start_time'])) {
+                    throw ValidationException::withMessages([
+                        'availability_by_month' => 'End time must be after start time for all days.',
+                    ]);
+                }
+                
                 $profile->availability()->create([
                     'effective_month' => $monthData['month'],
                     'day_of_week' => $slot['day_of_week'],
