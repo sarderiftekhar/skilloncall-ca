@@ -253,9 +253,9 @@ class OnboardingController extends Controller
             'province' => 'required|string|size:2',
             'postal_code' => 'required|string|regex:/^[A-Z]\d[A-Z] ?\d[A-Z]\d$/',
             'work_authorization' => 'required|in:canadian_citizen,permanent_resident,work_permit,student_permit',
-            'emergency_contact_name' => 'required|string|max:255',
-            'emergency_contact_phone' => 'required|string|max:20',
-            'emergency_contact_relationship' => 'required|string|max:100',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_phone' => 'nullable|string|max:20',
+            'emergency_contact_relationship' => 'nullable|string|max:100',
         ])->validate();
 
         // Handle file upload for profile photo
