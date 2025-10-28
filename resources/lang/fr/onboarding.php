@@ -44,6 +44,17 @@ return [
     'nav.finishing' => 'Finalisation...',
     'nav.cancel' => 'Annuler',
     
+    // Month selector
+    'month_selector.current_month' => 'Mois actuel',
+    'month_selector.next_month' => 'Mois prochain',
+    
+    // Actions
+    'actions.copy_to_next_month' => 'Copier au mois prochain',
+    
+    // Messages
+    'messages.copied_to_next_month' => 'Disponibilité copiée au mois prochain avec succès!',
+    'validation.at_least_current_month' => 'Veuillez définir votre disponibilité pour au moins le mois en cours.',
+    
     // Messages
     'help_text' => 'Besoin d\'aide? Vous pouvez toujours revenir pour compléter cela plus tard.',
     'validation_required' => 'Veuillez sélectionner le statut d\'emploi et ajouter au moins une expérience de travail',

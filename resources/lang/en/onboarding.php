@@ -44,6 +44,17 @@ return [
     'nav.finishing' => 'Finishing...',
     'nav.cancel' => 'Cancel',
     
+    // Month selector
+    'month_selector.current_month' => 'Current Month',
+    'month_selector.next_month' => 'Next Month',
+    
+    // Actions
+    'actions.copy_to_next_month' => 'Copy to Next Month',
+    
+    // Messages
+    'messages.copied_to_next_month' => 'Availability copied to next month successfully!',
+    'validation.at_least_current_month' => 'Please set your availability for at least the current month.',
+    
     // Messages
     'help_text' => 'Need help? You can always come back to complete this later.',
     'validation_required' => 'Please select employment status and add at least one work experience',

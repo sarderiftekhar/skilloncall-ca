@@ -15,6 +15,7 @@ class WorkerAvailability extends Model
 
     protected $fillable = [
         'worker_profile_id',
+        'effective_month',
         'day_of_week',
         'start_time',
         'end_time',
@@ -39,6 +40,21 @@ class WorkerAvailability extends Model
     public function scopeAvailable($query)
     {
         return $query->where('is_available', true);
+    }
+
+    public function scopeForMonth($query, $month)
+    {
+        return $query->where('effective_month', $month);
+    }
+
+    public function scopeCurrentMonth($query)
+    {
+        return $query->where('effective_month', now()->format('Y-m'));
+    }
+
+    public function scopeNextMonth($query)
+    {
+        return $query->where('effective_month', now()->addMonth()->format('Y-m'));
     }
 
     public function scopeWeekdays($query)

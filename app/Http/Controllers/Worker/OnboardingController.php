@@ -9,15 +9,17 @@ use App\Models\GlobalLanguage;
 use App\Models\GlobalProvince;
 use App\Models\GlobalSkill;
 use App\Models\WorkerProfile;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class OnboardingController extends Controller
 {
-    public function index(Request $request): Response
+    public function index(Request $request): Response|RedirectResponse
     {
         $user = $request->user();
 
@@ -104,7 +106,19 @@ class OnboardingController extends Controller
                 });
 
             $profileData['service_areas'] = $workerProfile->serviceAreas()->get();
-            $profileData['availability'] = $workerProfile->availability()->get();
+            
+            // Load availability grouped by month
+            $availabilityRecords = $workerProfile->availability()->get();
+            $profileData['availability_by_month'] = $availabilityRecords
+                ->groupBy('effective_month')
+                ->map(function ($monthAvailability, $month) {
+                    return [
+                        'month' => $month,
+                        'availability' => $monthAvailability->toArray(),
+                    ];
+                })
+                ->values()
+                ->toArray();
         }
 
         return Inertia::render('worker/onboarding', array_merge([
@@ -144,16 +158,13 @@ class OnboardingController extends Controller
                     $this->saveLocationPreferences($workerProfile, $data);
                     break;
                 case 5:
-                    $this->saveLanguagesAvailability($workerProfile, $data);
-                    break;
-                case 6:
-                    $this->savePortfolio($workerProfile, $data);
+                    $this->saveAvailability($workerProfile, $data);
                     break;
             }
 
-            // Update onboarding step (do not exceed final step)
+            // Update onboarding step (do not exceed final step - now 5)
             if ($step >= $workerProfile->onboarding_step) {
-                $workerProfile->onboarding_step = min($step + 1, 6);
+                $workerProfile->onboarding_step = min($step + 1, 5);
                 $workerProfile->save();
             }
 
@@ -164,7 +175,7 @@ class OnboardingController extends Controller
         } catch (ValidationException $e) {
             DB::rollBack();
             // Log the validation errors for debugging
-            \Log::error('Onboarding validation error', [
+            Log::error('Onboarding validation error', [
                 'step' => $step,
                 'errors' => $e->errors(),
                 'data' => $data,
@@ -174,7 +185,7 @@ class OnboardingController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             // Log the full exception for debugging
-            \Log::error('Onboarding save error', [
+            Log::error('Onboarding save error', [
                 'step' => $step,
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -436,35 +447,42 @@ class OnboardingController extends Controller
         }
     }
 
-    private function saveLanguagesAvailability(WorkerProfile $profile, array $data)
+    private function saveAvailability(WorkerProfile $profile, array $data)
     {
         $validated = validator($data, [
-            'selected_languages' => 'required|array|min:1',
-            'selected_languages.*.id' => 'required|exists:global_languages,id',
-            'selected_languages.*.proficiency_level' => 'required|in:basic,conversational,fluent,native',
-            'selected_languages.*.is_primary_language' => 'boolean',
-            'availability' => 'required|array',
-            'availability.*.day_of_week' => 'required|integer|between:0,6',
-            'availability.*.start_time' => 'required|date_format:H:i',
-            'availability.*.end_time' => 'required|date_format:H:i|after:start_time',
-            'availability.*.is_available' => 'boolean',
-            'availability.*.rate_multiplier' => 'numeric|min:1|max:3',
+            'availability_by_month' => 'required|array|min:1|max:2',
+            'availability_by_month.*.month' => 'required|date_format:Y-m',
+            'availability_by_month.*.availability' => 'required|array',
+            'availability_by_month.*.availability.*.day_of_week' => 'required|integer|between:0,6',
+            'availability_by_month.*.availability.*.start_time' => 'required|date_format:H:i',
+            'availability_by_month.*.availability.*.end_time' => 'required|date_format:H:i',
+            'availability_by_month.*.availability.*.is_available' => 'boolean',
+            'availability_by_month.*.availability.*.rate_multiplier' => 'numeric|min:1|max:3',
         ])->validate();
 
-        // Sync languages
-        $languagesData = [];
-        foreach ($validated['selected_languages'] as $language) {
-            $languagesData[$language['id']] = [
-                'proficiency_level' => $language['proficiency_level'],
-                'is_primary_language' => $language['is_primary_language'] ?? false,
-            ];
-        }
-        $profile->languages()->sync($languagesData);
+        // Delete existing availability for the months being updated
+        $monthsToUpdate = array_column($validated['availability_by_month'], 'month');
+        $profile->availability()->whereIn('effective_month', $monthsToUpdate)->delete();
 
-        // Save availability
-        $profile->availability()->delete();
-        foreach ($validated['availability'] as $slot) {
-            $profile->availability()->create($slot);
+        // Save new availability for each month
+        foreach ($validated['availability_by_month'] as $monthData) {
+            foreach ($monthData['availability'] as $slot) {
+                // Validate end_time is after start_time
+                if (strtotime($slot['end_time']) <= strtotime($slot['start_time'])) {
+                    throw ValidationException::withMessages([
+                        'availability_by_month' => 'End time must be after start time for all days.',
+                    ]);
+                }
+                
+                $profile->availability()->create([
+                    'effective_month' => $monthData['month'],
+                    'day_of_week' => $slot['day_of_week'],
+                    'start_time' => $slot['start_time'],
+                    'end_time' => $slot['end_time'],
+                    'is_available' => $slot['is_available'] ?? true,
+                    'rate_multiplier' => $slot['rate_multiplier'] ?? 1.0,
+                ]);
+            }
         }
     }
 

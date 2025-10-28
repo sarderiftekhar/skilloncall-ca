@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Briefcase, Camera, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
+import { ArrowLeft, ArrowRight, Briefcase, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 
 // Import step components (we'll create these next)
@@ -11,7 +11,6 @@ import FeedbackModal from '@/components/feedback-modal';
 import LanguagesAvailabilityStep from '@/components/onboarding/LanguagesAvailabilityStep';
 import LocationPreferencesStep from '@/components/onboarding/LocationPreferencesStep';
 import PersonalInfoStep from '@/components/onboarding/PersonalInfoStep';
-import PortfolioCompletionStep from '@/components/onboarding/PortfolioCompletionStep';
 import SkillsExperienceStep from '@/components/onboarding/SkillsExperienceStep';
 import WorkHistoryStep from '@/components/onboarding/WorkHistoryStep';
 
@@ -93,13 +92,6 @@ export default function WorkerOnboarding({
             icon: Clock,
             description: t('steps.schedule.description', 'When you are available to work'),
             mobileTitle: t('steps.schedule.mobile', 'Schedule'),
-        },
-        {
-            id: 6,
-            title: t('steps.portfolio.title', 'Portfolio & Complete'),
-            icon: Camera,
-            description: t('steps.portfolio.description', 'Work samples and finalize'),
-            mobileTitle: t('steps.portfolio.mobile', 'Portfolio & Done'),
         },
     ];
 
@@ -381,8 +373,6 @@ export default function WorkerOnboarding({
                 return <LocationPreferencesStep {...commonProps} />;
             case 5:
                 return <LanguagesAvailabilityStep {...commonProps} />;
-            case 6:
-                return <PortfolioCompletionStep {...commonProps} />;
             default:
                 return <PersonalInfoStep {...commonProps} />;
         }
