@@ -1,0 +1,406 @@
+import { Head, router } from '@inertiajs/react';
+import PublicLayout from '@/layouts/public-layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { 
+    Save,
+    ArrowLeft,
+    Upload,
+    X,
+    FileImage
+} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
+interface ProgressEntry {
+    id: number;
+    project: string;
+    main_section: string;
+    feature_section?: string;
+    conditions_applied?: string;
+    designed: 'YES' | 'NO' | 'PENDING';
+    testing: 'YES' | 'NO' | 'PENDING';
+    debug: 'YES' | 'NO' | 'PENDING';
+    confirm: 'YES' | 'NO' | 'PENDING';
+    uat: 'YES' | 'NO' | 'PENDING';
+    notes_comments?: string;
+    page_url_link?: string;
+    screenshots_pictures?: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+interface EditProgressEntryProps {
+    entry: ProgressEntry;
+}
+
+// Form data interface
+interface FormData {
+    main_section: string;
+    feature_section: string;
+    conditions_applied: string;
+    designed: 'YES' | 'NO' | 'PENDING';
+    testing: 'YES' | 'NO' | 'PENDING';
+    debug: 'YES' | 'NO' | 'PENDING';
+    confirm: 'YES' | 'NO' | 'PENDING';
+    uat: 'YES' | 'NO' | 'PENDING';
+    notes_comments: string;
+    page_url_link: string;
+    screenshots: File[];
+    remove_screenshots: string[];
+}
+
+export default function EditProgressEntry({ entry }: EditProgressEntryProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [formData, setFormData] = useState<FormData>({
+        main_section: entry.main_section || '',
+        feature_section: entry.feature_section || '',
+        conditions_applied: entry.conditions_applied || '',
+        designed: entry.designed || 'PENDING',
+        testing: entry.testing || 'PENDING',
+        debug: entry.debug || 'PENDING',
+        confirm: entry.confirm || 'PENDING',
+        uat: entry.uat || 'PENDING',
+        notes_comments: entry.notes_comments || '',
+        page_url_link: entry.page_url_link || '',
+        screenshots: [],
+        remove_screenshots: []
+    });
+
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(event.target.files || []);
+        setFormData(prev => ({
+            ...prev,
+            screenshots: [...prev.screenshots, ...files]
+        }));
+    };
+
+    const handlePasteScreenshot = async (event: ClipboardEvent) => {
+        const items = event.clipboardData?.items;
+        if (!items) return;
+
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const blob = items[i].getAsFile();
+                if (blob) {
+                    const file = new File([blob], `pasted-screenshot-${Date.now()}.png`, {
+                        type: 'image/png'
+                    });
+                    setFormData(prev => ({
+                        ...prev,
+                        screenshots: [...prev.screenshots, file]
+                    }));
+                }
+            }
+        }
+    };
+
+    const removeNewScreenshot = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            screenshots: prev.screenshots.filter((_, i) => i !== index)
+        }));
+    };
+
+    const removeExistingScreenshot = (screenshot: string) => {
+        setFormData(prev => ({
+            ...prev,
+            remove_screenshots: [...prev.remove_screenshots, screenshot]
+        }));
+    };
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const submitData = new FormData();
+            
+            // Add text fields
+            Object.entries(formData).forEach(([key, value]) => {
+                if (key !== 'screenshots' && key !== 'remove_screenshots' && value) {
+                    submitData.append(key, value);
+                }
+            });
+
+            // Add screenshots to remove
+            if (formData.remove_screenshots.length > 0) {
+                formData.remove_screenshots.forEach((screenshot, index) => {
+                    submitData.append(`remove_screenshots[${index}]`, screenshot);
+                });
+            }
+
+            // Add new screenshots
+            formData.screenshots.forEach((file, index) => {
+                submitData.append(`screenshots[${index}]`, file);
+            });
+
+            router.put(`/progress/${entry.id}`, submitData, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    router.visit('/progress');
+                }
+            });
+        } catch (error) {
+            console.error('Error updating entry:', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const getScreenshotUrl = (path: string) => {
+        return `/storage/${path}`;
+    };
+
+    const isScreenshotRemoved = (screenshot: string) => {
+        return formData.remove_screenshots.includes(screenshot);
+    };
+
+    useEffect(() => {
+        document.addEventListener('paste', handlePasteScreenshot);
+        return () => document.removeEventListener('paste', handlePasteScreenshot);
+    }, []);
+
+    return (
+        <PublicLayout title={`Edit: ${entry.main_section}`}>
+            <div className="w-full px-6 py-8">
+                <div className="max-w-4xl mx-auto">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-bold leading-tight" style={{color: '#192341'}}>
+                                Edit Progress Entry
+                            </h1>
+                            <p className="text-lg leading-relaxed text-gray-600 mt-1">
+                                Update details for: {entry.main_section}
+                            </p>
+                        </div>
+                        <Button 
+                            variant="outline"
+                            onClick={() => router.visit('/progress')}
+                            className="cursor-pointer hover:scale-105 transition-all duration-200"
+                            style={{height: '2.7em'}}
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Back to List
+                        </Button>
+                    </div>
+
+                    {/* Edit Form */}
+                    <Card className="bg-white rounded-xl shadow-sm" style={{borderTop: '0.5px solid #192341'}}>
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold">
+                                Entry Details
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Main Section *
+                                        </label>
+                                        <Input
+                                            type="text"
+                                            value={formData.main_section}
+                                            onChange={(e) => setFormData(prev => ({...prev, main_section: e.target.value}))}
+                                            required
+                                            placeholder="e.g., Welcome page"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Feature / Section
+                                        </label>
+                                        <Input
+                                            type="text"
+                                            value={formData.feature_section}
+                                            onChange={(e) => setFormData(prev => ({...prev, feature_section: e.target.value}))}
+                                            placeholder="e.g., Login button"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Conditions Applied
+                                    </label>
+                                    <textarea
+                                        value={formData.conditions_applied}
+                                        onChange={(e) => setFormData(prev => ({...prev, conditions_applied: e.target.value}))}
+                                        rows={3}
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Describe the conditions or requirements applied..."
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                    {['designed', 'testing', 'debug', 'confirm', 'uat'].map((field) => (
+                                        <div key={field}>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2 capitalize">
+                                                {field}
+                                            </label>
+                                            <select
+                                                value={formData[field as keyof FormData] as string}
+                                                onChange={(e) => setFormData(prev => ({...prev, [field]: e.target.value}))}
+                                                className="w-full h-9 rounded-md border border-gray-300 bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option value="PENDING">PENDING</option>
+                                                <option value="YES">YES</option>
+                                                <option value="NO">NO</option>
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Notes / Comments
+                                    </label>
+                                    <textarea
+                                        value={formData.notes_comments}
+                                        onChange={(e) => setFormData(prev => ({...prev, notes_comments: e.target.value}))}
+                                        rows={4}
+                                        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        placeholder="Additional notes or comments..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Page URL / Link
+                                    </label>
+                                    <Input
+                                        type="url"
+                                        value={formData.page_url_link}
+                                        onChange={(e) => setFormData(prev => ({...prev, page_url_link: e.target.value}))}
+                                        placeholder="https://example.com/page"
+                                    />
+                                </div>
+
+                                {/* Existing Screenshots */}
+                                {entry.screenshots_pictures && entry.screenshots_pictures.length > 0 && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-4">
+                                            Existing Screenshots
+                                        </label>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+                                            {entry.screenshots_pictures.map((screenshot, index) => (
+                                                <div key={index} className={`relative border border-gray-200 rounded-lg overflow-hidden ${isScreenshotRemoved(screenshot) ? 'opacity-50' : ''}`}>
+                                                    <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                                                        <img
+                                                            src={getScreenshotUrl(screenshot)}
+                                                            alt={`Screenshot ${index + 1}`}
+                                                            className="max-w-full max-h-full object-contain"
+                                                        />
+                                                    </div>
+                                                    <div className="p-2 flex items-center justify-between">
+                                                        <span className="text-xs text-gray-600 flex items-center gap-1">
+                                                            <FileImage className="h-3 w-3" />
+                                                            Screenshot {index + 1}
+                                                        </span>
+                                                        {!isScreenshotRemoved(screenshot) ? (
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => removeExistingScreenshot(screenshot)}
+                                                                className="cursor-pointer h-6 w-6 p-0 text-red-600 hover:text-red-800"
+                                                            >
+                                                                <X className="h-3 w-3" />
+                                                            </Button>
+                                                        ) : (
+                                                            <span className="text-xs text-red-600">Will be removed</span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* New Screenshots Upload */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Add New Screenshots / Pictures
+                                    </label>
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-4">
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileUpload}
+                                                multiple
+                                                accept="image/*"
+                                                className="hidden"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="cursor-pointer"
+                                            >
+                                                <Upload className="h-4 w-4 mr-2" />
+                                                Browse Files
+                                            </Button>
+                                            <span className="text-sm text-gray-600">
+                                                or paste screenshots (Ctrl+V)
+                                            </span>
+                                        </div>
+
+                                        {formData.screenshots.length > 0 && (
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                                {formData.screenshots.map((file, index) => (
+                                                    <div key={index} className="relative border border-gray-200 rounded-lg p-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-xs text-gray-600 truncate">
+                                                                {file.name}
+                                                            </span>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => removeNewScreenshot(index)}
+                                                                className="cursor-pointer h-6 w-6 p-0"
+                                                            >
+                                                                <X className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => router.visit('/progress')}
+                                        className="cursor-pointer"
+                                        style={{height: '2.7em'}}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button
+                                        type="submit"
+                                        disabled={isSubmitting}
+                                        className="text-white cursor-pointer"
+                                        style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
+                                    >
+                                        <Save className="h-4 w-4 mr-2" />
+                                        {isSubmitting ? 'Saving...' : 'Save Changes'}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </PublicLayout>
+    );
+}
