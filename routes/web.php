@@ -168,6 +168,18 @@ Route::middleware(['auth', 'verified', 'check.user.active'])->group(function () 
     Route::get('/subscriptions/usage', [App\Http\Controllers\SubscriptionController::class, 'usage'])->name('subscriptions.usage');
 });
 
+// SkillOnCall Progress Tracker routes (Public access)
+Route::resource('progress', App\Http\Controllers\SkillOnCallProgressController::class)->names([
+    'index' => 'progress.index',
+    'create' => 'progress.create', 
+    'store' => 'progress.store',
+    'show' => 'progress.show',
+    'edit' => 'progress.edit',
+    'update' => 'progress.update',
+    'destroy' => 'progress.destroy',
+]);
+Route::post('/progress/upload-screenshot', [App\Http\Controllers\SkillOnCallProgressController::class, 'uploadPastedScreenshot'])->name('progress.upload-screenshot');
+
 require __DIR__.'/admin.php';
 require __DIR__.'/employer.php';
 require __DIR__.'/worker.php';
