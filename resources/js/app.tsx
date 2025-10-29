@@ -3,9 +3,21 @@ import '../css/app.css';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
+import { router } from '@inertiajs/react';
 import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+// Set up CSRF token for Inertia requests
+router.on('before', (event) => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    if (csrfToken && event.detail.visit.method !== 'get') {
+        event.detail.visit.headers = {
+            ...event.detail.visit.headers,
+            'X-CSRF-TOKEN': csrfToken,
+        };
+    }
+});
 
 createInertiaApp({
     title: (title) => title ? `${title} - ${appName}` : appName,
