@@ -5,6 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { useSidebar } from '@/components/ui/sidebar';
 import { SubscriptionBadge } from '@/components/subscription-badge';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { useTranslations } from '@/hooks/useTranslations';
 import { cn } from '@/lib/utils';
 // Temporarily using simple route strings to fix import issues
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
@@ -14,10 +15,10 @@ import { Activity, Bell, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut
 import AppLogoIcon from './app-logo-icon';
 
 // Get role-based navigation items for mobile menu
-function getRoleBasedNavItems(userRole: string): NavItem[] {
+function getRoleBasedNavItems(userRole: string, t: (key: string) => string): NavItem[] {
     const baseItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: t('nav.dashboard'),
             href: '/dashboard',
             icon: Grid,
         },
@@ -89,32 +90,32 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Find Jobs',
+                title: t('nav.find_jobs'),
                 href: '/worker/jobs',
                 icon: Briefcase,
             },
             {
-                title: 'My Applications',
+                title: t('nav.my_applications'),
                 href: '/worker/applications',
                 icon: Users,
             },
             {
-                title: 'Messages',
+                title: t('nav.messages'),
                 href: '/worker/messages',
                 icon: MessageCircle,
             },
             {
-                title: 'Availability',
+                title: t('nav.availability'),
                 href: '/worker/availability',
                 icon: Clock,
             },
             {
-                title: 'My Profile',
+                title: t('nav.my_profile'),
                 href: '/worker/profile',
                 icon: Settings,
             },
             {
-                title: 'Subscription',
+                title: t('nav.subscription'),
                 href: '/subscriptions',
                 icon: Shield,
             },
@@ -128,8 +129,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const page = usePage<SharedData>();
     const { auth, subscription } = page.props;
     const { toggleSidebar } = useSidebar();
+    const { t } = useTranslations();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin');
+    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t);
 
     // Notification state - in real app, this would come from props/context/API
     const [notifications] = useState([

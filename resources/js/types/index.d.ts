@@ -34,6 +34,8 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     subscription: SubscriptionInfo | null;
+    locale: string;
+    translations: Record<string, any>;
     sidebarOpen: boolean;
     [key: string]: unknown;
 }

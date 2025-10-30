@@ -1,6 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { useTranslations } from '@/hooks/useTranslations';
 // Temporarily using simple route strings to fix import issues
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -19,10 +20,10 @@ import {
 import AppLogo from './app-logo';
 
 // Navigation items - role-based navigation
-function getNavItems(userRole: string): NavItem[] {
+function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
     const baseItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: t('nav.dashboard'),
             href: '/dashboard',
             icon: Grid,
         },
@@ -99,32 +100,32 @@ function getNavItems(userRole: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Find Jobs',
+                title: t('nav.find_jobs'),
                 href: '/worker/jobs',
                 icon: Briefcase,
             },
             {
-                title: 'My Applications',
+                title: t('nav.my_applications'),
                 href: '/worker/applications',
                 icon: Users,
             },
             {
-                title: 'Messages',
+                title: t('nav.messages'),
                 href: '/worker/messages',
                 icon: MessageCircle,
             },
             {
-                title: 'Availability',
+                title: t('nav.availability'),
                 href: '/worker/availability',
                 icon: Clock,
             },
             {
-                title: 'My Profile',
+                title: t('nav.my_profile'),
                 href: '/worker/profile',
                 icon: Settings,
             },
             {
-                title: 'Subscription',
+                title: t('nav.subscription'),
                 href: '/subscriptions',
                 icon: Shield,
             },
@@ -138,7 +139,8 @@ const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const navItems = getNavItems(auth.user.role || 'admin');
+    const { t } = useTranslations();
+    const navItems = getNavItems(auth.user.role || 'admin', t);
 
     return (
         <Sidebar variant="inset" className="hidden lg:flex w-64 min-w-64" style={{width: '256px', minWidth: '256px'}}>

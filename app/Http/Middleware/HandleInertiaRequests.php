@@ -87,6 +87,44 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // Get current locale and translations
+        $locale = $request->get('lang', session('locale', config('app.locale', 'en')));
+        app()->setLocale($locale);
+        
+        // Load translations for the current page
+        $translations = [];
+        try {
+            // Get current route to determine which translations to load
+            $routeName = $request->route()?->getName();
+            
+            if (str_contains($routeName ?? '', 'dashboard')) {
+                $translations = __('dashboard');
+            } elseif (str_contains($routeName ?? '', 'onboarding')) {
+                $translations = __('onboarding');
+            } elseif (str_contains($routeName ?? '', 'welcome')) {
+                $translations = __('welcome');
+            }
+            
+            // Always include common translations
+            if (is_array($translations)) {
+                $translations = array_merge($translations, [
+                    'common' => [
+                        'loading' => __('Loading...'),
+                        'save' => __('Save'),
+                        'cancel' => __('Cancel'),
+                        'edit' => __('Edit'),
+                        'delete' => __('Delete'),
+                        'confirm' => __('Confirm'),
+                        'yes' => __('Yes'),
+                        'no' => __('No'),
+                    ]
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to load translations: ' . $e->getMessage());
+            $translations = [];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -95,6 +133,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'subscription' => $subscription,
+            'locale' => $locale,
+            'translations' => $translations,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }
