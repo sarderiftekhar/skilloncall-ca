@@ -495,14 +495,21 @@ export default function LocationPreferencesStep({
                                 id="hourly_rate_min"
                                 type="number"
                                 value={formData.hourly_rate_min || ''}
-                                onChange={(e) => handleBasicFieldChange('hourly_rate_min', parseFloat(e.target.value) || 0)}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Restrict to 3 digits (max 999)
+                                    if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999)) {
+                                        handleBasicFieldChange('hourly_rate_min', parseFloat(value) || 0);
+                                    }
+                                }}
                                 className="mt-1"
                                 placeholder="20.00"
-                                min="15.00" // Minimum wage consideration
+                                min="5.00"
+                                max="999"
                                 step="0.50"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Your lowest acceptable rate
+                                Your lowest acceptable rate ($5 - $999)
                             </p>
                             {validationErrors.hourly_rate_min && (
                                 <p className="text-red-600 text-sm mt-1">{validationErrors.hourly_rate_min}</p>
@@ -517,14 +524,21 @@ export default function LocationPreferencesStep({
                                 id="hourly_rate_max"
                                 type="number"
                                 value={formData.hourly_rate_max || ''}
-                                onChange={(e) => handleBasicFieldChange('hourly_rate_max', parseFloat(e.target.value) || 0)}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    // Restrict to 4 digits (max 9999)
+                                    if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 9999)) {
+                                        handleBasicFieldChange('hourly_rate_max', parseFloat(value) || 0);
+                                    }
+                                }}
                                 className="mt-1"
                                 placeholder="35.00"
-                                min={formData.hourly_rate_min || 15}
+                                min={formData.hourly_rate_min || 5}
+                                max="9999"
                                 step="0.50"
                             />
                             <p className="text-xs text-gray-500 mt-1">
-                                Your ideal hourly rate
+                                Your ideal hourly rate ($5 - $9999)
                             </p>
                         </div>
                     </div>
