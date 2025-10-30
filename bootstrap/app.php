@@ -22,7 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
-
+        
+        // Ensure session and CSRF middleware are properly configured for web routes
+        $middleware->web(prepend: [
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+        ]);
+        
         $middleware->web(append: [
             LocaleFromQuery::class,
             HandleAppearance::class,
