@@ -281,7 +281,7 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
                                     <div key={experience.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
                                         {/* Header with remove button */}
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-medium text-gray-900">
+                                            <h4 className="font-medium" style={{ color: '#192341' }}>
                                                 Job #{index + 1}
                                                 {experience.is_current && (
                                                     <Badge className="ml-2 text-xs" style={{ backgroundColor: '#10B3D6', color: 'white' }}>
@@ -460,7 +460,7 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="font-medium text-gray-900">{experience.job_title}</h4>
+                                                        <h4 className="font-medium" style={{ color: '#192341' }}>{experience.job_title}</h4>
                                                         {experience.is_current && (
                                                             <Badge className="text-xs" style={{ backgroundColor: '#10B3D6', color: 'white' }}>
                                                                 Current
@@ -552,7 +552,7 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
                                     <div key={reference.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
                                         {/* Header */}
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-medium text-gray-900">Reference #{index + 1}</h4>
+                                            <h4 className="font-medium" style={{ color: '#192341' }}>Reference #{index + 1}</h4>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -691,7 +691,7 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
                                             <div className="flex items-start space-x-4">
                                                 <User className="w-5 h-5 text-gray-400 mt-1" />
                                                 <div className="flex-1">
-                                                    <h4 className="font-medium text-gray-900">{reference.reference_name}</h4>
+                                                    <h4 className="font-medium" style={{ color: '#192341' }}>{reference.reference_name}</h4>
                                                     <p className="text-sm text-gray-600">{reference.relationship?.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}</p>
                                                     {reference.company_name && (
                                                         <p className="text-sm text-gray-500">{reference.company_name}</p>

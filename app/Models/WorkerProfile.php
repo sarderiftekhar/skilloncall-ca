@@ -20,6 +20,7 @@ class WorkerProfile extends Model
         'profile_photo',
         'date_of_birth',
         'bio',
+        'overall_experience',
         'address_line_1',
         'address_line_2',
         'city',
