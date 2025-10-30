@@ -2,6 +2,9 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useSidebar } from '@/components/ui/sidebar';
+import { SubscriptionBadge } from '@/components/subscription-badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { cn } from '@/lib/utils';
 // Temporarily using simple route strings to fix import issues
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
@@ -123,7 +126,8 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
     const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { auth, subscription } = page.props;
+    const { toggleSidebar } = useSidebar();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin');
 
@@ -138,8 +142,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border/50 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sm:px-6">
-            {/* Mobile Menu Button - Left side */}
+            {/* Left side - Mobile Menu, Sidebar Toggle, Language Switcher and Breadcrumbs */}
             <div className="flex items-center gap-2">
+                {/* Mobile Menu Button - Only on mobile */}
                 <div className="lg:hidden">
                     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                         <SheetTrigger asChild>
@@ -248,11 +253,30 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         </SheetContent>
                     </Sheet>
                 </div>
+                
+                {/* Sidebar Toggle - Only on desktop */}
+                <div className="hidden lg:block">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 cursor-pointer hover:bg-gray-100"
+                        onClick={toggleSidebar}
+                    >
+                        <Menu className="h-5 w-5 text-gray-700" />
+                    </Button>
+                </div>
+                
+                {/* Language Switcher */}
+                <LanguageSwitcher variant="compact" />
+                
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
 
-            {/* Right side - Notification Bell and User Avatar */}
+            {/* Right side - Subscription Badge, Notification Bell and User Avatar */}
             <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
+                {/* Subscription Badge */}
+                <SubscriptionBadge subscription={subscription} />
+                
                 {/* Notification Bell - Hidden on mobile */}
                 <div className="relative hidden sm:block">
                     <Button

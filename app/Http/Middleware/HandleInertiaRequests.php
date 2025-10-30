@@ -67,6 +67,26 @@ class HandleInertiaRequests extends Middleware
             $user->display_name = $displayName;
         }
 
+        // Get current subscription info
+        $subscription = null;
+        if ($user) {
+            try {
+                $activeSubscription = $user->activeSubscription();
+                if ($activeSubscription) {
+                    $subscription = [
+                        'plan_name' => $activeSubscription->plan->name,
+                        'plan_type' => $activeSubscription->plan->type,
+                        'status' => $activeSubscription->status,
+                        'ends_at' => $activeSubscription->ends_at?->format('M j, Y'),
+                        'days_until_expiration' => $activeSubscription->daysUntilExpiration(),
+                        'is_cancelled' => $activeSubscription->isCancelled(),
+                    ];
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to load subscription in HandleInertiaRequests: ' . $e->getMessage());
+            }
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -74,6 +94,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user,
             ],
+            'subscription' => $subscription,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

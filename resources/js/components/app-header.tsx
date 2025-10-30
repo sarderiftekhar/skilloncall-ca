@@ -7,6 +7,8 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuT
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { SubscriptionBadge } from '@/components/subscription-badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
@@ -162,7 +164,7 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { auth, subscription } = page.props;
     const getInitials = useInitials();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin');
@@ -270,6 +272,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {/* Right Side Controls */}
                     <div className="ml-auto flex items-center gap-1 lg:gap-2">
+                        {/* Language Switcher */}
+                        <LanguageSwitcher variant="compact" />
+                        
+                        {/* Subscription Badge */}
+                        <SubscriptionBadge subscription={subscription} />
+                        
                         <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-9 lg:w-9 hidden sm:flex">
                             <Search className="h-4 w-4 lg:h-5 lg:w-5 opacity-80 hover:opacity-100" />
                         </Button>
