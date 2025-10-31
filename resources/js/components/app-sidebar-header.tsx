@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users } from 'react-feather';
+import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users, Search } from 'react-feather';
 import AppLogoIcon from './app-logo-icon';
 
 // Helper function to add language parameter to URLs
@@ -79,6 +79,16 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string, loca
                 title: 'Applications',
                 href: addLangParam('/employer/applications', locale),
                 icon: Users,
+            },
+            {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
             },
             {
                 title: 'Payments',

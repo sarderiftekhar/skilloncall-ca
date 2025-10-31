@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('global_cities', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('global_province_id')->constrained('global_provinces')->onDelete('cascade');
-        });
+        if (!Schema::hasTable('global_cities')) {
+            Schema::create('global_cities', function (Blueprint $table) {
+                $table->id();
+                $table->string('name');
+                $table->foreignId('global_province_id')->constrained('global_provinces')->onDelete('cascade');
+            });
+        }
     }
 
     /**

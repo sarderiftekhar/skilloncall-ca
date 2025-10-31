@@ -440,6 +440,7 @@ export default function WorkHistoryStep({
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                                                     {globalIndustries
                                                         .filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase()))
+                                                        .sort((a, b) => a.name.localeCompare(b.name))
                                                         .slice(0, 10)
                                                         .map((industry) => (
                                                             <div

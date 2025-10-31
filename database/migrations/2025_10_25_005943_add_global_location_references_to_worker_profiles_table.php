@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('worker_profiles', function (Blueprint $table) {
-            $table->foreignId('global_province_id')->nullable()->after('postal_code')->constrained('global_provinces')->onDelete('set null');
-            $table->foreignId('global_city_id')->nullable()->after('global_province_id')->constrained('global_cities')->onDelete('set null');
+            if (!Schema::hasColumn('worker_profiles', 'global_province_id')) {
+                $table->foreignId('global_province_id')->nullable()->after('postal_code')->constrained('global_provinces')->onDelete('set null');
+            }
+            if (!Schema::hasColumn('worker_profiles', 'global_city_id')) {
+                $table->foreignId('global_city_id')->nullable()->after('global_province_id')->constrained('global_cities')->onDelete('set null');
+            }
         });
     }
 

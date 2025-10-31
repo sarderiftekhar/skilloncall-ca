@@ -90,7 +90,7 @@ export default function BusinessInfoStep({
                                 <SelectValue placeholder={t('employer.steps.business_info.industry_placeholder', 'Select industry (optional)')} />
                             </SelectTrigger>
                             <SelectContent>
-                                {globalIndustries.map((industry) => (
+                                {[...globalIndustries].sort((a, b) => a.name.localeCompare(b.name)).map((industry) => (
                                     <SelectItem key={industry.id} value={String(industry.id)}>
                                         {industry.name}
                                     </SelectItem>

@@ -33,6 +33,10 @@ class Job extends Model
         'deadline',
         'required_skills',
         'location',
+        'province',
+        'city',
+        'global_province_id',
+        'global_city_id',
         'job_type',
         'experience_level',
         'status',
@@ -71,6 +75,22 @@ class Job extends Model
     public function applications(): HasMany
     {
         return $this->hasMany(Application::class);
+    }
+
+    /**
+     * Get the global province for the job.
+     */
+    public function globalProvince(): BelongsTo
+    {
+        return $this->belongsTo(GlobalProvince::class, 'global_province_id');
+    }
+
+    /**
+     * Get the global city for the job.
+     */
+    public function globalCity(): BelongsTo
+    {
+        return $this->belongsTo(GlobalCity::class, 'global_city_id');
     }
 
     /**

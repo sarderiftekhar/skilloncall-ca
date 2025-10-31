@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { type BreadcrumbItem } from '@/types';
 import { Briefcase, X, Plus } from 'react-feather';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -21,6 +21,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface CreateJobPageProps {
     categories: Record<string, string>;
+    globalSkills?: any[];
 }
 
 const JOB_TYPES = [
@@ -36,7 +37,7 @@ const EXPERIENCE_LEVELS = [
     { value: 'expert', label: 'Expert' },
 ];
 
-export default function CreateJobPage({ categories }: CreateJobPageProps) {
+export default function CreateJobPage({ categories, globalSkills = [] }: CreateJobPageProps) {
     const { t, locale } = useTranslations();
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
@@ -45,13 +46,120 @@ export default function CreateJobPage({ categories }: CreateJobPageProps) {
         budget: '',
         deadline: '',
         required_skills: [] as string[],
-        location: '',
+        province: '',
+        city: '',
+        global_province_id: null as number | null,
+        global_city_id: null as number | null,
         job_type: '',
         experience_level: '',
     });
 
-    const [skillInput, setSkillInput] = useState('');
+    const [skillSearch, setSkillSearch] = useState('');
+    const [showSkillSuggestions, setShowSkillSuggestions] = useState<boolean>(false);
+    const [selectedSkillId, setSelectedSkillId] = useState<string>('');
+    const skillInputRef = useRef<HTMLDivElement>(null);
     const [firstErrorField, setFirstErrorField] = useState<string | null>(null);
+    const [citySearch, setCitySearch] = useState<string>('');
+    const [showCitySuggestions, setShowCitySuggestions] = useState<boolean>(false);
+    const [cities, setCities] = useState<Array<{ id: number; name: string; global_province_id: number }>>([]);
+    const [loadingCities, setLoadingCities] = useState<boolean>(false);
+    const [citiesLoaded, setCitiesLoaded] = useState<boolean>(false);
+    const [previousProvince, setPreviousProvince] = useState<string | null>(null);
+    const cityInputRef = useRef<HTMLDivElement>(null);
+
+    const CANADIAN_PROVINCES = [
+        { value: 'AB', label: t('provinces.AB', 'Alberta') },
+        { value: 'BC', label: t('provinces.BC', 'British Columbia') },
+        { value: 'MB', label: t('provinces.MB', 'Manitoba') },
+        { value: 'NB', label: t('provinces.NB', 'New Brunswick') },
+        { value: 'NL', label: t('provinces.NL', 'Newfoundland and Labrador') },
+        { value: 'NS', label: t('provinces.NS', 'Nova Scotia') },
+        { value: 'NT', label: t('provinces.NT', 'Northwest Territories') },
+        { value: 'NU', label: t('provinces.NU', 'Nunavut') },
+        { value: 'ON', label: t('provinces.ON', 'Ontario') },
+        { value: 'PE', label: t('provinces.PE', 'Prince Edward Island') },
+        { value: 'QC', label: t('provinces.QC', 'Quebec') },
+        { value: 'SK', label: t('provinces.SK', 'Saskatchewan') },
+        { value: 'YT', label: t('provinces.YT', 'Yukon') },
+    ];
+
+    // Fetch cities from API only when user interacts with city field
+    const fetchCities = async () => {
+        if (!data.province) {
+            return;
+        }
+
+        setLoadingCities(true);
+        try {
+            // First, fetch province to get global_province_id
+            const provinceResponse = await fetch(`/employer/api/provinces`);
+            if (provinceResponse.ok) {
+                const provinces = await provinceResponse.json();
+                const selectedProvince = provinces.find((p: { code: string }) => p.code === data.province);
+                if (selectedProvince) {
+                    setData('global_province_id', selectedProvince.id);
+                }
+            }
+
+            // Then fetch cities
+            const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
+            const response = await fetch(`/employer/api/provinces/code/${data.province}/cities${searchParam}`);
+            if (response.ok) {
+                const citiesData = await response.json();
+                setCities(citiesData);
+                setCitiesLoaded(true);
+            }
+        } catch (error) {
+            console.error('Failed to fetch cities:', error);
+        } finally {
+            setLoadingCities(false);
+        }
+    };
+
+    // Debounce city search when user types
+    useEffect(() => {
+        if (!data.province || !citiesLoaded || !citySearch) {
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            fetchCities();
+        }, 300);
+
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [citySearch]);
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (cityInputRef.current && !cityInputRef.current.contains(event.target as Node)) {
+                setShowCitySuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Clear city when province changes
+    useEffect(() => {
+        if (previousProvince !== null && data.province !== previousProvince) {
+            setData('city', '');
+            setData('global_city_id', null);
+            setData('global_province_id', null);
+            setCitySearch('');
+            setCities([]);
+            setCitiesLoaded(false);
+        }
+        setPreviousProvince(data.province);
+    }, [data.province]);
+
+    // Initialize citySearch with the selected city name
+    useEffect(() => {
+        if (data.city && !citySearch) {
+            setCitySearch(data.city);
+        }
+    }, [data.city, citySearch]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -74,10 +182,61 @@ export default function CreateJobPage({ categories }: CreateJobPageProps) {
         });
     };
 
+    // Close skill suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (skillInputRef.current && !skillInputRef.current.contains(event.target as Node)) {
+                setShowSkillSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Group skills by category for easier selection
+    const skillsByCategory = globalSkills.reduce((acc: any, skill: any) => {
+        if (!acc[skill.category]) {
+            acc[skill.category] = [];
+        }
+        acc[skill.category].push(skill);
+        return acc;
+    }, {});
+
+    // Filter skills based on search
+    const filteredSkills = globalSkills.filter(skill => 
+        skill.name.toLowerCase().includes(skillSearch.toLowerCase()) &&
+        !data.required_skills.includes(skill.name)
+    ).slice(0, 15); // Show max 15 results
+
+    // Group filtered skills by category
+    const filteredSkillsByCategory = filteredSkills.reduce((acc: any, skill: any) => {
+        if (!acc[skill.category]) {
+            acc[skill.category] = [];
+        }
+        acc[skill.category].push(skill);
+        return acc;
+    }, {});
+
     const addSkill = () => {
-        if (skillInput.trim() && !data.required_skills.includes(skillInput.trim())) {
-            setData('required_skills', [...data.required_skills, skillInput.trim()]);
-            setSkillInput('');
+        let skillToAdd = '';
+        
+        // If a skill is selected from dropdown, use that
+        if (selectedSkillId) {
+            const skill = globalSkills.find(s => s.id.toString() === selectedSkillId);
+            if (skill && !data.required_skills.includes(skill.name)) {
+                skillToAdd = skill.name;
+            }
+        } 
+        // Otherwise, use the typed text
+        else if (skillSearch.trim() && !data.required_skills.includes(skillSearch.trim())) {
+            skillToAdd = skillSearch.trim();
+        }
+
+        if (skillToAdd) {
+            setData('required_skills', [...data.required_skills, skillToAdd]);
+            setSkillSearch('');
+            setSelectedSkillId('');
+            setShowSkillSuggestions(false);
         }
     };
 
@@ -287,44 +446,215 @@ export default function CreateJobPage({ categories }: CreateJobPageProps) {
                                     </div>
                                 </div>
 
-                                {/* Location */}
-                                <div id="location">
-                                    <Label htmlFor="location" className="text-sm font-medium">
-                                        {t('jobs.create.location_label', 'Location')} 
-                                        <span className="text-gray-500 ml-1">({t('jobs.create.optional', 'Optional')})</span>
-                                    </Label>
-                                    <Input
-                                        id="location"
-                                        type="text"
-                                        value={data.location}
-                                        onChange={(e) => setData('location', e.target.value)}
-                                        placeholder={t('jobs.create.location_placeholder', 'e.g., Toronto, ON')}
-                                        className={`mt-1 ${errors.location ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
-                                    />
-                                    {errors.location && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.location}</p>
-                                    )}
+                                {/* Province and City */}
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div id="province">
+                                        <Label htmlFor="province" className="text-sm font-medium">
+                                            {t('jobs.create.province_label', 'Province')} <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Select
+                                            value={data.province}
+                                            onValueChange={(value) => setData('province', value)}
+                                        >
+                                            <SelectTrigger className={`mt-1 cursor-pointer ${errors.province ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}>
+                                                <SelectValue placeholder={t('jobs.create.province_placeholder', 'Select province')} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {CANADIAN_PROVINCES.map((province) => (
+                                                    <SelectItem key={province.value} value={province.value}>
+                                                        {province.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.province && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.province}</p>
+                                        )}
+                                    </div>
+
+                                    <div ref={cityInputRef} id="city" className="relative">
+                                        <Label htmlFor="city" className="text-sm font-medium">
+                                            {t('jobs.create.city_label', 'City')} <span className="text-red-500">*</span>
+                                        </Label>
+                                        <div className="relative mt-1">
+                                            <Input
+                                                id="city"
+                                                type="text"
+                                                value={citySearch || data.city || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setCitySearch(value);
+                                                    setShowCitySuggestions(true);
+                                                    if (!value) {
+                                                        setData('city', '');
+                                                        setData('global_city_id', null);
+                                                    }
+                                                }}
+                                                onFocus={() => {
+                                                    if (data.province && !citiesLoaded) {
+                                                        fetchCities();
+                                                    }
+                                                    setShowCitySuggestions(true);
+                                                }}
+                                                placeholder={
+                                                    data.province 
+                                                        ? t('jobs.create.city_placeholder', 'Type to search cities...') 
+                                                        : t('jobs.create.city_placeholder_disabled', 'Select a province first')
+                                                }
+                                                className={`${errors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
+                                                disabled={!data.province}
+                                                style={{ cursor: data.province ? 'text' : 'not-allowed' }}
+                                                required
+                                            />
+
+                                            {/* Suggestions dropdown */}
+                                            {showCitySuggestions && cities.length > 0 && (
+                                                <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                                                    {cities.map((city) => (
+                                                        <div
+                                                            key={city.id}
+                                                            className="cursor-pointer px-3 py-2 font-medium text-gray-900 hover:bg-gray-100"
+                                                            onClick={() => {
+                                                                setData('city', city.name);
+                                                                setData('global_city_id', city.id);
+                                                                setCitySearch(city.name);
+                                                                setShowCitySuggestions(false);
+                                                            }}
+                                                        >
+                                                            {city.name}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* Loading message */}
+                                            {showCitySuggestions && loadingCities && (
+                                                <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
+                                                    {t('jobs.create.loading_cities', 'Loading cities...')}
+                                                </div>
+                                            )}
+
+                                            {/* No results message */}
+                                            {showCitySuggestions && !loadingCities && citySearch && cities.length === 0 && (
+                                                <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
+                                                    {t('jobs.create.no_cities', 'No cities found matching')}{' '}"{citySearch}"
+                                                </div>
+                                            )}
+                                        </div>
+                                        {!data.province && (
+                                            <p className="mt-1 text-sm text-gray-500">
+                                                {t('jobs.create.city_placeholder_disabled', 'Select a province first')}
+                                            </p>
+                                        )}
+                                        {errors.city && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.city}</p>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Required Skills */}
                                 <div id="required_skills">
                                     <Label className="text-sm font-medium">
-                                        {t('jobs.create.skills_label', 'Required Skills')} 
-                                        <span className="text-gray-500 ml-1">({t('jobs.create.optional', 'Optional')})</span>
+                                        {t('jobs.create.skills_label', 'Required Skills')} <span className="text-red-500">*</span>
                                     </Label>
                                     <div className="mt-1 flex gap-2">
-                                        <Input
-                                            type="text"
-                                            value={skillInput}
-                                            onChange={(e) => setSkillInput(e.target.value)}
-                                            onKeyPress={handleKeyPress}
-                                            placeholder={t('jobs.create.skills_placeholder', 'Enter a skill and press Enter')}
-                                            className="flex-1"
-                                        />
+                                        <div className="flex-1 relative" ref={skillInputRef}>
+                                            <div className="relative">
+                                                <Input
+                                                    type="text"
+                                                    value={skillSearch}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        setSkillSearch(value);
+                                                        setShowSkillSuggestions(true);
+                                                        setSelectedSkillId('');
+                                                    }}
+                                                    onFocus={() => setShowSkillSuggestions(true)}
+                                                    onKeyPress={handleKeyPress}
+                                                    placeholder={t('jobs.create.skills_placeholder', 'Type to search skills or select from list...')}
+                                                    className="w-full"
+                                                />
+                                                
+                                                {/* Suggestions dropdown */}
+                                                {showSkillSuggestions && (skillSearch.length > 0 ? filteredSkills.length > 0 : globalSkills.length > 0) && (
+                                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto">
+                                                        {skillSearch.length === 0 ? (
+                                                            /* Show all skills grouped by category when no search */
+                                                            Object.entries(skillsByCategory).map(([category, skills]) => (
+                                                                <div key={category}>
+                                                                    <div className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-50 sticky top-0">
+                                                                        {category}
+                                                                    </div>
+                                                                    {(skills as any[]).map((skill) => {
+                                                                        const isDisabled = data.required_skills.includes(skill.name);
+                                                                        return (
+                                                                            <div
+                                                                                key={skill.id}
+                                                                                className={`px-3 py-2 text-sm text-gray-900 font-medium ${
+                                                                                    isDisabled 
+                                                                                        ? 'opacity-50 cursor-not-allowed bg-gray-50' 
+                                                                                        : 'cursor-pointer hover:bg-gray-100'
+                                                                                }`}
+                                                                                onClick={() => {
+                                                                                    if (!isDisabled) {
+                                                                                        setSelectedSkillId(skill.id.toString());
+                                                                                        setSkillSearch(skill.name);
+                                                                                        setShowSkillSuggestions(false);
+                                                                                    }
+                                                                                }}
+                                                                            >
+                                                                                {skill.name}
+                                                                            </div>
+                                                                        );
+                                                                    })}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            /* Show filtered skills grouped by category when searching */
+                                                            Object.entries(filteredSkillsByCategory).map(([category, skills]) => (
+                                                                <div key={category}>
+                                                                    <div className="px-3 py-2 text-sm font-semibold text-gray-700 bg-gray-50 sticky top-0">
+                                                                        {category}
+                                                                    </div>
+                                                                    {(skills as any[]).map((skill) => (
+                                                                        <div
+                                                                            key={skill.id}
+                                                                            className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900 font-medium"
+                                                                            onClick={() => {
+                                                                                setSelectedSkillId(skill.id.toString());
+                                                                                setSkillSearch(skill.name);
+                                                                                setShowSkillSuggestions(false);
+                                                                            }}
+                                                                        >
+                                                                            {skill.name}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            ))
+                                                        )}
+                                                    </div>
+                                                )}
+                                                
+                                                {/* No results message with option to add custom skill */}
+                                                {showSkillSuggestions && skillSearch && filteredSkills.length === 0 && (
+                                                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+                                                        <div className="p-3">
+                                                            <p className="text-sm text-gray-500 mb-2">
+                                                                {t('jobs.create.no_skills_found', 'No skills found matching')} "{skillSearch}"
+                                                            </p>
+                                                            <p className="text-xs text-gray-400">
+                                                                {t('jobs.create.add_custom_skill_hint', 'Press Enter or click Add to add as custom skill')}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                         <Button
                                             type="button"
                                             onClick={addSkill}
-                                            className="cursor-pointer"
+                                            disabled={!selectedSkillId && !skillSearch.trim()}
+                                            className="cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                                         >
                                             <Plus className="h-4 w-4" />

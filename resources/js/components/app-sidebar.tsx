@@ -16,7 +16,8 @@ import {
     MessageCircle,
     Calendar,
     Clock,
-    Bookmark
+    Bookmark,
+    Search
 } from 'react-feather';
 import AppLogo from './app-logo';
 
@@ -90,6 +91,16 @@ function getNavItems(userRole: string, t: (key: string) => string, locale: strin
                 title: 'Applications',
                 href: addLangParam('/employer/applications', locale),
                 icon: Users,
+            },
+            {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
             },
             {
                 title: 'Payments',

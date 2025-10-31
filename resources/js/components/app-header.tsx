@@ -122,6 +122,16 @@ function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
                 icon: Users,
             },
             {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
+            },
+            {
                 title: 'Payments',
                 href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,

@@ -49,6 +49,7 @@ class EmployerJobController extends Controller
 
         return Inertia::render('employer/jobs/create', [
             'categories' => $categories,
+            'globalSkills' => \App\Models\GlobalSkill::active()->ordered()->get(),
         ]);
     }
 
@@ -89,6 +90,7 @@ class EmployerJobController extends Controller
         return Inertia::render('employer/jobs/edit', [
             'job' => $job,
             'categories' => $categories,
+            'globalSkills' => \App\Models\GlobalSkill::active()->ordered()->get(),
         ]);
     }
 
