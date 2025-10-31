@@ -108,7 +108,11 @@ class HandleInertiaRequests extends Middleware
             // Load dashboard translations for all worker pages since they share navigation
             if (str_contains($routeName ?? '', 'dashboard') || 
                 str_contains($currentPath, 'worker/') || 
-                str_contains($routeName ?? '', 'worker.')) {
+                str_contains($routeName ?? '', 'worker.') ||
+                str_contains($currentPath, 'subscriptions') ||
+                str_contains($currentPath, 'settings/') ||
+                str_contains($currentPath, 'admin/') ||
+                str_contains($currentPath, 'employer/')) {
                 $translations = __('dashboard');
             } elseif (str_contains($routeName ?? '', 'onboarding')) {
                 $translations = __('onboarding');
