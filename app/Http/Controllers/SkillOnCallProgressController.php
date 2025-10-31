@@ -11,10 +11,17 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Services\ImageCompressionService;
 
 class SkillOnCallProgressController extends Controller
 {
     protected string $project = 'skilloncall';
+    protected ImageCompressionService $imageService;
+
+    public function __construct(ImageCompressionService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
 
     /**
      * Display a listing of the resource.
@@ -80,8 +87,8 @@ class SkillOnCallProgressController extends Controller
             'uat' => ['nullable', Rule::in(['YES', 'NO', 'PENDING'])],
             'notes_comments' => ['nullable', 'string'],
             'page_url_link' => ['nullable', 'url'],
-            'screenshots' => ['nullable', 'array'],
-            'screenshots.*' => ['file', 'image', 'max:10240'], // 10MB max per image
+            'screenshots' => ['nullable', 'array', 'max:5'], // Limit to 5 screenshots
+            'screenshots.*' => ['file', 'image', 'max:5120', 'mimes:jpeg,jpg,png,gif'], // 5MB max per image, specific formats
         ]);
 
         if ($validator->fails()) {
@@ -98,14 +105,44 @@ class SkillOnCallProgressController extends Controller
         $data = $validator->validated();
         $data['project'] = $this->project;
 
-        // Handle screenshot uploads
+        // Handle screenshot uploads with timeout protection
         if ($request->hasFile('screenshots')) {
-            $screenshots = [];
-            foreach ($request->file('screenshots') as $file) {
-                $path = $file->store('progress-screenshots', 'public');
-                $screenshots[] = $path;
+            try {
+                // Extend execution time for file uploads
+                set_time_limit(300); // 5 minutes
+                
+                $screenshots = [];
+                $totalSize = 0;
+                $maxTotalSize = 25 * 1024 * 1024; // 25MB total limit
+                
+                foreach ($request->file('screenshots') as $index => $file) {
+                    // Check individual file size
+                    if ($file->getSize() > 5 * 1024 * 1024) { // 5MB limit
+                        return $this->handleValidationError($request, "Screenshot " . ($index + 1) . " is too large. Maximum size is 5MB.");
+                    }
+                    
+                    $totalSize += $file->getSize();
+                    if ($totalSize > $maxTotalSize) {
+                        return $this->handleValidationError($request, "Total screenshots size exceeds 25MB limit.");
+                    }
+                    
+                    // Use image compression if available, fallback to direct storage
+                    if ($this->imageService->isAvailable()) {
+                        $path = $this->imageService->compressScreenshot($file, 'progress-screenshots');
+                    } else {
+                        $path = $file->store('progress-screenshots', 'public');
+                    }
+                    $screenshots[] = $path;
+                }
+                $data['screenshots_pictures'] = $screenshots;
+            } catch (\Exception $e) {
+                \Log::error('Screenshot upload failed', [
+                    'error' => $e->getMessage(),
+                    'user_agent' => $request->userAgent()
+                ]);
+                
+                return $this->handleValidationError($request, 'Screenshot upload failed. Please try again or use smaller images.');
             }
-            $data['screenshots_pictures'] = $screenshots;
         }
 
         $entry = ProgressEntry::create($data);
@@ -277,35 +314,124 @@ class SkillOnCallProgressController extends Controller
             ], 422);
         }
 
-        $imageData = $request->image;
-        
-        // Remove data:image/png;base64, or similar prefix
-        if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
-            $imageData = substr($imageData, strpos($imageData, ',') + 1);
-            $type = strtolower($type[1]); // jpg, png, gif
+        try {
+            // Extend execution time for image processing
+            set_time_limit(120); // 2 minutes
             
-            if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
-                return response()->json(['message' => 'Invalid image type'], 422);
+            $imageData = $request->image;
+            
+            // Validate base64 string size before processing (prevent memory issues)
+            $base64Size = strlen($imageData);
+            $maxBase64Size = 7 * 1024 * 1024; // ~5MB when decoded (base64 is ~33% larger)
+            
+            if ($base64Size > $maxBase64Size) {
+                return response()->json([
+                    'message' => 'Image is too large. Maximum size is 5MB.'
+                ], 422);
             }
-        } else {
-            return response()->json(['message' => 'Invalid image format'], 422);
+            
+            // Remove data:image/png;base64, or similar prefix
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, gif
+                
+                if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
+                    return response()->json(['message' => 'Invalid image type. Supported: JPG, PNG, GIF'], 422);
+                }
+            } else {
+                return response()->json(['message' => 'Invalid image format'], 422);
+            }
+
+            // Check memory availability before decoding
+            $memoryUsage = memory_get_usage(true);
+            $memoryLimit = $this->getMemoryLimitInBytes();
+            
+            if ($memoryLimit > 0 && ($memoryUsage + $base64Size) > ($memoryLimit * 0.8)) {
+                return response()->json([
+                    'message' => 'Insufficient memory to process image. Please use a smaller image.'
+                ], 422);
+            }
+
+            $decodedImage = base64_decode($imageData);
+            
+            if ($decodedImage === false) {
+                return response()->json(['message' => 'Failed to decode image'], 422);
+            }
+            
+            // Validate decoded image size
+            $decodedSize = strlen($decodedImage);
+            $maxSize = 5 * 1024 * 1024; // 5MB
+            
+            if ($decodedSize > $maxSize) {
+                return response()->json([
+                    'message' => 'Decoded image is too large. Maximum size is 5MB.'
+                ], 422);
+            }
+
+            // Use image compression for base64 images if available
+            if ($this->imageService->isAvailable()) {
+                $path = $this->imageService->compressBase64Image($request->image, 'progress-screenshots');
+            } else {
+                $filename = ($request->filename ?: 'pasted-screenshot-' . time()) . '.' . $type;
+                $path = 'progress-screenshots/' . $filename;
+                Storage::disk('public')->put($path, $decodedImage);
+            }
+
+            return response()->json([
+                'message' => 'Screenshot uploaded successfully',
+                'path' => $path,
+                'url' => Storage::disk('public')->url($path)
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Base64 screenshot upload failed', [
+                'error' => $e->getMessage(),
+                'memory_usage' => memory_get_usage(true),
+                'user_agent' => $request->userAgent()
+            ]);
+            
+            return response()->json([
+                'message' => 'Screenshot upload failed. Please try again with a smaller image.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
         }
-
-        $imageData = base64_decode($imageData);
+    }
+    
+    /**
+     * Get PHP memory limit in bytes
+     */
+    private function getMemoryLimitInBytes(): int
+    {
+        $memoryLimit = ini_get('memory_limit');
         
-        if ($imageData === false) {
-            return response()->json(['message' => 'Failed to decode image'], 422);
+        if ($memoryLimit === '-1') {
+            return -1; // No limit
         }
-
-        $filename = ($request->filename ?: 'pasted-screenshot-' . time()) . '.' . $type;
-        $path = 'progress-screenshots/' . $filename;
         
-        Storage::disk('public')->put($path, $imageData);
-
-        return response()->json([
-            'message' => 'Screenshot uploaded successfully',
-            'path' => $path,
-            'url' => Storage::disk('public')->url($path)
-        ]);
+        $value = (int) $memoryLimit;
+        $unit = strtolower(substr($memoryLimit, -1));
+        
+        switch ($unit) {
+            case 'g': $value *= 1024;
+            case 'm': $value *= 1024;
+            case 'k': $value *= 1024;
+        }
+        
+        return $value;
+    }
+    
+    /**
+     * Handle validation error response
+     */
+    private function handleValidationError(Request $request, string $message)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => ['screenshots' => [$message]]
+            ], 422);
+        }
+        
+        return back()->withErrors(['screenshots' => $message])->withInput();
     }
 }

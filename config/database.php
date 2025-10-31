@@ -37,9 +37,12 @@ return [
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
             'prefix' => '',
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
-            'busy_timeout' => null,
+            'busy_timeout' => env('DB_BUSY_TIMEOUT', 30000), // 30 seconds in milliseconds
             'journal_mode' => null,
             'synchronous' => null,
+            'options' => [
+                PDO::ATTR_TIMEOUT => env('DB_TIMEOUT', 10), // 10 second timeout
+            ],
         ],
 
         'mysql' => [
@@ -59,6 +62,8 @@ return [
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::ATTR_TIMEOUT => env('DB_TIMEOUT', 10), // 10 second connection timeout
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET SESSION wait_timeout=30', // 30 second session timeout
             ]) : [],
         ],
 

@@ -11,6 +11,7 @@ use App\Models\EmployeeProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
@@ -119,24 +120,61 @@ class EmployeeProfileController extends Controller
                 $this->updatePortfolioAndCertifications($profile, $data, $request);
             }
 
-            // Handle profile photo upload first (if present)
+            // Handle profile photo upload first (if present) with validation and timeout protection
             if ($request->hasFile('profile_photo') && $request->file('profile_photo') instanceof \Illuminate\Http\UploadedFile) {
-                $file = $request->file('profile_photo');
-                Log::info('Profile photo upload attempt', [
-                    'user_id' => $user->id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'file_size' => $file->getSize(),
-                    'mime_type' => $file->getMimeType(),
-                ]);
-                
-                $path = $file->store('profile_photos', 'public');
-                $profile->profile_photo = $path;
-                $profile->save();
-                
-                Log::info('Profile photo uploaded successfully', [
-                    'user_id' => $user->id,
-                    'stored_path' => $path,
-                ]);
+                try {
+                    $file = $request->file('profile_photo');
+                    
+                    // Validate file size (5MB max)
+                    $maxSize = 5 * 1024 * 1024; // 5MB
+                    if ($file->getSize() > $maxSize) {
+                        return redirect()->back()->withErrors(['profile_photo' => 'Profile photo must be less than 5MB.'])->withInput();
+                    }
+                    
+                    // Validate file type
+                    $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                    if (!in_array($file->getMimeType(), $allowedMimes)) {
+                        return redirect()->back()->withErrors(['profile_photo' => 'Profile photo must be a valid image (JPEG, PNG, GIF).'])->withInput();
+                    }
+                    
+                    // Extend execution time for file upload
+                    set_time_limit(120); // 2 minutes
+                    
+                    Log::info('Profile photo upload attempt', [
+                        'user_id' => $user->id,
+                        'file_name' => $file->getClientOriginalName(),
+                        'file_size' => $file->getSize(),
+                        'mime_type' => $file->getMimeType(),
+                    ]);
+                    
+                    if ($file->isValid()) {
+                        // Delete old profile photo if it exists
+                        if ($profile->profile_photo) {
+                            Storage::disk('public')->delete($profile->profile_photo);
+                        }
+                        
+                        $path = $file->store('profile_photos', 'public');
+                        $profile->profile_photo = $path;
+                        $profile->save();
+                        
+                        Log::info('Profile photo uploaded successfully', [
+                            'user_id' => $user->id,
+                            'stored_path' => $path,
+                        ]);
+                    } else {
+                        Log::error('Profile photo upload failed - file not valid', [
+                            'user_id' => $user->id,
+                            'file_name' => $file->getClientOriginalName(),
+                        ]);
+                        return redirect()->back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again.'])->withInput();
+                    }
+                } catch (\Exception $e) {
+                    Log::error('Profile photo upload exception', [
+                        'user_id' => $user->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                    return redirect()->back()->withErrors(['profile_photo' => 'Profile photo upload failed. Please try again or use a smaller image.'])->withInput();
+                }
             }
 
             // Handle regular profile field updates
@@ -258,41 +296,85 @@ class EmployeeProfileController extends Controller
 
     private function updatePortfolioAndCertifications(EmployeeProfile $profile, array $data, Request $request)
     {
-        // Handle portfolio photo uploads
+        // Handle portfolio photo uploads with validation and timeout protection
         $portfolioPhotos = [];
         $portfolioIndex = 0;
+        $maxPortfolioFiles = 5; // Limit portfolio files
+        $totalSize = 0;
+        $maxTotalSize = 25 * 1024 * 1024; // 25MB total
+        $maxFileSize = 5 * 1024 * 1024; // 5MB per file
         
-        // Look for portfolio_photos[n][file] pattern in request
-        // Laravel converts portfolio_photos[0][file] to portfolio_photos.0.file internally
-        while ($request->hasFile("portfolio_photos.{$portfolioIndex}.file")) {
-            $file = $request->file("portfolio_photos.{$portfolioIndex}.file");
-            $caption = $request->input("portfolio_photos.{$portfolioIndex}.caption", '');
+        try {
+            // Extend execution time for multiple file uploads
+            set_time_limit(300); // 5 minutes
             
-            Log::info('Found portfolio file', [
-                'index' => $portfolioIndex,
-                'file_key' => "portfolio_photos.{$portfolioIndex}.file",
-                'caption_key' => "portfolio_photos.{$portfolioIndex}.caption",
-                'file_name' => $file ? $file->getClientOriginalName() : 'null',
-                'caption' => $caption,
-            ]);
-            
-            if ($file && $file->isValid()) {
-                $path = $file->store('portfolio_photos', 'public');
+            // Look for portfolio_photos[n][file] pattern in request
+            // Laravel converts portfolio_photos[0][file] to portfolio_photos.0.file internally
+            while ($request->hasFile("portfolio_photos.{$portfolioIndex}.file") && $portfolioIndex < $maxPortfolioFiles) {
+                $file = $request->file("portfolio_photos.{$portfolioIndex}.file");
+                $caption = $request->input("portfolio_photos.{$portfolioIndex}.caption", '');
                 
-                $portfolioPhotos[] = [
-                    'path' => $path,
-                    'caption' => $caption,
-                ];
+                // Validate individual file
+                if ($file->getSize() > $maxFileSize) {
+                    return back()->withErrors(['portfolio_photos' => "Portfolio photo " . ($portfolioIndex + 1) . " is too large. Maximum size is 5MB."])->withInput();
+                }
                 
-                Log::info('Portfolio photo uploaded', [
-                    'user_id' => $profile->user_id,
-                    'file_name' => $file->getClientOriginalName(),
-                    'stored_path' => $path,
+                $totalSize += $file->getSize();
+                if ($totalSize > $maxTotalSize) {
+                    return back()->withErrors(['portfolio_photos' => "Total portfolio photos size exceeds 25MB limit."])->withInput();
+                }
+                
+                // Validate file type
+                $allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!in_array($file->getMimeType(), $allowedMimes)) {
+                    return back()->withErrors(['portfolio_photos' => "Portfolio photo " . ($portfolioIndex + 1) . " must be a valid image (JPEG, PNG, GIF)."])->withInput();
+                }
+                
+                Log::info('Found portfolio file', [
+                    'index' => $portfolioIndex,
+                    'file_key' => "portfolio_photos.{$portfolioIndex}.file",
+                    'caption_key' => "portfolio_photos.{$portfolioIndex}.caption",
+                    'file_name' => $file ? $file->getClientOriginalName() : 'null',
+                    'file_size' => $file->getSize(),
                     'caption' => $caption,
                 ]);
+                
+                if ($file && $file->isValid()) {
+                    $path = $file->store('portfolio_photos', 'public');
+                    
+                    $portfolioPhotos[] = [
+                        'path' => $path,
+                        'caption' => $caption,
+                    ];
+                    
+                    Log::info('Portfolio photo uploaded', [
+                        'user_id' => $profile->user_id,
+                        'file_name' => $file->getClientOriginalName(),
+                        'stored_path' => $path,
+                        'caption' => $caption,
+                    ]);
+                } else {
+                    Log::error('Invalid portfolio file', [
+                        'index' => $portfolioIndex,
+                        'user_id' => $profile->user_id,
+                    ]);
+                    return back()->withErrors(['portfolio_photos' => "Portfolio photo " . ($portfolioIndex + 1) . " is invalid."])->withInput();
+                }
+                
+                $portfolioIndex++;
             }
             
-            $portfolioIndex++;
+            if ($portfolioIndex >= $maxPortfolioFiles && $request->hasFile("portfolio_photos.{$portfolioIndex}.file")) {
+                return back()->withErrors(['portfolio_photos' => "Maximum of {$maxPortfolioFiles} portfolio photos allowed."])->withInput();
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Portfolio photos upload exception', [
+                'user_id' => $profile->user_id,
+                'error' => $e->getMessage(),
+                'files_processed' => $portfolioIndex,
+            ]);
+            return back()->withErrors(['portfolio_photos' => 'Portfolio photos upload failed. Please try again or use smaller images.'])->withInput();
         }
         
         // Update portfolio photos if any were uploaded

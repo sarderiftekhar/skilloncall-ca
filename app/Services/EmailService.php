@@ -4,81 +4,74 @@ namespace App\Services;
 
 use Resend\Laravel\Facades\Resend;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\SendEmailJob;
 
 class EmailService
 {
     /**
-     * Send contact form email
+     * Send contact form email (queued for better performance)
      */
     public function sendContactFormEmail(array $data): bool
     {
         try {
-            $result = Resend::emails()->send([
-                'from' => 'SkillOnCall <onboarding@resend.dev>',
-                'to' => [$data['email']], // Send to the email provided in data
-                'subject' => '🎉 SkillOnCall.ca Subscription System - Successfully Implemented!',
-                'html' => $this->buildContactEmailHtml($data),
-                'text' => $this->buildContactEmailText($data),
-            ]);
+            // Dispatch email to queue instead of sending synchronously
+            SendEmailJob::dispatch($data, 'contact');
 
-            Log::info('Contact form email sent successfully', [
-                'email_id' => $result['id'] ?? null,
-                'to' => 'contact@skilloncall.ca',
-                'from_user' => $data['email']
+            Log::info('Contact form email queued successfully', [
+                'to' => $data['email'],
+                'queued_at' => now()
             ]);
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to send contact form email', [
+            Log::error('Failed to queue contact form email', [
                 'error' => $e->getMessage(),
                 'error_class' => get_class($e),
-                'trace' => $e->getTraceAsString(),
                 'data' => $data
             ]);
 
-            // Also output to console if running in CLI
-            if (app()->runningInConsole()) {
-                echo "EmailService Error: " . $e->getMessage() . "\n";
-                echo "Error Class: " . get_class($e) . "\n";
-            }
-
-            return false;
+            // Fallback: try to send directly with timeout
+            return $this->sendEmailDirectlyWithTimeout([
+                'from' => 'SkillOnCall <onboarding@resend.dev>',
+                'to' => [$data['email']],
+                'subject' => '🎉 Contact Form Received - SkillOnCall.ca',
+                'html' => $this->buildContactEmailHtml($data),
+                'text' => $this->buildContactEmailText($data),
+            ], 'contact', $data['email']);
         }
     }
 
     /**
-     * Send newsletter subscription confirmation email
+     * Send newsletter subscription confirmation email (queued)
      */
     public function sendNewsletterConfirmation(array $data): bool
     {
         try {
-            $result = Resend::emails()->send([
+            // Dispatch to low priority queue since it's not urgent
+            SendEmailJob::dispatch($data, 'newsletter');
+
+            Log::info('Newsletter confirmation email queued successfully', [
+                'to' => $data['email'],
+                'queued_at' => now()
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to queue newsletter confirmation email', [
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'data' => $data
+            ]);
+
+            // Fallback: try to send directly with timeout
+            return $this->sendEmailDirectlyWithTimeout([
                 'from' => 'SkillOnCall <onboarding@resend.dev>',
                 'to' => [$data['email']],
                 'subject' => '📧 Welcome to SkillOnCall.ca Newsletter!',
                 'html' => $this->buildNewsletterConfirmationHtml($data),
                 'text' => $this->buildNewsletterConfirmationText($data),
-            ]);
-
-            Log::info('Newsletter confirmation email sent successfully', [
-                'email_id' => $result['id'] ?? null,
-                'to' => $data['email']
-            ]);
-
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Failed to send newsletter confirmation email', [
-                'error' => $e->getMessage(),
-                'error_class' => get_class($e),
-                'trace' => $e->getTraceAsString(),
-                'data' => $data
-            ]);
-
-            if (app()->runningInConsole()) {
-                echo "Newsletter Email Error: " . $e->getMessage() . "\n";
-            }
-
-            return false;
+            ], 'newsletter', $data['email']);
         }
     }
 
@@ -120,29 +113,75 @@ class EmailService
     }
 
     /**
-     * Send welcome email to new users
+     * Send welcome email to new users (queued with high priority)
      */
     public function sendWelcomeEmail(string $userEmail, string $userName): bool
     {
         try {
-            $result = Resend::emails()->send([
+            $data = [
+                'email' => $userEmail,
+                'name' => $userName
+            ];
+            
+            // Dispatch to high priority queue since it's part of registration flow
+            SendEmailJob::dispatch($data, 'welcome');
+
+            Log::info('Welcome email queued successfully', [
+                'to' => $userEmail,
+                'queued_at' => now()
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to queue welcome email', [
+                'error' => $e->getMessage(),
+                'to' => $userEmail
+            ]);
+
+            // Fallback: try to send directly with timeout
+            return $this->sendEmailDirectlyWithTimeout([
                 'from' => 'welcome@skilloncall.ca',
                 'to' => [$userEmail],
                 'subject' => 'Welcome to SkillOnCall.ca!',
                 'html' => $this->buildWelcomeEmailHtml($userName),
                 'text' => $this->buildWelcomeEmailText($userName),
-            ]);
+            ], 'welcome', $userEmail);
+        }
+    }
 
-            Log::info('Welcome email sent successfully', [
+    /**
+     * Send email directly with timeout protection (fallback method)
+     */
+    private function sendEmailDirectlyWithTimeout(array $emailData, string $emailType, string $recipient): bool
+    {
+        try {
+            // Set timeout for HTTP client used by Resend
+            $oldTimeout = ini_get('default_socket_timeout');
+            ini_set('default_socket_timeout', 10); // 10 second timeout
+            
+            $result = Resend::emails()->send($emailData);
+            
+            // Restore original timeout
+            ini_set('default_socket_timeout', $oldTimeout);
+
+            Log::info('Email sent directly (fallback)', [
+                'email_type' => $emailType,
                 'email_id' => $result['id'] ?? null,
-                'to' => $userEmail
+                'to' => $recipient
             ]);
 
             return true;
         } catch (\Exception $e) {
-            Log::error('Failed to send welcome email', [
+            // Restore original timeout in case of exception
+            if (isset($oldTimeout)) {
+                ini_set('default_socket_timeout', $oldTimeout);
+            }
+            
+            Log::error('Direct email sending failed (fallback)', [
+                'email_type' => $emailType,
                 'error' => $e->getMessage(),
-                'to' => $userEmail
+                'error_class' => get_class($e),
+                'to' => $recipient
             ]);
 
             return false;

@@ -26,7 +26,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register ImageCompressionService as singleton
+        $this->app->singleton(\App\Services\ImageCompressionService::class);
     }
 
     /**
