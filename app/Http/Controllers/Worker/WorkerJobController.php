@@ -18,6 +18,15 @@ class WorkerJobController extends Controller
      */
     public function index(Request $request): Response
     {
+        // Get all active jobs for profession extraction (before filtering)
+        $allActiveJobs = Job::query()
+            ->active()
+            ->published()
+            ->get(['title']); // Only need titles for profession extraction
+
+        // Extract professions from all jobs
+        $allProfessions = $this->extractProfessions($allActiveJobs);
+
         $query = Job::query()
             ->with(['employer:id,name'])
             ->active()
@@ -73,6 +82,7 @@ class WorkerJobController extends Controller
             'jobs' => $jobs,
             'filters' => $request->only(['search', 'professions', 'shifts', 'experience', 'min_rate', 'max_rate']),
             'savedJobIds' => $savedJobIds,
+            'allProfessions' => $allProfessions,
         ]);
     }
 
@@ -164,5 +174,26 @@ class WorkerJobController extends Controller
             ->delete();
 
         return redirect()->back()->with('success', 'Job removed from saved jobs!');
+    }
+
+    /**
+     * Extract unique professions from job titles.
+     */
+    private function extractProfessions($jobs): array
+    {
+        $professions = collect();
+        
+        foreach ($jobs as $job) {
+            $titleParts = preg_split('/[\s\-\/]+/', strtolower($job->title));
+            
+            foreach ($titleParts as $part) {
+                $part = trim($part);
+                if (strlen($part) > 2 && !in_array($part, ['the', 'for', 'and', 'or', 'a', 'an', 'in', 'on', 'at', 'to', 'from', 'with', 'by'])) {
+                    $professions->push(ucfirst($part));
+                }
+            }
+        }
+        
+        return $professions->unique()->sort()->values()->toArray();
     }
 }

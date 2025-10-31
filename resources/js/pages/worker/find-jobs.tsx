@@ -71,6 +71,7 @@ interface FindJobsProps {
         max_rate?: number;
     };
     savedJobIds?: number[];
+    allProfessions?: string[];
 }
 
 // Extract unique professions from job titles
@@ -87,7 +88,7 @@ const extractProfessions = (jobs: Job[]) => {
     return Array.from(professions).sort();
 };
 
-export default function FindJobs({ jobs: initialJobs, filters: initialFilters = {}, savedJobIds = [] }: FindJobsProps) {
+export default function FindJobs({ jobs: initialJobs, filters: initialFilters = {}, savedJobIds = [], allProfessions = [] }: FindJobsProps) {
     const { subscription } = usePage<SharedData>().props;
     const { t } = useTranslations();
     
@@ -128,8 +129,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
         console.log('Applying to job:', jobId);
     };
 
-    // Use all jobs data to extract professions
-    const allProfessions = extractProfessions(initialJobs.data);
+    // Use professions from backend (always complete list)
     const filteredProfessions = professionSearch.length > 0 
         ? allProfessions.filter(p => p.toLowerCase().includes(professionSearch.toLowerCase()))
         : allProfessions;
