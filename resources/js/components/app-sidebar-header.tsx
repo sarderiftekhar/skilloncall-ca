@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Activity, Bell, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users } from 'react-feather';
+import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users } from 'react-feather';
 import AppLogoIcon from './app-logo-icon';
 
 // Get role-based navigation items for mobile menu
@@ -93,6 +93,11 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string): Nav
                 title: t('nav.find_jobs'),
                 href: '/worker/jobs',
                 icon: Briefcase,
+            },
+            {
+                title: t('nav.saved_jobs'),
+                href: '/worker/saved-jobs',
+                icon: Bookmark,
             },
             {
                 title: t('nav.my_applications'),

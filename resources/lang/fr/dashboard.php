@@ -86,6 +86,7 @@ return [
     'nav' => [
         'dashboard' => 'Tableau de Bord',
         'find_jobs' => 'Trouver des Emplois',
+        'saved_jobs' => 'Emplois Sauvegardés',
         'my_applications' => 'Mes Candidatures',
         'messages' => 'Messages',
         'availability' => 'Disponibilité',
@@ -112,4 +113,38 @@ return [
 
     // Loading states
     'loading' => 'Chargement...',
+
+    // Jobs page translations
+    'discover_opportunities' => 'Découvrez des opportunités qui correspondent à vos compétences et à votre expérience',
+    'jobs_found' => 'emplois trouvés',
+    'how_it_works' => 'Comment ça marche :',
+    'how_it_works_description' => 'Cliquez sur "Postuler" pour exprimer votre intérêt. Votre profil sera visible par l\'employeur. S\'il est intéressé, il vous contactera via la plateforme.',
+    'free_plan_limitations' => 'Limitations du plan gratuit :',
+    'free_plan_description' => 'Vous êtes actuellement sur le plan gratuit. Les noms d\'entreprise sont partiellement masqués et les candidatures sont restreintes.',
+    'upgrade_to_pro' => 'Passer au Pro',
+    'upgrade_message' => 'pour accéder à toutes les fonctionnalités.',
+    'please_subscribe_to_apply' => 'Veuillez vous abonner pour postuler',
+    'company' => 'Entreprise',
+    'apply' => 'Postuler',
+    'interested' => 'intéressé(s)',
+    'no_jobs_found' => 'Aucun emploi trouvé',
+    'try_adjusting_filters' => 'Essayez d\'ajuster vos filtres ou termes de recherche',
+    'filters' => 'Filtres',
+    'search' => 'Rechercher',
+    'search_placeholder' => 'Emploi, entreprise, localisation...',
+    'showing' => 'Affichage',
+    'to' => 'à',
+    'of' => 'sur',
+
+    // Saved jobs page translations
+    'your_bookmarked_jobs' => 'Vos emplois mis en signet et opportunités',
+    'saved_jobs_count' => 'emplois sauvegardés',
+    'saved_jobs_info' => 'Vos emplois sauvegardés :',
+    'saved_jobs_description' => 'Les emplois que vous avez mis en signet apparaîtront ici. Cliquez sur l\'icône de signet pour retirer les emplois de cette liste.',
+    'no_saved_jobs' => 'Aucun emploi sauvegardé pour le moment',
+    'no_saved_jobs_description' => 'Commencez à parcourir les emplois et mettez en signet ceux qui vous intéressent. Ils apparaîtront ici pour un accès facile.',
+    'minutes_ago' => 'minutes passées',
+    'hours_ago' => 'heures passées',
+    'yesterday' => 'hier',
+    'days_ago' => 'jours passés',
 ];

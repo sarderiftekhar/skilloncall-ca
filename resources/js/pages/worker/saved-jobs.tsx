@@ -1,0 +1,289 @@
+import { Head, router, usePage } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+    MapPin,
+    Clock,
+    DollarSign,
+    Briefcase,
+    Bookmark,
+    ChevronLeft,
+    ChevronRight,
+    Lock,
+} from 'react-feather';
+import { useState } from 'react';
+import { SharedData } from '@/types';
+import { useTranslations } from '@/hooks/useTranslations';
+
+interface Job {
+    id: number;
+    title: string;
+    employer?: {
+        id: number;
+        name: string;
+    };
+    location: string;
+    budget: number;
+    job_type: string;
+    experience_level: string;
+    required_skills?: string[];
+    description: string;
+    published_at: string;
+    applications_count?: number;
+    views_count?: number;
+    status: string;
+    category?: string;
+}
+
+interface PaginatedJobs {
+    data: Job[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from?: number;
+    to?: number;
+}
+
+interface SavedJobsProps {
+    jobs: PaginatedJobs;
+}
+
+export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
+    const { subscription } = usePage<SharedData>().props;
+    const { t } = useTranslations();
+
+    // Check if user is on free tier (no subscription or Basic plan)
+    const isFreeTier = !subscription || subscription.plan_name === 'Basic' || !subscription.plan_name;
+
+    // Function to mask company name for free tier users
+    const getMaskedCompanyName = (companyName: string) => {
+        if (!isFreeTier) return companyName;
+        if (companyName.length <= 5) return companyName;
+        return companyName.substring(0, 5) + '•••••';
+    };
+
+    // Function to handle apply button click
+    const handleApplyClick = (jobId: number) => {
+        if (isFreeTier) {
+            return;
+        }
+        console.log('Applying to job:', jobId);
+    };
+
+    // Function to remove job from saved jobs
+    const handleUnsaveJob = (jobId: number) => {
+        router.delete(`/worker/jobs/${jobId}/unsave`, {
+            preserveScroll: true,
+        });
+    };
+
+    const getTimeAgo = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMs = now.getTime() - date.getTime();
+        const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+        
+        if (diffInDays === 0) {
+            const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+            if (diffInHours === 0) {
+                const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+                return `${diffInMinutes} ${t('minutes_ago')}`;
+            }
+            return `${diffInHours} ${t('hours_ago')}`;
+        } else if (diffInDays === 1) {
+            return t('yesterday');
+        } else {
+            return `${diffInDays} ${t('days_ago')}`;
+        }
+    };
+
+    return (
+        <AppLayout>
+            <Head title={t('nav.saved_jobs')} />
+            
+            <div className="flex-1 min-w-0 max-w-7xl mx-auto px-4 py-6">
+                {/* Header */}
+                <div className="mb-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div>
+                            <h1 className="text-2xl lg:text-3xl font-bold mb-1" style={{ color: '#10B3D6' }}>
+                                {t('nav.saved_jobs')}
+                            </h1>
+                            <p className="text-sm lg:text-base text-gray-600">
+                                {t('your_bookmarked_jobs')}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <div className="text-2xl lg:text-3xl font-bold" style={{ color: '#192341' }}>{initialJobs.total || 0}</div>
+                            <p className="text-xs lg:text-sm text-gray-600">{t('saved_jobs_count')}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Info Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm" style={{ borderColor: '#10B3D6' }}>
+                    <p className="text-gray-700">
+                        <strong style={{ color: '#10B3D6' }}>💾 {t('saved_jobs_info')}</strong> {t('saved_jobs_description')}
+                    </p>
+                </div>
+
+                {/* Free Tier Restriction Notice */}
+                {isFreeTier && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm">
+                        <p className="text-amber-800">
+                            <strong className="text-amber-700">⚠️ {t('free_plan_limitations')}</strong> {t('free_plan_description')} 
+                            <span className="ml-1">
+                                <a href="/subscriptions" className="text-amber-700 underline hover:text-amber-900 cursor-pointer">
+                                    {t('upgrade_to_pro')}
+                                </a>
+                            </span> {t('upgrade_message')}
+                        </p>
+                    </div>
+                )}
+
+                {/* Jobs List */}
+                <div className="space-y-3 lg:space-y-4 pb-8">
+                    {initialJobs.data.length > 0 ? (
+                        initialJobs.data.map(job => (
+                            <Card key={job.id} className="hover:shadow-md transition-shadow">
+                                <CardContent className="p-4 lg:p-5">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+                                        {/* Job Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                                                <h3 className="text-base lg:text-lg font-semibold" style={{ color: '#192341' }}>
+                                                    {job.title}
+                                                </h3>
+                                            </div>
+                                            <p className="text-xs lg:text-sm text-gray-600 mb-3">
+                                                {getMaskedCompanyName(job.employer?.name || t('company'))}
+                                            </p>
+
+                                            <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4 mb-3">
+                                                <div className="flex items-center gap-2 text-xs lg:text-sm">
+                                                    <MapPin className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" style={{ color: '#10B3D6' }} />
+                                                    <span className="text-gray-700 truncate">{job.location}</span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs lg:text-sm">
+                                                    <DollarSign className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" style={{ color: '#10B3D6' }} />
+                                                    <span className="text-gray-700 font-semibold">
+                                                        ${job.budget ? Math.round(Number(job.budget)) : '0'}{t('per_hour')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex items-center gap-2 text-xs lg:text-sm">
+                                                    <Clock className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" style={{ color: '#10B3D6' }} />
+                                                    <span className="text-gray-700 capitalize">{job.job_type?.replace('_', ' ')}</span>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-xs lg:text-sm text-gray-600 mb-3 line-clamp-2">{job.description}</p>
+
+                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                                <span>{job.applications_count || 0} {t('interested')}</span>
+                                                <span>{getTimeAgo(job.published_at)}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex sm:flex-col gap-2 w-full sm:w-auto flex-shrink-0">
+                                            {isFreeTier ? (
+                                                <div className="flex-1 sm:flex-none">
+                                                    <Button
+                                                        size="sm"
+                                                        disabled
+                                                        className="text-white text-xs px-4 lg:px-6 w-full opacity-60 cursor-not-allowed"
+                                                        style={{ backgroundColor: '#10B3D6' }}
+                                                        title={t('please_subscribe_to_apply')}
+                                                    >
+                                                        <Lock className="w-3 h-3 mr-1" />
+                                                        {t('apply')}
+                                                    </Button>
+                                                    <p className="text-xs text-gray-500 text-center mt-1 sm:hidden">
+                                                        {t('please_subscribe_to_apply')}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <Button
+                                                    size="sm"
+                                                    onClick={() => handleApplyClick(job.id)}
+                                                    className="text-white text-xs px-4 lg:px-6 flex-1 sm:flex-none cursor-pointer"
+                                                    style={{ backgroundColor: '#10B3D6' }}
+                                                >
+                                                    {t('apply')}
+                                                </Button>
+                                            )}
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleUnsaveJob(job.id)}
+                                                className="text-xs flex-1 sm:flex-none cursor-pointer text-red-500 hover:text-red-700 hover:border-red-300"
+                                            >
+                                                <Bookmark 
+                                                    className="w-4 h-4"
+                                                    fill="currentColor"
+                                                />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))
+                    ) : (
+                        <Card>
+                            <CardContent className="p-8 lg:p-12 text-center">
+                                <Bookmark className="w-10 h-10 lg:w-12 lg:h-12 mx-auto mb-4 text-gray-300" />
+                                <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">{t('no_saved_jobs')}</h3>
+                                <p className="text-sm text-gray-500 mb-4">{t('no_saved_jobs_description')}</p>
+                                <Button
+                                    onClick={() => router.get('/worker/jobs')}
+                                    className="cursor-pointer"
+                                    style={{ backgroundColor: '#10B3D6' }}
+                                >
+                                    {t('browse_jobs')}
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+
+                {/* Pagination */}
+                {initialJobs.last_page > 1 && (
+                    <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 bg-white rounded-lg mb-6">
+                        <div className="text-sm text-gray-600">
+                            {t('showing')} {initialJobs.from} {t('to')} {initialJobs.to} {t('of')} {initialJobs.total} {t('saved_jobs_count')}
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page - 1}`)}
+                                disabled={initialJobs.current_page === 1}
+                                className="cursor-pointer"
+                            >
+                                <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            
+                            <span className="px-3 py-1 text-sm text-gray-600">
+                                {initialJobs.current_page} {t('of')} {initialJobs.last_page}
+                            </span>
+                            
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page + 1}`)}
+                                disabled={initialJobs.current_page === initialJobs.last_page}
+                                className="cursor-pointer"
+                            >
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </AppLayout>
+    );
+}

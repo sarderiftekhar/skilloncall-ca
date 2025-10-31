@@ -89,6 +89,13 @@ class HandleInertiaRequests extends Middleware
 
         // Get current locale and translations
         $locale = $request->get('lang', session('locale', config('app.locale', 'en')));
+        
+        // Store the locale in session if provided via URL parameter
+        if ($request->has('lang') && in_array($request->get('lang'), ['en', 'fr'])) {
+            session(['locale' => $request->get('lang')]);
+            $locale = $request->get('lang');
+        }
+        
         app()->setLocale($locale);
         
         // Load translations for the current page
@@ -96,8 +103,12 @@ class HandleInertiaRequests extends Middleware
         try {
             // Get current route to determine which translations to load
             $routeName = $request->route()?->getName();
+            $currentPath = $request->path();
             
-            if (str_contains($routeName ?? '', 'dashboard')) {
+            // Load dashboard translations for all worker pages since they share navigation
+            if (str_contains($routeName ?? '', 'dashboard') || 
+                str_contains($currentPath, 'worker/') || 
+                str_contains($routeName ?? '', 'worker.')) {
                 $translations = __('dashboard');
             } elseif (str_contains($routeName ?? '', 'onboarding')) {
                 $translations = __('onboarding');

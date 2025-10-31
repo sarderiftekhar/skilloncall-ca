@@ -50,6 +50,11 @@ Route::middleware(['auth', 'verified', 'worker', 'ensure.worker.profile.complete
     Route::post('jobs/{job}/apply', [WorkerJobController::class, 'apply'])->name('jobs.apply');
     Route::get('jobs/search', [WorkerJobController::class, 'search'])->name('jobs.search');
 
+    // Saved Jobs
+    Route::get('saved-jobs', [WorkerJobController::class, 'savedJobs'])->name('saved-jobs');
+    Route::post('jobs/{job}/save', [WorkerJobController::class, 'saveJob'])->name('jobs.save');
+    Route::delete('jobs/{job}/unsave', [WorkerJobController::class, 'unsaveJob'])->name('jobs.unsave');
+
     // Application Management
     Route::get('applications', [WorkerApplicationController::class, 'index'])->name('applications.index');
     Route::get('applications/{application}', [WorkerApplicationController::class, 'show'])->name('applications.show');

@@ -86,6 +86,7 @@ return [
     'nav' => [
         'dashboard' => 'Dashboard',
         'find_jobs' => 'Find Jobs',
+        'saved_jobs' => 'Saved Jobs',
         'my_applications' => 'My Applications',
         'messages' => 'Messages',
         'availability' => 'Availability',
@@ -112,4 +113,38 @@ return [
 
     // Loading states
     'loading' => 'Loading...',
+
+    // Jobs page translations
+    'discover_opportunities' => 'Discover opportunities that match your skills and experience',
+    'jobs_found' => 'jobs found',
+    'how_it_works' => 'How it works:',
+    'how_it_works_description' => 'Click "Apply" to express interest. Your profile will be visible to the employer. If interested, they\'ll message you through the platform.',
+    'free_plan_limitations' => 'Free Plan Limitations:',
+    'free_plan_description' => 'You\'re currently on the Free plan. Company names are partially hidden and job applications are restricted.',
+    'upgrade_to_pro' => 'Upgrade to Pro',
+    'upgrade_message' => 'to access all features.',
+    'please_subscribe_to_apply' => 'Please subscribe to apply',
+    'company' => 'Company',
+    'apply' => 'Apply',
+    'interested' => 'interested',
+    'no_jobs_found' => 'No jobs found',
+    'try_adjusting_filters' => 'Try adjusting your filters or search terms',
+    'filters' => 'Filters',
+    'search' => 'Search',
+    'search_placeholder' => 'Job, company, location...',
+    'showing' => 'Showing',
+    'to' => 'to',
+    'of' => 'of',
+
+    // Saved jobs page translations
+    'your_bookmarked_jobs' => 'Your bookmarked jobs and opportunities',
+    'saved_jobs_count' => 'saved jobs',
+    'saved_jobs_info' => 'Your Saved Jobs:',
+    'saved_jobs_description' => 'Jobs you\'ve bookmarked will appear here. Click the bookmark icon to remove jobs from this list.',
+    'no_saved_jobs' => 'No saved jobs yet',
+    'no_saved_jobs_description' => 'Start browsing jobs and bookmark the ones you\'re interested in. They\'ll appear here for easy access.',
+    'minutes_ago' => 'minutes ago',
+    'hours_ago' => 'hours ago',
+    'yesterday' => 'yesterday',
+    'days_ago' => 'days ago',
 ];

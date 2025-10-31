@@ -140,6 +140,14 @@ class User extends Authenticatable
         return $this->hasMany(Portfolio::class, 'user_id');
     }
 
+    /**
+     * Get the jobs saved by the worker.
+     */
+    public function savedJobs(): HasMany
+    {
+        return $this->hasMany(SavedJob::class);
+    }
+
     // Subscription relationships
     public function subscriptions(): HasMany
     {

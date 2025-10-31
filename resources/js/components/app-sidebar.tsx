@@ -15,7 +15,8 @@ import {
     Shield,
     MessageCircle,
     Calendar,
-    Clock
+    Clock,
+    Bookmark
 } from 'react-feather';
 import AppLogo from './app-logo';
 
@@ -103,6 +104,11 @@ function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
                 title: t('nav.find_jobs'),
                 href: '/worker/jobs',
                 icon: Briefcase,
+            },
+            {
+                title: t('nav.saved_jobs'),
+                href: '/worker/saved-jobs',
+                icon: Bookmark,
             },
             {
                 title: t('nav.my_applications'),

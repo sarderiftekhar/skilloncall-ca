@@ -4,6 +4,7 @@ globs:
 alwaysApply: true
 ---
 always make sure this project is multilnagual so create both English and French for any content or new page 
+Only work on the section is asked for dont change other places witout asking.
 always follow the ui-guide.md file for design or ui work in the project.
 all the clickable link should have mouse hand cursor
 Whenever creating a page always start with Mobile view first. Always check the responsiveness.
