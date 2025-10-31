@@ -305,7 +305,7 @@ export default function EmployeeDashboard({
                                         <span className="sm:hidden">Complete</span>
                                     </Badge>
                                 )}
-                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1 animate-[bounce_2s_ease-in-out_infinite]">
+                                <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1">
                                     <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1" />
                                     <span className="hidden sm:inline">Active Employee</span>
                                     <span className="sm:hidden">Active</span>
