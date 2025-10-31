@@ -22,7 +22,7 @@ import {
 } from 'react-feather';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState, useMemo, useEffect } from 'react';
-import * as workerJobsRoute from '@/routes/worker/jobs';
+import * as employeeJobsRoute from '@/routes/employee/jobs';
 import { SharedData } from '@/types';
 import { useTranslations } from '@/hooks/useTranslations';
 
@@ -137,7 +137,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
 
     // Handle filter changes
     const applyFilters = () => {
-        router.get(workerJobsRoute.index.url(), {
+        router.get(employeeJobsRoute.index.url(), {
             search: searchQuery || undefined,
             professions: selectedProfessions.length > 0 ? selectedProfessions : undefined,
             shifts: selectedShifts.length > 0 ? selectedShifts : undefined,
@@ -163,7 +163,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
     };
 
     const handlePageChange = (page: number) => {
-        router.get(workerJobsRoute.index.url(), {
+        router.get(employeeJobsRoute.index.url(), {
             page,
             search: searchQuery || undefined,
             professions: selectedProfessions.length > 0 ? selectedProfessions : undefined,
@@ -188,7 +188,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
         // Make API call to persist the change
         if (isSaved) {
             // Unsave the job
-            router.delete(`/worker/jobs/${jobId}/unsave`, {
+            router.delete(`/employee/jobs/${jobId}/unsave`, {
                 preserveScroll: true,
                 onError: () => {
                     // Revert on error
@@ -197,7 +197,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
             });
         } else {
             // Save the job
-            router.post(`/worker/jobs/${jobId}/save`, {}, {
+            router.post(`/employee/jobs/${jobId}/save`, {}, {
                 preserveScroll: true,
                 onError: () => {
                     // Revert on error
@@ -433,7 +433,7 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
                                     setMinRate(16);
                                     setMaxRate(100);
                                     setProfessionSearch('');
-                                    router.get(workerJobsRoute.index.url());
+                                    router.get(employeeJobsRoute.index.url());
                                 }}
                                 className="w-full text-xs cursor-pointer"
                             >

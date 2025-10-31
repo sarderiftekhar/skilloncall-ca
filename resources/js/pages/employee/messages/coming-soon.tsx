@@ -113,7 +113,7 @@ export default function MessagesComingSoon() {
 
                             {/* Action Buttons */}
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                <Link href="/worker/jobs">
+                                <Link href="/employee/jobs">
                                     <Button 
                                         className="text-white px-8 py-3 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-[1.02] w-full sm:w-auto"
                                         style={{ 
@@ -126,7 +126,7 @@ export default function MessagesComingSoon() {
                                     </Button>
                                 </Link>
                                 
-                                <Link href="/worker/dashboard">
+                                <Link href="/employee/dashboard">
                                     <Button 
                                         variant="outline" 
                                         className="border-gray-300 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-50 transition-all duration-200 w-full sm:w-auto"

@@ -152,7 +152,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
 
     // Function to remove job from saved jobs
     const handleUnsaveJob = (jobId: number) => {
-        router.delete(`/worker/jobs/${jobId}/unsave`, {
+        router.delete(`/employee/jobs/${jobId}/unsave`, {
             preserveScroll: true,
         });
     };
@@ -393,7 +393,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                 <h3 className="text-base lg:text-lg font-semibold text-gray-600 mb-2">{t('no_saved_jobs')}</h3>
                                 <p className="text-sm text-gray-500 mb-4">{t('no_saved_jobs_description')}</p>
                                 <Button
-                                    onClick={() => router.get('/worker/jobs')}
+                                    onClick={() => router.get('/employee/jobs')}
                                     className="cursor-pointer text-white hover:scale-[1.02] transition-all duration-200"
                                     style={{ backgroundColor: '#10B3D6' }}
                                 >
@@ -417,7 +417,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page - 1}`)}
+                                onClick={() => router.get(`/employee/saved-jobs?page=${initialJobs.current_page - 1}`)}
                                 disabled={initialJobs.current_page === 1}
                                 className="cursor-pointer hover:scale-[1.02] transition-all duration-200 disabled:hover:scale-100"
                             >
@@ -431,7 +431,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                             <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page + 1}`)}
+                                onClick={() => router.get(`/employee/saved-jobs?page=${initialJobs.current_page + 1}`)}
                                 disabled={initialJobs.current_page === initialJobs.last_page}
                                 className="cursor-pointer hover:scale-[1.02] transition-all duration-200 disabled:hover:scale-100"
                             >
