@@ -124,6 +124,7 @@ return [
     'upgrade_to_pro' => 'Passer au Pro',
     'upgrade_message' => 'pour accéder à toutes les fonctionnalités.',
     'please_subscribe_to_apply' => 'Veuillez vous abonner pour postuler',
+    'click_to_apply' => 'Cliquez pour postuler à cet emploi',
     'company' => 'Entreprise',
     'apply' => 'Postuler',
     'interested' => 'intéressé(s)',

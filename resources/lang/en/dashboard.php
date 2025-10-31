@@ -124,6 +124,7 @@ return [
     'upgrade_to_pro' => 'Upgrade to Pro',
     'upgrade_message' => 'to access all features.',
     'please_subscribe_to_apply' => 'Please subscribe to apply',
+    'click_to_apply' => 'Click to apply for this job',
     'company' => 'Company',
     'apply' => 'Apply',
     'interested' => 'interested',

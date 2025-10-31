@@ -20,6 +20,7 @@ import {
     ChevronRight,
     Lock,
 } from 'react-feather';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState, useMemo, useEffect } from 'react';
 import * as workerJobsRoute from '@/routes/worker/jobs';
 import { SharedData } from '@/types';
@@ -458,24 +459,41 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
                         </div>
                     </div>
 
-                    {/* Info Notice */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm" style={{ borderColor: '#10B3D6' }}>
-                        <p className="text-gray-700">
-                            <strong style={{ color: '#10B3D6' }}>ℹ️ {t('how_it_works')}</strong> {t('how_it_works_description')}
-                        </p>
-                    </div>
-
                     {/* Free Tier Restriction Notice */}
                     {isFreeTier && (
-                        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm">
-                            <p className="text-amber-800">
-                                <strong className="text-amber-700">⚠️ {t('free_plan_limitations')}</strong> {t('free_plan_description')} 
-                                <span className="ml-1">
-                                    <a href="/subscriptions" className="text-amber-700 underline hover:text-amber-900 cursor-pointer">
-                                        {t('upgrade_to_pro')}
-                                    </a>
-                                </span> {t('upgrade_message')}
-                            </p>
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-lg p-3 lg:p-4 mb-4 shadow-md relative overflow-hidden">
+                            {/* Background accent */}
+                            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-400"></div>
+                            
+                            <div className="flex items-center gap-3">
+                                {/* Warning Icon */}
+                                <div className="flex-shrink-0 w-6 h-6 lg:w-7 lg:h-7 bg-amber-100 rounded-full flex items-center justify-center">
+                                    <span className="text-amber-600 text-sm lg:text-base font-bold">⚠️</span>
+                                </div>
+                                
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="text-amber-900 font-bold text-sm mb-1">
+                                                {t('free_plan_limitations')}
+                                            </h3>
+                                            <p className="text-amber-800 text-xs lg:text-sm leading-snug">
+                                                {t('free_plan_description')}
+                                            </p>
+                                        </div>
+                                        
+                                        {/* Upgrade Button */}
+                                        <a 
+                                            href="/subscriptions" 
+                                            className="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-medium px-3 lg:px-4 py-1.5 lg:py-2 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md cursor-pointer text-xs lg:text-sm whitespace-nowrap"
+                                        >
+                                            <span>{t('upgrade_to_pro')}</span>
+                                            <span className="hidden sm:inline opacity-90">{t('upgrade_message')}</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -526,30 +544,43 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
                                             <div className="flex sm:flex-col gap-2 w-full sm:w-auto flex-shrink-0">
                                                 {isFreeTier ? (
                                                     <div className="flex-1 sm:flex-none">
-                                                        <Button
-                                                            size="sm"
-                                                            disabled
-                                                            className="text-white text-xs px-4 lg:px-6 w-full opacity-60 cursor-not-allowed"
-                                                            style={{ backgroundColor: '#10B3D6' }}
-                                                            title={t('please_subscribe_to_apply')}
-                                                        >
-                                                            <Lock className="w-3 h-3 mr-1" />
-                                                            {t('apply')}
-                                                        </Button>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    size="sm"
+                                                                    disabled
+                                                                    className="text-white text-xs px-4 lg:px-6 w-full opacity-60 cursor-not-allowed"
+                                                                    style={{ backgroundColor: '#10B3D6' }}
+                                                                >
+                                                                    <Lock className="w-3 h-3 mr-1" />
+                                                                    {t('apply')}
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                {t('please_subscribe_to_apply')}
+                                                            </TooltipContent>
+                                                        </Tooltip>
                                                         <p className="text-xs text-gray-500 text-center mt-1 sm:hidden">
                                                             {t('please_subscribe_to_apply')}
                                                         </p>
                                                     </div>
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        onClick={() => handleApplyClick(job.id)}
-                                                        className="text-white text-xs px-4 lg:px-6 flex-1 sm:flex-none cursor-pointer"
-                                                        style={{ backgroundColor: '#10B3D6' }}
-                                                    >
-                                                        {t('jobs.apply')}
-                                                    </Button>
-                                                )}
+                                ) : (
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <Button
+                                                size="sm"
+                                                onClick={() => handleApplyClick(job.id)}
+                                                className="text-white text-xs px-4 lg:px-6 flex-1 sm:flex-none cursor-pointer"
+                                                style={{ backgroundColor: '#10B3D6' }}
+                                            >
+                                                {t('apply')}
+                                            </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            {t('please_subscribe_to_apply')}
+                                        </TooltipContent>
+                                    </Tooltip>
+                                )}
                                                 <Button
                                                     size="sm"
                                                     variant="outline"

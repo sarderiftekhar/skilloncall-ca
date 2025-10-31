@@ -12,9 +12,10 @@ interface TabNavigationProps {
     activeTab: string;
     onTabChange: (tabId: string) => void;
     tabs: Tab[];
+    isLoading?: boolean;
 }
 
-export default function TabNavigation({ activeTab, onTabChange, tabs }: TabNavigationProps) {
+export default function TabNavigation({ activeTab, onTabChange, tabs, isLoading = false }: TabNavigationProps) {
     return (
         <div className="bg-white border-b border-gray-200">
             {/* Desktop Tab Navigation */}
@@ -28,12 +29,14 @@ export default function TabNavigation({ activeTab, onTabChange, tabs }: TabNavig
                             <button
                                 key={tab.id}
                                 onClick={() => onTabChange(tab.id)}
+                                disabled={isLoading}
                                 className={`
                                     group relative flex items-center space-x-2 py-3 px-4 text-sm font-semibold transition-all duration-300 cursor-pointer rounded-t-xl
                                     ${isActive 
                                         ? 'text-white bg-gradient-to-br from-[#10B3D6] to-[#0D8FA8] shadow-lg transform scale-105' 
                                         : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 hover:shadow-md'
                                     }
+                                    ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}
                                 `}
                                 style={isActive ? { 
                                     boxShadow: '0 -2px 12px rgba(16, 179, 214, 0.3), 0 4px 8px rgba(0, 0, 0, 0.1)'
@@ -45,7 +48,7 @@ export default function TabNavigation({ activeTab, onTabChange, tabs }: TabNavig
                                 <Icon 
                                     className={`h-5 w-5 transition-all duration-300 ${
                                         isActive ? 'text-white' : 'text-gray-400 group-hover:text-[#10B3D6]'
-                                    }`}
+                                    } ${isLoading && isActive ? 'animate-pulse' : ''}`}
                                 />
                                 <span className="whitespace-nowrap">{tab.title}</span>
                                 
