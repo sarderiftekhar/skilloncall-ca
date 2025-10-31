@@ -62,7 +62,7 @@ class WorkerDashboardService
         
         $query = Job::where('status', 'active')
             ->whereDoesntHave('applications', function ($q) use ($worker) {
-                $q->where('worker_id', $worker->id);
+                $q->where('employee_id', $worker->id);
             });
 
         // If worker has skills, prioritize jobs matching those skills

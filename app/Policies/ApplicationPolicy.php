@@ -12,7 +12,7 @@ class ApplicationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isEmployer() || $user->isWorker();
+        return $user->isAdmin() || $user->isEmployer() || $user->isEmployee();
     }
 
     /**
@@ -25,8 +25,8 @@ class ApplicationPolicy
             return true;
         }
 
-        // Workers can view their own applications
-        if ($user->isWorker() && $application->worker_id === $user->id) {
+        // Employees can view their own applications
+        if ($user->isEmployee() && $application->employee_id === $user->id) {
             return true;
         }
 
@@ -43,7 +43,7 @@ class ApplicationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isWorker();
+        return $user->isEmployee();
     }
 
     /**
@@ -56,8 +56,8 @@ class ApplicationPolicy
             return true;
         }
 
-        // Workers can update their own applications (withdraw, etc.)
-        if ($user->isWorker() && $application->worker_id === $user->id) {
+        // Employees can update their own applications (withdraw, etc.)
+        if ($user->isEmployee() && $application->employee_id === $user->id) {
             return true;
         }
 
@@ -79,7 +79,7 @@ class ApplicationPolicy
             return true;
         }
 
-        // Workers can delete their own applications
-        return $user->isWorker() && $application->worker_id === $user->id;
+        // Employees can delete their own applications
+        return $user->isEmployee() && $application->employee_id === $user->id;
     }
 }

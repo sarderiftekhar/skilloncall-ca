@@ -12,7 +12,7 @@ class PaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isEmployer() || $user->isWorker();
+        return $user->isAdmin() || $user->isEmployer() || $user->isEmployee();
     }
 
     /**
@@ -34,7 +34,7 @@ class PaymentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isEmployer() || $user->isWorker();
+        return $user->isEmployer() || $user->isEmployee();
     }
 
     /**

@@ -219,7 +219,7 @@ export default function Welcome() {
 
                             {/* Navigation */}
                             <nav className="hidden md:flex space-x-8">
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_workers')}</a>
+                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</a>
                                 <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</a>
                                 <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</a>
                                 <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
@@ -751,7 +751,7 @@ export default function Welcome() {
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_workers', 'For Workers')}</h3>
+                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_employees', 'For Employees')}</h3>
                                 <ul className="space-y-2 text-gray-100">
                                     <li><a href="#" className="hover:text-white cursor-pointer">Create Profile</a></li>
                                     <li><a href="#" className="hover:text-white cursor-pointer">Browse Jobs</a></li>

@@ -11,7 +11,7 @@ class WorkExperience extends Model
     use HasFactory;
 
     protected $fillable = [
-        'worker_profile_id',
+        'employee_profile_id',
         'global_skill_id',
         'global_industry_id',
         'company_name',
@@ -31,9 +31,9 @@ class WorkExperience extends Model
     ];
 
     // Relationships
-    public function workerProfile(): BelongsTo
+    public function employeeProfile(): BelongsTo
     {
-        return $this->belongsTo(WorkerProfile::class);
+        return $this->belongsTo(EmployeeProfile::class);
     }
 
     public function skill(): BelongsTo

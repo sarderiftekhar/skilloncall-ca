@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'nav.find_workers' => 'Trouver des travailleurs',
+    'nav.find_employees' => 'Trouver des employés',
     'nav.post_jobs' => 'Publier des offres',
     'nav.how_it_works' => 'Comment ça marche',
     'nav.pricing' => 'Tarifs',
@@ -31,7 +31,7 @@ return [
     'footer.subscribe' => 'S’abonner',
     'footer.subscribing' => 'Abonnement...',
     'footer.for_employers' => 'Pour les employeurs',
-    'footer.for_workers' => 'Pour les travailleurs',
+    'footer.for_employees' => 'Pour les employés',
     'footer.contact' => 'Contact',
     'footer.privacy' => 'Confidentialité',
     'footer.terms' => 'Conditions',

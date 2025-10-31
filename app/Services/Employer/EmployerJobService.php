@@ -77,13 +77,13 @@ class EmployerJobService
      */
     public function getJobDetails(Job $job): array
     {
-        $job->load(['applications.worker', 'employer']);
+        $job->load(['applications.employee', 'employer']);
 
         return [
             'job' => $job->toArray(),
             'stats' => $this->getJobStats($job),
             'recentApplications' => $job->applications()
-                ->with('worker:id,name,email')
+                ->with('employee:id,name,email')
                 ->latest()
                 ->take(5)
                 ->get()

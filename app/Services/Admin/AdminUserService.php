@@ -115,7 +115,7 @@ class AdminUserService
             $stats['totalJobs'] = $user->jobs()->count();
             $stats['activeJobs'] = $user->jobs()->where('status', 'active')->count();
             $stats['completedJobs'] = $user->jobs()->where('status', 'completed')->count();
-        } elseif ($user->isWorker()) {
+        } elseif ($user->isEmployee()) {
             $stats['totalApplications'] = $user->applications()->count();
             $stats['totalEarnings'] = $user->receivedPayments()->where('status', 'completed')->sum('amount');
         }

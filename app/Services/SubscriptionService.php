@@ -32,11 +32,11 @@ class SubscriptionService
     }
 
     /**
-     * Get worker plans
+     * Get employee plans
      */
-    public function getWorkerPlans(): \Illuminate\Database\Eloquent\Collection
+    public function getEmployeePlans(): \Illuminate\Database\Eloquent\Collection
     {
-        return $this->getPlansForType('worker');
+        return $this->getPlansForType('employee');
     }
 
     /**
@@ -289,8 +289,8 @@ class SubscriptionService
             'employer_subscriptions' => Subscription::whereHas('plan', function ($query) {
                 $query->where('type', 'employer');
             })->where('status', 'active')->count(),
-            'worker_subscriptions' => Subscription::whereHas('plan', function ($query) {
-                $query->where('type', 'worker');
+            'employee_subscriptions' => Subscription::whereHas('plan', function ($query) {
+                $query->where('type', 'employee');
             })->where('status', 'active')->count(),
         ];
     }

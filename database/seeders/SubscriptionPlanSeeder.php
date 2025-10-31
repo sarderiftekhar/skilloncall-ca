@@ -104,12 +104,12 @@ class SubscriptionPlanSeeder extends Seeder
             ],
         ]);
 
-        // Worker Plans
+        // Employee Plans
         SubscriptionPlan::create([
             'name' => 'Basic',
-            'slug' => 'worker-basic',
+            'slug' => 'employee-basic',
             'description' => 'Get started finding work opportunities in your area.',
-            'type' => 'worker',
+            'type' => 'employee',
             'price' => 0.00,
             'yearly_price' => 0.00,
             'currency' => 'CAD',
@@ -133,10 +133,10 @@ class SubscriptionPlanSeeder extends Seeder
         ]);
 
         SubscriptionPlan::create([
-            'name' => 'Pro Worker',
-            'slug' => 'worker-pro',
+            'name' => 'Pro Employee',
+            'slug' => 'employee-pro',
             'description' => 'Stand out from the competition and get more job opportunities.',
-            'type' => 'worker',
+            'type' => 'employee',
             'price' => 19.99,
             'yearly_price' => 191.99, // 20% discount
             'currency' => 'CAD',
@@ -164,10 +164,10 @@ class SubscriptionPlanSeeder extends Seeder
         ]);
 
         SubscriptionPlan::create([
-            'name' => 'Premium Worker',
-            'slug' => 'worker-premium',
-            'description' => 'Maximum visibility and tools for professional skilled workers.',
-            'type' => 'worker',
+            'name' => 'Premium Employee',
+            'slug' => 'employee-premium',
+            'description' => 'Maximum visibility and tools for professional skilled employees.',
+            'type' => 'employee',
             'price' => 39.99,
             'yearly_price' => 383.99, // 20% discount
             'currency' => 'CAD',

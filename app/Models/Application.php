@@ -18,7 +18,7 @@ class Application extends Model
      */
     protected $fillable = [
         'job_id',
-        'worker_id',
+        'employee_id',
         'cover_letter',
         'proposed_rate',
         'estimated_duration',
@@ -55,11 +55,11 @@ class Application extends Model
     }
 
     /**
-     * Get the worker that submitted the application.
+     * Get the employee that submitted the application.
      */
-    public function worker(): BelongsTo
+    public function employee(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'worker_id');
+        return $this->belongsTo(User::class, 'employee_id');
     }
 
     /**

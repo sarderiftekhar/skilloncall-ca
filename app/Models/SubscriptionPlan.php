@@ -77,11 +77,11 @@ class SubscriptionPlan extends Model
     }
 
     /**
-     * Scope for worker plans
+     * Scope for employee plans
      */
-    public function scopeForWorkers($query)
+    public function scopeForEmployees($query)
     {
-        return $query->where('type', 'worker');
+        return $query->where('type', 'employee');
     }
 
     /**

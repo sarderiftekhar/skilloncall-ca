@@ -15,7 +15,7 @@ class ApplicationObserver
         Log::info('New application submitted', [
             'application_id' => $application->id,
             'job_id' => $application->job_id,
-            'worker_id' => $application->worker_id,
+            'employee_id' => $application->employee_id,
         ]);
 
         // Notify employer about new application
@@ -35,7 +35,7 @@ class ApplicationObserver
             Log::info('Application status changed', [
                 'application_id' => $application->id,
                 'job_id' => $application->job_id,
-                'worker_id' => $application->worker_id,
+                'employee_id' => $application->employee_id,
                 'old_status' => $application->getOriginal('status'),
                 'new_status' => $application->status,
             ]);
@@ -53,7 +53,7 @@ class ApplicationObserver
         Log::info('Application deleted', [
             'application_id' => $application->id,
             'job_id' => $application->job_id,
-            'worker_id' => $application->worker_id,
+            'employee_id' => $application->employee_id,
         ]);
 
         // Update job stats
@@ -168,7 +168,7 @@ class ApplicationObserver
         // Payment::create([
         //     'job_id' => $application->job_id,
         //     'payer_id' => $application->job->employer_id,
-        //     'payee_id' => $application->worker_id,
+        //     'payee_id' => $application->employee_id,
         //     'amount' => $application->job->budget,
         //     'status' => 'pending',
         //     'type' => 'job_payment',
@@ -182,7 +182,7 @@ class ApplicationObserver
     {
         // Find and process the payment for this job
         // $payment = Payment::where('job_id', $application->job_id)
-        //     ->where('payee_id', $application->worker_id)
+        //     ->where('payee_id', $application->employee_id)
         //     ->where('status', 'pending')
         //     ->first();
         // 

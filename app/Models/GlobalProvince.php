@@ -23,10 +23,10 @@ class GlobalProvince extends Model
     }
 
     /**
-     * Get all worker profiles in this province
+     * Get all employee profiles in this province
      */
-    public function workerProfiles(): HasMany
+    public function employeeProfiles(): HasMany
     {
-        return $this->hasMany(WorkerProfile::class, 'global_province_id');
+        return $this->hasMany(EmployeeProfile::class, 'global_province_id');
     }
 }

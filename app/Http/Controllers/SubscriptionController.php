@@ -126,7 +126,7 @@ class SubscriptionController extends Controller
 
         // Validate user role matches plan type
         if (($user->isEmployer() && $plan->type !== 'employer') ||
-            ($user->isWorker() && $plan->type !== 'worker')) {
+            ($user->isEmployee() && $plan->type !== 'employee')) {
             return response()->json([
                 'success' => false,
                 'message' => 'This plan is not available for your account type.',
@@ -238,7 +238,7 @@ class SubscriptionController extends Controller
 
         // Validate user role matches plan type
         if (($user->isEmployer() && $newPlan->type !== 'employer') ||
-            ($user->isWorker() && $newPlan->type !== 'worker')) {
+            ($user->isEmployee() && $newPlan->type !== 'employee')) {
             return response()->json([
                 'success' => false,
                 'message' => 'This plan is not available for your account type.',

@@ -34,11 +34,11 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::put('jobs/{job}/publish', [EmployerJobController::class, 'publish'])->name('jobs.publish');
     Route::put('jobs/{job}/unpublish', [EmployerJobController::class, 'unpublish'])->name('jobs.unpublish');
     
-    // Worker Management
-    Route::get('workers', [EmployerWorkerController::class, 'index'])->name('workers.index');
-    Route::get('workers/{worker}', [EmployerWorkerController::class, 'show'])->name('workers.show');
-    Route::post('workers/{worker}/hire', [EmployerWorkerController::class, 'hire'])->name('workers.hire');
-    Route::put('workers/{worker}/rate', [EmployerWorkerController::class, 'rate'])->name('workers.rate');
+    // Employee Management
+    Route::get('employees', [EmployerWorkerController::class, 'index'])->name('employees.index');
+    Route::get('employees/{employee}', [EmployerWorkerController::class, 'show'])->name('employees.show');
+    Route::post('employees/{employee}/hire', [EmployerWorkerController::class, 'hire'])->name('employees.hire');
+    Route::put('employees/{employee}/rate', [EmployerWorkerController::class, 'rate'])->name('employees.rate');
     
     // Application Management
     Route::get('applications', [EmployerApplicationController::class, 'index'])->name('applications.index');

@@ -109,7 +109,7 @@ class UserObserver
     {
         match ($user->role) {
             'employer' => $this->createEmployerProfile($user),
-            'worker' => $this->createWorkerProfile($user),
+            'employee' => $this->createEmployeeProfile($user),
             default => null,
         };
     }
@@ -129,12 +129,12 @@ class UserObserver
     }
 
     /**
-     * Create worker-specific profile data.
+     * Create employee-specific profile data.
      */
-    private function createWorkerProfile(User $user): void
+    private function createEmployeeProfile(User $user): void
     {
-        // Create worker profile record
-        // $user->workerProfile()->create([
+        // Create employee profile record
+        // $user->employeeProfile()->create([
         //     'hourly_rate' => null,
         //     'availability' => 'full_time',
         //     'experience_level' => 'beginner',

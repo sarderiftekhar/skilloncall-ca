@@ -3,6 +3,8 @@
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CheckUserActive;
 use App\Http\Middleware\EmployerMiddleware;
+use App\Http\Middleware\EmployeeMiddleware;
+use App\Http\Middleware\EnsureEmployeeProfileComplete;
 use App\Http\Middleware\EnsureWorkerProfileComplete;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -34,8 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             'admin' => AdminMiddleware::class,
             'employer' => EmployerMiddleware::class,
-            'worker' => WorkerMiddleware::class,
-            'ensure.worker.profile.complete' => EnsureWorkerProfileComplete::class,
+            'employee' => EmployeeMiddleware::class,
+            'worker' => WorkerMiddleware::class, // Keep for backward compatibility
+            'ensure.employee.profile.complete' => EnsureEmployeeProfileComplete::class,
+            'ensure.worker.profile.complete' => EnsureWorkerProfileComplete::class, // Keep for backward compatibility
             'check.user.active' => CheckUserActive::class,
         ]);
     })

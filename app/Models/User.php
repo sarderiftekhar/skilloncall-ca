@@ -53,9 +53,14 @@ class User extends Authenticatable
     /**
      * Relationships
      */
-    public function workerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function employeeProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(WorkerProfile::class);
+        return $this->hasOne(EmployeeProfile::class);
+    }
+
+    public function employerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EmployerProfile::class);
     }
 
     /**
@@ -71,9 +76,9 @@ class User extends Authenticatable
         return $this->role === 'employer';
     }
 
-    public function isWorker(): bool
+    public function isEmployee(): bool
     {
-        return $this->role === 'worker';
+        return $this->role === 'employee';
     }
 
     /**
@@ -85,11 +90,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the applications submitted by the worker.
+     * Get the applications submitted by the employee.
      */
     public function applications(): HasMany
     {
-        return $this->hasMany(Application::class, 'worker_id');
+        return $this->hasMany(Application::class, 'employee_id');
     }
 
     /**
@@ -125,7 +130,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the skills of the worker.
+     * Get the skills of the employee.
      */
     public function skills(): HasMany
     {
@@ -133,7 +138,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the portfolios of the worker.
+     * Get the portfolios of the employee.
      */
     public function portfolios(): HasMany
     {

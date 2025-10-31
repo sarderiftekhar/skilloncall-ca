@@ -28,7 +28,7 @@ class PortfolioPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isWorker();
+        return $user->isEmployee();
     }
 
     /**
@@ -36,8 +36,8 @@ class PortfolioPolicy
      */
     public function update(User $user, Portfolio $portfolio): bool
     {
-        // Workers can update their own portfolio items
-        return $user->isWorker() && $portfolio->user_id === $user->id;
+        // Employees can update their own portfolio items
+        return $user->isEmployee() && $portfolio->user_id === $user->id;
     }
 
     /**
@@ -50,7 +50,7 @@ class PortfolioPolicy
             return true;
         }
 
-        // Workers can delete their own portfolio items
-        return $user->isWorker() && $portfolio->user_id === $user->id;
+        // Employees can delete their own portfolio items
+        return $user->isEmployee() && $portfolio->user_id === $user->id;
     }
 }

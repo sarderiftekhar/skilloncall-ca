@@ -61,7 +61,7 @@ class EmployerDashboardService
     {
         return DB::table('applications')
             ->join('job_postings', 'applications.job_id', '=', 'job_postings.id')
-            ->join('users', 'applications.worker_id', '=', 'users.id')
+            ->join('users', 'applications.employee_id', '=', 'users.id')
             ->where('job_postings.employer_id', $employer->id)
             ->select([
                 'applications.id',
@@ -83,7 +83,7 @@ class EmployerDashboardService
     {
         return DB::table('applications')
             ->join('job_postings', 'applications.job_id', '=', 'job_postings.id')
-            ->join('users', 'applications.worker_id', '=', 'users.id')
+            ->join('users', 'applications.employee_id', '=', 'users.id')
             ->where('job_postings.employer_id', $employer->id)
             ->where('applications.status', 'accepted')
             ->select([
@@ -143,7 +143,7 @@ class EmployerDashboardService
             ->join('job_postings', 'applications.job_id', '=', 'job_postings.id')
             ->where('job_postings.employer_id', $employer->id)
             ->where('applications.status', 'accepted')
-            ->distinct('applications.worker_id')
-            ->count('applications.worker_id');
+            ->distinct('applications.employee_id')
+            ->count('applications.employee_id');
     }
 }

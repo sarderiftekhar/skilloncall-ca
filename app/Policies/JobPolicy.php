@@ -30,8 +30,8 @@ class JobPolicy
             return true;
         }
 
-        // Workers can view active/published jobs
-        if ($user->isWorker() && $job->status === 'active') {
+        // Employees can view active/published jobs
+        if ($user->isEmployee() && $job->status === 'active') {
             return true;
         }
 

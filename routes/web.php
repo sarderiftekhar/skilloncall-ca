@@ -7,9 +7,9 @@ Route::get('/', function (Illuminate\Http\Request $request) {
     $user = $request->user();
     $isProfileComplete = false;
     
-    if ($user && $user->role === 'worker') {
-        $workerProfile = \App\Models\WorkerProfile::where('user_id', $user->id)->first();
-        $isProfileComplete = $workerProfile && $workerProfile->is_profile_complete;
+    if ($user && $user->role === 'employee') {
+        $employeeProfile = \App\Models\EmployeeProfile::where('user_id', $user->id)->first();
+        $isProfileComplete = $employeeProfile && $employeeProfile->is_profile_complete;
     }
     
     return Inertia::render('welcome', [
@@ -145,14 +145,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         } elseif ($user->isEmployer()) {
             return redirect()->route('employer.dashboard');
         } else {
-            // For workers, check if profile is complete before redirecting
-            $workerProfile = \App\Models\WorkerProfile::where('user_id', $user->id)->first();
+            // For employees, check if profile is complete before redirecting
+            $employeeProfile = \App\Models\EmployeeProfile::where('user_id', $user->id)->first();
 
-            if (! $workerProfile || ! $workerProfile->is_profile_complete) {
-                return redirect()->route('worker.onboarding.index');
+            if (! $employeeProfile || ! $employeeProfile->is_profile_complete) {
+                return redirect()->route('employee.onboarding.index');
             }
 
-            return redirect()->route('worker.dashboard');
+            return redirect()->route('employee.dashboard');
         }
     })->name('dashboard')->middleware('check.user.active');
 });
@@ -182,7 +182,7 @@ Route::post('/progress/upload-screenshot', [App\Http\Controllers\SkillOnCallProg
 
 require __DIR__.'/admin.php';
 require __DIR__.'/employer.php';
-require __DIR__.'/worker.php';
+require __DIR__.'/employee.php';
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'nav.find_workers' => 'Find Workers',
+    'nav.find_employees' => 'Find Employees',
     'nav.post_jobs' => 'Post Jobs',
     'nav.how_it_works' => 'How it Works',
     'nav.pricing' => 'Pricing',
@@ -31,7 +31,7 @@ return [
     'footer.subscribe' => 'Subscribe',
     'footer.subscribing' => 'Subscribing...',
     'footer.for_employers' => 'For Employers',
-    'footer.for_workers' => 'For Workers',
+    'footer.for_employees' => 'For Employees',
     'footer.contact' => 'Contact',
     'footer.privacy' => 'Privacy',
     'footer.terms' => 'Terms',
