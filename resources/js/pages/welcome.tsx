@@ -333,7 +333,7 @@ export default function Welcome() {
                                         {/* Decorative colored circle behind avatar */}
                                         <div className={`absolute -bottom-3 -right-2 ${avatar.decorationSize ?? 'w-8 h-8'} rounded-full ${avatar.decoration} opacity-70 group-hover:scale-110 transition-transform duration-300`}></div>
                                         <Avatar className={`${avatar.size ?? 'h-20 w-20'} border-4 border-white shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300`}>
-                                            <AvatarImage src={avatar.src} alt="Worker" className="object-cover" />
+                                            <AvatarImage src={avatar.src} alt="Employee" className="object-cover" />
                                             <AvatarFallback className="text-white text-sm font-semibold" style={{backgroundColor: '#10B3D6'}}>
                                                 {avatar.initials}
                                             </AvatarFallback>

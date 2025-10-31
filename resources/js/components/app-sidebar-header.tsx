@@ -156,7 +156,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                             SkillOnCall
                                         </span>
                                         <span className="text-xs text-gray-500">
-                                            {auth.user.role === 'admin' ? 'Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Worker'}{' '}
+                                            {auth.user.role === 'admin' ? 'Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Employee'}{' '}
                                             Menu
                                         </span>
                                     </div>

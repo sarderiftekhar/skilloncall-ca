@@ -62,7 +62,7 @@ export default function Register() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="role">Register as</Label>
-                                <Select name="role" defaultValue="worker" onValueChange={(value) => {
+                                <Select name="role" defaultValue="employee" onValueChange={(value) => {
                                     const input = document.querySelector('input[name="role"]') as HTMLInputElement | null;
                                     if (input) input.value = value;
                                 }}>
@@ -71,11 +71,11 @@ export default function Register() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="employer">Employer</SelectItem>
-                                        <SelectItem value="worker">Worker</SelectItem>
+                                        <SelectItem value="employee">Employee</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {/* Hidden input to submit Select value */}
-                                <input type="hidden" name="role" defaultValue="worker" />
+                                <input type="hidden" name="role" defaultValue="employee" />
                                 <InputError message={errors.role} />
                             </div>
 
