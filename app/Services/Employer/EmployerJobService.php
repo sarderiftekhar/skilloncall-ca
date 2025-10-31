@@ -46,13 +46,27 @@ class EmployerJobService
     public function getJobCategories(): array
     {
         return [
-            'web_development' => 'Web Development',
-            'mobile_development' => 'Mobile Development',
-            'design' => 'Design',
-            'writing' => 'Writing & Content',
-            'marketing' => 'Marketing',
-            'data_entry' => 'Data Entry',
+            'automotive' => 'Automotive',
+            'cleaning_maintenance' => 'Cleaning & Maintenance',
+            'construction' => 'Construction',
             'customer_service' => 'Customer Service',
+            'data_entry' => 'Data Entry',
+            'design' => 'Design',
+            'event_services' => 'Event Services',
+            'food_service' => 'Food Service',
+            'handyman_services' => 'Handyman Services',
+            'landscaping_outdoors' => 'Landscaping & Outdoors',
+            'marketing' => 'Marketing',
+            'mobile_development' => 'Mobile Development',
+            'personal_care' => 'Personal Care',
+            'personal_services' => 'Personal Services',
+            'retail' => 'Retail',
+            'seasonal_work' => 'Seasonal Work',
+            'technology' => 'Technology',
+            'trades_maintenance' => 'Trades & Maintenance',
+            'transportation_delivery' => 'Transportation & Delivery',
+            'web_development' => 'Web Development',
+            'writing' => 'Writing & Content',
             'other' => 'Other',
         ];
     }

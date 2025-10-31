@@ -229,6 +229,12 @@ export default function WorkerOnboarding({
                         }
                     });
 
+                    // Explicitly add CSRF token to FormData to prevent 419 errors
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    if (csrfToken) {
+                        formDataObj.append('_token', csrfToken);
+                    }
+
                     submitData = formDataObj;
                     console.log('Using FormData for file upload');
                 } else {
@@ -255,6 +261,18 @@ export default function WorkerOnboarding({
                         console.log('Error values:', Object.values(errors));
                         console.log('Stringified errors:', JSON.stringify(errors, null, 2));
                         console.error('Validation errors:', errors);
+                        
+                        // Check for 419 Page Expired error (CSRF token expired)
+                        const isCsrfError = errors.form === '419 Page Expired' || 
+                                           errors.message === '419 Page Expired' ||
+                                           (typeof errors.form === 'string' && errors.form.includes('419'));
+                        
+                        if (isCsrfError) {
+                            console.warn('CSRF token expired - reloading page to refresh token');
+                            // Reload the page to get a fresh CSRF token and session
+                            window.location.reload();
+                            return;
+                        }
                         
                         // Check for debug info to show detailed development errors
                         if (errors.debug_file || errors.debug_line || errors.debug_step || errors.debug_data) {
@@ -413,6 +431,18 @@ export default function WorkerOnboarding({
                     },
                     onError: (errors) => {
                         console.error('Completion errors:', errors);
+                        
+                        // Check for 419 Page Expired error (CSRF token expired)
+                        const isCsrfError = errors.form === '419 Page Expired' || 
+                                           errors.message === '419 Page Expired' ||
+                                           (typeof errors.form === 'string' && errors.form.includes('419'));
+                        
+                        if (isCsrfError) {
+                            console.warn('CSRF token expired during completion - reloading page to refresh token');
+                            window.location.reload();
+                            return;
+                        }
+                        
                         const errorMessage = errors?.message || (typeof errors === 'string' ? errors : t('modal.complete_error.message', 'An error occurred while completing your profile.'));
                         const details = errors && typeof errors === 'object' && !errors?.message 
                             ? Object.entries(errors).map(([key, value]) => `${key}: ${String(value)}`)

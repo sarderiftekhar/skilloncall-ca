@@ -114,6 +114,14 @@ class HandleInertiaRequests extends Middleware
                 str_contains($currentPath, 'admin/') ||
                 str_contains($currentPath, 'employer/')) {
                 $translations = __('dashboard');
+                
+                // Load jobs translations for employer job pages
+                if (str_contains($routeName ?? '', 'jobs') || str_contains($currentPath, 'jobs')) {
+                    $jobsTranslations = __('jobs');
+                    if (is_array($jobsTranslations)) {
+                        $translations = array_merge($translations ?? [], ['jobs' => $jobsTranslations]);
+                    }
+                }
             } elseif (str_contains($routeName ?? '', 'onboarding')) {
                 $translations = __('onboarding');
             } elseif (str_contains($routeName ?? '', 'welcome')) {

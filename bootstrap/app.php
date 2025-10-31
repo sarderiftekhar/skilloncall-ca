@@ -40,5 +40,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Handle CSRF token mismatch errors for Inertia and AJAX requests
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            // Check if it's an Inertia request or AJAX request
+            if ($request->expectsJson() || $request->header('X-Inertia') || $request->ajax()) {
+                return response()->json([
+                    'message' => '419 Page Expired',
+                    'errors' => [
+                        'form' => '419 Page Expired',
+                    ],
+                ], 419);
+            }
+        });
     })->create();
