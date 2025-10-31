@@ -139,6 +139,26 @@
     body {
         @apply bg-background text-foreground;
     }
+    
+    /* Ensure all clickable elements show pointer cursor */
+    a,
+    button,
+    [role="button"],
+    [onclick],
+    [onClick],
+    .cursor-pointer,
+    input[type="button"],
+    input[type="submit"],
+    input[type="reset"],
+    select {
+        cursor: pointer !important;
+    }
+    
+    /* Cards with onClick handlers */
+    [onclick] > *,
+    [onClick] > * {
+        cursor: inherit;
+    }
 }
 
 /* Custom sidebar styling to force white text */

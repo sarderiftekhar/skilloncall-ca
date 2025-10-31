@@ -131,7 +131,15 @@ export default function EmployerDashboard({
             <Head title="Employer Dashboard">
                 <style>{`
                     * { cursor: default; }
-                    a, button, [role="button"], .cursor-pointer { cursor: pointer !important; }
+                    a, button, [role="button"], .cursor-pointer, 
+                    [onclick], [onClick], select, input[type="button"],
+                    input[type="submit"], input[type="reset"] { 
+                        cursor: pointer !important; 
+                    }
+                    
+                    /* Ensure cards with onClick show pointer cursor */
+                    [onclick], [onClick] { cursor: pointer !important; }
+                    [onclick] *, [onClick] * { cursor: inherit !important; }
                     
                     .employer-title {
                         color: #192341 !important;

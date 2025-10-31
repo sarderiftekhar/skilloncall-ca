@@ -172,7 +172,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild style={{height: '2.7em', width: '100%', justifyContent: 'flex-start'}}>
-                            <Link href={addLangParam("/dashboard", locale)} className="flex items-center gap-2 px-2 w-full">
+                            <Link href={addLangParam("/dashboard", locale)} className="flex items-center gap-2 px-2 w-full cursor-pointer">
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
