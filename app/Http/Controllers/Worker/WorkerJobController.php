@@ -26,11 +26,21 @@ class WorkerJobController extends Controller
 
         // Extract professions from all jobs inline
         $professionsCollection = collect();
+        $excludeWords = [
+            'the', 'for', 'and', 'or', 'a', 'an', 'in', 'on', 'at', 'to', 'from', 'with', 'by',
+            'needed', 'shift', 'service', 'work', 'job', 'position', 'team', 'member', 'day', 
+            'night', 'evening', 'evenings', 'morning', 'weekend', 'weekends', 'part', 'time', 
+            'full', 'flexible', 'hours', 'daily', 'weekly', 'monthly', 'contract', 'temporary',
+            'permanent', 'immediate', 'urgent', 'experienced', 'entry', 'level', 'senior',
+            'junior', 'assistant', 'helper', 'specialist', 'coordinator', 'supervisor',
+            'manager', 'director', 'lead', 'head'
+        ];
+        
         foreach ($allActiveJobs as $job) {
             $titleParts = preg_split('/[\s\-\/]+/', strtolower($job->title));
             foreach ($titleParts as $part) {
                 $part = trim($part);
-                if (strlen($part) > 2 && !in_array($part, ['the', 'for', 'and', 'or', 'a', 'an', 'in', 'on', 'at', 'to', 'from', 'with', 'by'])) {
+                if (strlen($part) > 2 && !in_array($part, $excludeWords)) {
                     $professionsCollection->push(ucfirst($part));
                 }
             }
