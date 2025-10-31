@@ -10,6 +10,7 @@ use App\Http\Controllers\Worker\WorkerProfileController;
 use App\Http\Controllers\Worker\WorkerProfileController as WorkerProfileCrudController;
 use App\Http\Controllers\Worker\WorkerSkillController;
 use App\Http\Controllers\Worker\WorkerAvailabilityController;
+use App\Http\Controllers\Worker\WorkerMessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,6 +61,12 @@ Route::middleware(['auth', 'verified', 'worker', 'ensure.worker.profile.complete
     Route::get('applications/{application}', [WorkerApplicationController::class, 'show'])->name('applications.show');
     Route::put('applications/{application}/withdraw', [WorkerApplicationController::class, 'withdraw'])->name('applications.withdraw');
     Route::put('applications/{application}/complete', [WorkerApplicationController::class, 'complete'])->name('applications.complete');
+
+    // Messages Management
+    Route::get('messages', [WorkerMessageController::class, 'index'])->name('messages.index');
+    Route::get('messages/{message}', [WorkerMessageController::class, 'show'])->name('messages.show');
+    Route::post('messages', [WorkerMessageController::class, 'store'])->name('messages.store');
+    Route::put('messages/{message}/read', [WorkerMessageController::class, 'markAsRead'])->name('messages.read');
 
     // Profile Management (CRUD for profile view/edit)
     Route::get('profile', [WorkerProfileCrudController::class, 'show'])->name('profile.show');

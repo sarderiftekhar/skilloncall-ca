@@ -14,12 +14,19 @@ import { useState } from 'react';
 import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users } from 'react-feather';
 import AppLogoIcon from './app-logo-icon';
 
+// Helper function to add language parameter to URLs
+function addLangParam(href: string, locale: string): string {
+    const urlObj = new URL(href, window.location.origin);
+    urlObj.searchParams.set('lang', locale);
+    return urlObj.pathname + urlObj.search;
+}
+
 // Get role-based navigation items for mobile menu
-function getRoleBasedNavItems(userRole: string, t: (key: string) => string): NavItem[] {
+function getRoleBasedNavItems(userRole: string, t: (key: string) => string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
             title: t('nav.dashboard'),
-            href: '/dashboard',
+            href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
     ];
@@ -29,27 +36,27 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string): Nav
             ...baseItems,
             {
                 title: 'User Management',
-                href: '/admin/users',
+                href: addLangParam('/admin/users', locale),
                 icon: Users,
             },
             {
                 title: 'Job Management',
-                href: '/admin/jobs',
+                href: addLangParam('/admin/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Payments & Billing',
-                href: '/admin/payments',
+                href: addLangParam('/admin/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Reports & Analytics',
-                href: '/admin/reports',
+                href: addLangParam('/admin/reports', locale),
                 icon: Activity,
             },
             {
                 title: 'System Settings',
-                href: '/admin/settings',
+                href: addLangParam('/admin/settings', locale),
                 icon: Settings,
             },
         ];
@@ -60,27 +67,27 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string): Nav
             ...baseItems,
             {
                 title: 'Post Jobs',
-                href: '/employer/jobs/create',
+                href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Manage Jobs',
-                href: '/employer/jobs',
+                href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
                 title: 'Applications',
-                href: '/employer/applications',
+                href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
                 title: 'Payments',
-                href: '/employer/payments',
+                href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -91,37 +98,37 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string): Nav
             ...baseItems,
             {
                 title: t('nav.find_jobs'),
-                href: '/worker/jobs',
+                href: addLangParam('/worker/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: t('nav.saved_jobs'),
-                href: '/worker/saved-jobs',
+                href: addLangParam('/worker/saved-jobs', locale),
                 icon: Bookmark,
             },
             {
                 title: t('nav.my_applications'),
-                href: '/worker/applications',
+                href: addLangParam('/worker/applications', locale),
                 icon: Users,
             },
             {
                 title: t('nav.messages'),
-                href: '/worker/messages',
+                href: addLangParam('/worker/messages', locale),
                 icon: MessageCircle,
             },
             {
                 title: t('nav.availability'),
-                href: '/worker/availability',
+                href: addLangParam('/worker/availability', locale),
                 icon: Clock,
             },
             {
                 title: t('nav.my_profile'),
-                href: '/worker/profile',
+                href: addLangParam('/worker/profile', locale),
                 icon: Settings,
             },
             {
                 title: t('nav.subscription'),
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -131,12 +138,13 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string): Nav
 }
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
+    const { locale } = useTranslations();
     const page = usePage<SharedData>();
     const { auth, subscription } = page.props;
     const { toggleSidebar } = useSidebar();
     const { t } = useTranslations();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t);
+    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t, locale);
 
     // Notification state - in real app, this would come from props/context/API
     const [notifications] = useState([

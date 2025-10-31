@@ -20,12 +20,19 @@ import {
 } from 'react-feather';
 import AppLogo from './app-logo';
 
+// Helper function to add language parameter to URLs
+function addLangParam(href: string, locale: string): string {
+    const urlObj = new URL(href, window.location.origin);
+    urlObj.searchParams.set('lang', locale);
+    return urlObj.pathname + urlObj.search;
+}
+
 // Navigation items - role-based navigation
-function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
+function getNavItems(userRole: string, t: (key: string) => string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
             title: t('nav.dashboard'),
-            href: '/dashboard',
+            href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
     ];
@@ -35,32 +42,32 @@ function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
             ...baseItems,
             {
                 title: 'User Management',
-                href: '/admin/users',
+                href: addLangParam('/admin/users', locale),
                 icon: Users,
             },
             {
                 title: 'Job Management',
-                href: '/admin/jobs',
+                href: addLangParam('/admin/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Payments & Billing',
-                href: '/admin/payments',
+                href: addLangParam('/admin/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Reports & Analytics',
-                href: '/admin/reports',
+                href: addLangParam('/admin/reports', locale),
                 icon: Activity,
             },
             {
                 title: 'Subscriptions',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: CreditCard,
             },
             {
                 title: 'System Settings',
-                href: '/admin/settings',
+                href: addLangParam('/admin/settings', locale),
                 icon: Settings,
             },
         ];
@@ -71,27 +78,27 @@ function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
             ...baseItems,
             {
                 title: 'Post Jobs',
-                href: '/employer/jobs/create',
+                href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Manage Jobs',
-                href: '/employer/jobs',
+                href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
                 title: 'Applications',
-                href: '/employer/applications',
+                href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
                 title: 'Payments',
-                href: '/employer/payments',
+                href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -102,37 +109,37 @@ function getNavItems(userRole: string, t: (key: string) => string): NavItem[] {
             ...baseItems,
             {
                 title: t('nav.find_jobs'),
-                href: '/worker/jobs',
+                href: addLangParam('/worker/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: t('nav.saved_jobs'),
-                href: '/worker/saved-jobs',
+                href: addLangParam('/worker/saved-jobs', locale),
                 icon: Bookmark,
             },
             {
                 title: t('nav.my_applications'),
-                href: '/worker/applications',
+                href: addLangParam('/worker/applications', locale),
                 icon: Users,
             },
             {
                 title: t('nav.messages'),
-                href: '/worker/messages',
+                href: addLangParam('/worker/messages', locale),
                 icon: MessageCircle,
             },
             {
                 title: t('nav.availability'),
-                href: '/worker/availability',
+                href: addLangParam('/worker/availability', locale),
                 icon: Clock,
             },
             {
                 title: t('nav.my_profile'),
-                href: '/worker/profile',
+                href: addLangParam('/worker/profile', locale),
                 icon: Settings,
             },
             {
                 title: t('nav.subscription'),
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -145,8 +152,8 @@ const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const { t } = useTranslations();
-    const navItems = getNavItems(auth.user.role || 'admin', t);
+    const { t, locale } = useTranslations();
+    const navItems = getNavItems(auth.user.role || 'admin', t, locale);
 
     return (
         <Sidebar variant="inset" className="hidden lg:flex w-64 min-w-64" style={{width: '256px', minWidth: '256px'}}>
@@ -154,7 +161,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild style={{height: '2.7em', width: '100%', justifyContent: 'flex-start'}}>
-                            <Link href="/dashboard" className="flex items-center gap-2 px-2 w-full">
+                            <Link href={addLangParam("/dashboard", locale)} className="flex items-center gap-2 px-2 w-full">
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

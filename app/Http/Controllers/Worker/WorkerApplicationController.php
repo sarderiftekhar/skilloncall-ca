@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Worker;
 
 use App\Http\Controllers\Controller;
 use App\Models\Application;
-use App\Services\Worker\WorkerApplicationService;
+// use App\Services\Worker\WorkerApplicationService; // Temporarily commented out
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,60 +12,47 @@ use Inertia\Response;
 
 class WorkerApplicationController extends Controller
 {
-    public function __construct(
-        protected WorkerApplicationService $applicationService
-    ) {}
+    // public function __construct(
+    //     protected WorkerApplicationService $applicationService
+    // ) {} // Temporarily commented out
 
     /**
      * Display a listing of worker's applications.
+     * Temporarily showing coming soon page.
      */
     public function index(Request $request): Response
     {
-        $applications = $this->applicationService->getWorkerApplications(auth()->user(), $request->all());
-
-        return Inertia::render('worker/applications/index', [
-            'applications' => $applications,
-            'filters' => $request->only(['search', 'status']),
-        ]);
+        // Temporarily return coming soon page
+        return Inertia::render('worker/applications/coming-soon');
     }
 
     /**
      * Display the specified application.
+     * Temporarily showing coming soon page.
      */
     public function show(Application $application): Response
     {
-        $this->authorize('view', $application);
-        
-        $applicationDetails = $this->applicationService->getApplicationDetails($application);
-
-        return Inertia::render('worker/applications/show', [
-            'application' => $applicationDetails,
-        ]);
+        // Temporarily return coming soon page
+        return Inertia::render('worker/applications/coming-soon');
     }
 
     /**
      * Withdraw the specified application.
+     * Temporarily disabled.
      */
     public function withdraw(Application $application): RedirectResponse
     {
-        $this->authorize('update', $application);
-        
-        $this->applicationService->withdrawApplication($application);
-
         return redirect()->back()
-            ->with('success', 'Application withdrawn successfully.');
+            ->with('info', 'This feature is coming soon.');
     }
 
     /**
      * Mark the specified application as completed.
+     * Temporarily disabled.
      */
     public function complete(Application $application): RedirectResponse
     {
-        $this->authorize('update', $application);
-        
-        $this->applicationService->completeApplication($application);
-
         return redirect()->back()
-            ->with('success', 'Job marked as completed successfully.');
+            ->with('info', 'This feature is coming soon.');
     }
 }
