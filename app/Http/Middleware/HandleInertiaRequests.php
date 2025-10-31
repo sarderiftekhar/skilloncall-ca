@@ -105,8 +105,10 @@ class HandleInertiaRequests extends Middleware
             $routeName = $request->route()?->getName();
             $currentPath = $request->path();
             
-            // Load dashboard translations for all worker pages since they share navigation
+            // Load dashboard translations for all employee pages since they share navigation
             if (str_contains($routeName ?? '', 'dashboard') || 
+                str_contains($currentPath, 'employee/') || 
+                str_contains($routeName ?? '', 'employee.') ||
                 str_contains($currentPath, 'worker/') || 
                 str_contains($routeName ?? '', 'worker.') ||
                 str_contains($currentPath, 'subscriptions') ||
