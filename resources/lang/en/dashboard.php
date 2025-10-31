@@ -2,15 +2,15 @@
 
 return [
     // Page title and meta
-    'title' => 'Worker Dashboard',
-    'page_title' => 'Worker Dashboard',
+    'title' => 'Employee Dashboard',
+    'page_title' => 'Employee Dashboard',
     'welcome_message' => 'Welcome back! Here\'s your activity overview.',
 
     // Header badges
     'profile_complete' => 'Profile complete',
     'profile_complete_short' => 'Complete',
-    'active_worker' => 'Active Worker',
-    'active_worker_short' => 'Active',
+    'active_employee' => 'Active Employee',
+    'active_employee_short' => 'Active',
 
     // Stats cards
     'stats' => [
@@ -105,7 +105,7 @@ return [
     'total_hours' => 'Total: :hours hours',
 
     // Profile completion
-    'complete_profile_title' => 'Complete Your Worker Profile (:percentage%)',
+    'complete_profile_title' => 'Complete Your Employee Profile (:percentage%)',
     'complete_profile_description' => 'Add your skills, work experience, availability schedule, and hourly rates to get more booking requests.',
     'complete_profile_button' => 'Complete Profile',
     'current_bookings' => 'Current bookings',

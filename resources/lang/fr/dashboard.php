@@ -2,15 +2,15 @@
 
 return [
     // Page title and meta
-    'title' => 'Tableau de Bord Travailleur',
+    'title' => 'Tableau de Bord Employé',
     'page_title' => 'Tableau de Bord',
     'welcome_message' => 'Bon retour ! Voici un aperçu de votre activité.',
 
     // Header badges
     'profile_complete' => 'Profil complet',
     'profile_complete_short' => 'Complet',
-    'active_worker' => 'Travailleur Actif',
-    'active_worker_short' => 'Actif',
+    'active_employee' => 'Employé Actif',
+    'active_employee_short' => 'Actif',
 
     // Stats cards
     'stats' => [
@@ -105,7 +105,7 @@ return [
     'total_hours' => 'Total : :hours heures',
 
     // Profile completion
-    'complete_profile_title' => 'Complétez Votre Profil Travailleur (:percentage%)',
+    'complete_profile_title' => 'Complétez Votre Profil Employé (:percentage%)',
     'complete_profile_description' => 'Ajoutez vos compétences, expérience de travail, horaires de disponibilité et tarifs horaires pour obtenir plus de demandes de réservation.',
     'complete_profile_button' => 'Compléter le Profil',
     'current_bookings' => 'Réservations actuelles',
