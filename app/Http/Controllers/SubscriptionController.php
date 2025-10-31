@@ -7,6 +7,7 @@ use App\Services\SubscriptionService;
 use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -28,7 +29,8 @@ class SubscriptionController extends Controller
     public function index(): Response
     {
         try {
-            $user = auth()->user();
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
             
             $employerPlans = $this->subscriptionService->getEmployerPlans();
             $employeePlans = $this->subscriptionService->getEmployeePlans();
@@ -53,7 +55,7 @@ class SubscriptionController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('Subscription index error: ' . $e->getMessage(), [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -62,7 +64,7 @@ class SubscriptionController extends Controller
                 'employerPlans' => [],
                 'employeePlans' => [],
                 'currentSubscription' => null,
-                'userRole' => auth()->user()->role ?? 'employee',
+                'userRole' => Auth::user()->role ?? 'employee',
                 'error' => 'Unable to load subscription data. Please try again.',
             ]);
         }
@@ -73,7 +75,8 @@ class SubscriptionController extends Controller
      */
     public function show(): Response|\Illuminate\Http\RedirectResponse
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $subscription = $user->activeSubscription();
 
         if (!$subscription) {
@@ -137,7 +140,8 @@ class SubscriptionController extends Controller
             'billing_interval' => 'required|in:monthly,yearly',
         ]);
 
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $plan = SubscriptionPlan::findOrFail($request->plan_id);
 
         // Validate user role matches plan type
@@ -201,7 +205,8 @@ class SubscriptionController extends Controller
      */
     public function cancel(Request $request): JsonResponse
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $subscription = $user->activeSubscription();
 
         if (!$subscription) {
@@ -240,7 +245,8 @@ class SubscriptionController extends Controller
             'billing_interval' => 'sometimes|in:monthly,yearly',
         ]);
 
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $subscription = $user->activeSubscription();
 
         if (!$subscription) {
@@ -291,7 +297,8 @@ class SubscriptionController extends Controller
      */
     public function usage(): JsonResponse
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $subscription = $user->activeSubscription();
 
         if (!$subscription) {
