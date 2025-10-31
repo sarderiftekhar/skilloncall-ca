@@ -264,7 +264,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                             {initialJobs.data.length > 0 ? (
                                 initialJobs.data.map((job, index) => (
                             <div key={job.id} className={`animate-[fadeInUp_0.4s_ease-out_${0.1 + index * 0.05}s_both]`}>
-                                <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105">
+                                <Card className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
                                 <CardContent className="p-4 lg:p-5">
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
                                         {/* Job Info */}
@@ -325,7 +325,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                                 <Button
                                                     size="sm"
                                                     onClick={() => handleApplyClick(job.id)}
-                                                    className="text-white text-xs px-4 lg:px-6 flex-1 sm:flex-none cursor-pointer hover:scale-105 transition-all duration-200"
+                                                    className="text-white text-xs px-4 lg:px-6 flex-1 sm:flex-none cursor-pointer hover:scale-[1.02] transition-all duration-200"
                                                     style={{ backgroundColor: '#10B3D6' }}
                                                 >
                                                     {t('apply')}
@@ -335,7 +335,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                                 size="sm"
                                                 variant="outline"
                                                 onClick={() => handleUnsaveJob(job.id)}
-                                                className="text-xs flex-1 sm:flex-none cursor-pointer text-red-500 hover:text-red-700 hover:border-red-300 hover:scale-105 transition-all duration-200"
+                                                className="text-xs flex-1 sm:flex-none cursor-pointer text-red-500 hover:text-red-700 hover:border-red-300 hover:scale-[1.02] transition-all duration-200"
                                             >
                                                 <Bookmark 
                                                     className="w-4 h-4"
@@ -356,7 +356,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                 <p className="text-sm text-gray-500 mb-4">{t('no_saved_jobs_description')}</p>
                                 <Button
                                     onClick={() => router.get('/worker/jobs')}
-                                    className="cursor-pointer text-white hover:scale-105 transition-all duration-200"
+                                    className="cursor-pointer text-white hover:scale-[1.02] transition-all duration-200"
                                     style={{ backgroundColor: '#10B3D6' }}
                                 >
                                     {t('browse_jobs')}
@@ -381,7 +381,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                 variant="outline"
                                 onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page - 1}`)}
                                 disabled={initialJobs.current_page === 1}
-                                className="cursor-pointer hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
+                                className="cursor-pointer hover:scale-[1.02] transition-all duration-200 disabled:hover:scale-100"
                             >
                                 <ChevronLeft className="w-4 h-4" />
                             </Button>
@@ -395,7 +395,7 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                 variant="outline"
                                 onClick={() => router.get(`/worker/saved-jobs?page=${initialJobs.current_page + 1}`)}
                                 disabled={initialJobs.current_page === initialJobs.last_page}
-                                className="cursor-pointer hover:scale-105 transition-all duration-200 disabled:hover:scale-100"
+                                className="cursor-pointer hover:scale-[1.02] transition-all duration-200 disabled:hover:scale-100"
                             >
                                 <ChevronRight className="w-4 h-4" />
                             </Button>
