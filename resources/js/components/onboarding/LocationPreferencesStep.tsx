@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Plus, X, Truck, Tool, Globe, DollarSign, CheckCircle, Star } from 'react-feather';
+import { MapPin, Plus, X, Truck, Tool, Globe, DollarSign, CheckCircle, Star, Loader, Check } from 'react-feather';
 
 interface LocationPreferencesStepProps {
     formData: any;
@@ -22,6 +22,12 @@ interface ServiceArea {
     travel_time_minutes: number;
     additional_charge: number;
     is_primary_area: boolean;
+}
+
+interface City {
+    id: number;
+    name: string;
+    global_province_id: number;
 }
 
 interface SelectedLanguage {
@@ -84,8 +90,9 @@ export default function LocationPreferencesStep({
         return unique;
     }, [globalLanguages]);
 
-    const [serviceAreas, setServiceAreas] = useState<ServiceArea[]>(
-        formData.service_areas || [{
+    const [serviceAreas, setServiceAreas] = useState<ServiceArea[]>(() => {
+        // Always ensure the home area is first
+        const homeArea: ServiceArea = {
             id: 'primary',
             postal_code: formData.postal_code || '',
             city: formData.city || '',
@@ -93,15 +100,101 @@ export default function LocationPreferencesStep({
             travel_time_minutes: 0,
             additional_charge: 0,
             is_primary_area: true
-        }]
-    );
+        };
+        
+        // If we have saved service areas, filter out any that might be marked as primary
+        // and prepend the home area
+        if (formData.service_areas && Array.isArray(formData.service_areas)) {
+            const additionalAreas = formData.service_areas.filter((area: ServiceArea) => !area.is_primary_area);
+            return [homeArea, ...additionalAreas];
+        }
+        
+        return [homeArea];
+    });
     
     const [selectedLanguages, setSelectedLanguages] = useState<SelectedLanguage[]>(formData.selected_languages || []);
     const [selectedLanguageId, setSelectedLanguageId] = useState<string>('');
+    
+    // City loading states for each service area
+    const [citiesByArea, setCitiesByArea] = useState<Record<string, City[]>>({});
+    const [loadingCitiesByArea, setLoadingCitiesByArea] = useState<Record<string, boolean>>({});
+    const [citySearchByArea, setCitySearchByArea] = useState<Record<string, string>>({});
+    const [showCitySuggestionsByArea, setShowCitySuggestionsByArea] = useState<Record<string, boolean>>({});
+    const cityInputRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
     const handleBasicFieldChange = (field: string, value: any) => {
         updateFormData({ [field]: value });
     };
+
+    // Fetch cities for a specific service area
+    const fetchCitiesForArea = async (areaId: string, province: string, searchTerm?: string) => {
+        if (!province) return;
+
+        setLoadingCitiesByArea(prev => ({ ...prev, [areaId]: true }));
+        try {
+            const searchParam = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
+            const response = await fetch(`/worker/api/provinces/code/${province}/cities${searchParam}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCitiesByArea(prev => ({ ...prev, [areaId]: data }));
+            }
+        } catch (error) {
+            console.error('Failed to fetch cities:', error);
+        } finally {
+            setLoadingCitiesByArea(prev => ({ ...prev, [areaId]: false }));
+        }
+    };
+
+    // Debounce city search for each service area
+    useEffect(() => {
+        const timers: Record<string, NodeJS.Timeout> = {};
+
+        Object.keys(citySearchByArea).forEach(areaId => {
+            const searchTerm = citySearchByArea[areaId];
+            const area = serviceAreas.find(a => a.id === areaId);
+            
+            if (area && area.province && citiesByArea[areaId]) {
+                // Only refetch if we have an existing city list (meaning user is searching)
+                timers[areaId] = setTimeout(() => {
+                    fetchCitiesForArea(areaId, area.province, searchTerm);
+                }, 300);
+            }
+        });
+
+        return () => {
+            Object.values(timers).forEach(timer => clearTimeout(timer));
+        };
+    }, [citySearchByArea]);
+
+    // Validate Canadian postal code format
+    const validatePostalCode = (postalCode: string): boolean => {
+        const canadianPostalCodeRegex = /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/i;
+        return canadianPostalCodeRegex.test(postalCode.trim());
+    };
+
+    // Format postal code (add space if needed)
+    const formatPostalCode = (value: string): string => {
+        const cleaned = value.toUpperCase().replace(/\s/g, '');
+        if (cleaned.length > 3) {
+            return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)}`;
+        }
+        return cleaned;
+    };
+
+    // Close city suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            Object.keys(cityInputRefs.current).forEach(areaId => {
+                const ref = cityInputRefs.current[areaId];
+                if (ref && !ref.contains(event.target as Node)) {
+                    setShowCitySuggestionsByArea(prev => ({ ...prev, [areaId]: false }));
+                }
+            });
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
 
     // Service Area Management
     const addServiceArea = () => {
@@ -134,6 +227,28 @@ export default function LocationPreferencesStep({
         );
         setServiceAreas(updated);
         updateFormData({ service_areas: updated });
+        
+        // When province changes, clear the current city and reset city data
+        if (field === 'province') {
+            const updatedWithClearedCity = updated.map(a => 
+                a.id === id ? { ...a, city: '' } : a
+            );
+            setServiceAreas(updatedWithClearedCity);
+            updateFormData({ service_areas: updatedWithClearedCity });
+            
+            // Clear city-related state for this area
+            setCitiesByArea(prev => {
+                const newState = { ...prev };
+                delete newState[id];
+                return newState;
+            });
+            setCitySearchByArea(prev => {
+                const newState = { ...prev };
+                delete newState[id];
+                return newState;
+            });
+            setShowCitySuggestionsByArea(prev => ({ ...prev, [id]: false }));
+        }
     };
 
     // Language Management
@@ -405,24 +520,128 @@ export default function LocationPreferencesStep({
                                     </div>
                                     <div>
                                         <Label className="text-sm font-medium">City *</Label>
-                                        <Input
-                                            value={area.city}
-                                            onChange={(e) => updateServiceArea(area.id, 'city', e.target.value)}
-                                            placeholder="Toronto"
-                                            className="mt-1"
-                                            disabled={area.is_primary_area}
-                                        />
+                                        {area.is_primary_area ? (
+                                            <Input
+                                                value={area.city}
+                                                className="mt-1"
+                                                disabled={true}
+                                            />
+                                        ) : (
+                                            <div ref={(el) => {cityInputRefs.current[area.id] = el}} className="relative mt-1">
+                                                <Input
+                                                    value={citySearchByArea[area.id] !== undefined ? citySearchByArea[area.id] : area.city || ''}
+                                                    onChange={(e) => {
+                                                        const value = e.target.value;
+                                                        setCitySearchByArea(prev => ({ ...prev, [area.id]: value }));
+                                                        setShowCitySuggestionsByArea(prev => ({ ...prev, [area.id]: true }));
+                                                        // If user clears the input, clear the city
+                                                        if (!value) {
+                                                            updateServiceArea(area.id, 'city', '');
+                                                        }
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (area.province && !citiesByArea[area.id]) {
+                                                            // Load cities on first focus when province is selected
+                                                            fetchCitiesForArea(area.id, area.province);
+                                                        }
+                                                        if (area.province) {
+                                                            setShowCitySuggestionsByArea(prev => ({ ...prev, [area.id]: true }));
+                                                        }
+                                                    }}
+                                                    placeholder={area.province ? "Type to search cities..." : "Select a province first"}
+                                                    disabled={!area.province}
+                                                    style={{ cursor: area.province ? 'text' : 'not-allowed' }}
+                                                    className="pr-10"
+                                                />
+                                                {area.city && !loadingCitiesByArea[area.id] && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                        <div className="bg-green-500 rounded-full p-1">
+                                                            <Check className="h-3 w-3 text-white" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {loadingCitiesByArea[area.id] && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                                        <Loader className="h-4 w-4 animate-spin text-gray-400" />
+                                                    </div>
+                                                )}
+                                                {/* Suggestions dropdown */}
+                                                {showCitySuggestionsByArea[area.id] && citiesByArea[area.id] && citiesByArea[area.id].length > 0 && (
+                                                    <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-gray-200 bg-white shadow-lg">
+                                                        {citiesByArea[area.id].map((city) => (
+                                                            <div
+                                                                key={city.id}
+                                                                className="cursor-pointer px-3 py-2 font-medium text-gray-900 hover:bg-gray-100"
+                                                                onClick={() => {
+                                                                    updateServiceArea(area.id, 'city', city.name);
+                                                                    setCitySearchByArea(prev => ({ ...prev, [area.id]: city.name }));
+                                                                    setShowCitySuggestionsByArea(prev => ({ ...prev, [area.id]: false }));
+                                                                }}
+                                                            >
+                                                                {city.name}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {/* Loading message */}
+                                                {showCitySuggestionsByArea[area.id] && loadingCitiesByArea[area.id] && (
+                                                    <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
+                                                        Loading cities...
+                                                    </div>
+                                                )}
+                                                {/* No results message */}
+                                                {showCitySuggestionsByArea[area.id] && !loadingCitiesByArea[area.id] && citySearchByArea[area.id] && citiesByArea[area.id] && citiesByArea[area.id].length === 0 && (
+                                                    <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white p-3 text-sm text-gray-500 shadow-lg">
+                                                        No cities found matching "{citySearchByArea[area.id]}"
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     <div>
                                         <Label className="text-sm font-medium">Postal Code *</Label>
-                                        <Input
-                                            value={area.postal_code}
-                                            onChange={(e) => updateServiceArea(area.id, 'postal_code', e.target.value.toUpperCase())}
-                                            placeholder="K1A 0A6"
-                                            className="mt-1"
-                                            maxLength={7}
-                                            disabled={area.is_primary_area}
-                                        />
+                                        {area.is_primary_area ? (
+                                            <Input
+                                                value={area.postal_code}
+                                                className="mt-1"
+                                                disabled={true}
+                                            />
+                                        ) : (
+                                            <div className="relative mt-1">
+                                                <Input
+                                                    value={area.postal_code}
+                                                    onChange={(e) => {
+                                                        const formatted = formatPostalCode(e.target.value);
+                                                        updateServiceArea(area.id, 'postal_code', formatted);
+                                                    }}
+                                                    onBlur={(e) => {
+                                                        const value = e.target.value.trim();
+                                                        if (value && !validatePostalCode(value)) {
+                                                            console.warn('Invalid postal code format');
+                                                        }
+                                                    }}
+                                                    placeholder="K1A 0A6"
+                                                    className={`pr-10 ${
+                                                        area.postal_code && !validatePostalCode(area.postal_code) 
+                                                            ? 'border-red-500' 
+                                                            : ''
+                                                    }`}
+                                                    maxLength={7}
+                                                />
+                                                {area.postal_code && validatePostalCode(area.postal_code) && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                        <div className="bg-green-500 rounded-full p-1">
+                                                            <Check className="h-3 w-3 text-white" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {area.postal_code && !validatePostalCode(area.postal_code) && (
+                                                    <p className="text-xs text-red-600 mt-1">
+                                                        Please enter a valid Canadian postal code (e.g., K1A 0A6)
+                                                    </p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -431,27 +650,45 @@ export default function LocationPreferencesStep({
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <Label className="text-sm font-medium">Travel Time (minutes)</Label>
-                                            <Input
-                                                type="number"
-                                                value={area.travel_time_minutes}
-                                                onChange={(e) => updateServiceArea(area.id, 'travel_time_minutes', parseInt(e.target.value) || 0)}
-                                                placeholder="30"
-                                                className="mt-1"
-                                                min="0"
-                                                max="180"
-                                            />
+                                            <div className="relative mt-1">
+                                                <Input
+                                                    type="number"
+                                                    value={area.travel_time_minutes}
+                                                    onChange={(e) => updateServiceArea(area.id, 'travel_time_minutes', parseInt(e.target.value) || 0)}
+                                                    placeholder="30"
+                                                    className="pr-10"
+                                                    min="0"
+                                                    max="180"
+                                                />
+                                                {area.travel_time_minutes > 0 && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                        <div className="bg-green-500 rounded-full p-1">
+                                                            <Check className="h-3 w-3 text-white" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                         <div>
                                             <Label className="text-sm font-medium">Extra Travel Fee ($CAD)</Label>
-                                            <Input
-                                                type="number"
-                                                value={area.additional_charge}
-                                                onChange={(e) => updateServiceArea(area.id, 'additional_charge', parseFloat(e.target.value) || 0)}
-                                                placeholder="0.00"
-                                                className="mt-1"
-                                                min="0"
-                                                step="0.50"
-                                            />
+                                            <div className="relative mt-1">
+                                                <Input
+                                                    type="number"
+                                                    value={area.additional_charge}
+                                                    onChange={(e) => updateServiceArea(area.id, 'additional_charge', parseFloat(e.target.value) || 0)}
+                                                    placeholder="0.00"
+                                                    className="pr-10"
+                                                    min="0"
+                                                    step="0.50"
+                                                />
+                                                {area.additional_charge >= 0 && (
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                                        <div className="bg-green-500 rounded-full p-1">
+                                                            <Check className="h-3 w-3 text-white" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                             <p className="text-xs text-gray-500 mt-1">
                                                 Optional extra charge for this area
                                             </p>
@@ -491,18 +728,34 @@ export default function LocationPreferencesStep({
                             <Label htmlFor="hourly_rate_min" className="text-sm font-medium">
                                 Minimum Hourly Rate * ($CAD)
                             </Label>
-                            <Input
-                                id="hourly_rate_min"
-                                type="number"
-                                value={formData.hourly_rate_min || ''}
-                                onChange={(e) => handleBasicFieldChange('hourly_rate_min', parseFloat(e.target.value) || 0)}
-                                className="mt-1"
-                                placeholder="20.00"
-                                min="15.00" // Minimum wage consideration
-                                step="0.50"
-                            />
+                            <div className="relative mt-1">
+                                <Input
+                                    id="hourly_rate_min"
+                                    type="number"
+                                    value={formData.hourly_rate_min || ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        // Restrict to 3 digits (max 999)
+                                        if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 999)) {
+                                            handleBasicFieldChange('hourly_rate_min', parseFloat(value) || 0);
+                                        }
+                                    }}
+                                    className="pr-10"
+                                    placeholder="20.00"
+                                    min="5.00"
+                                    max="999"
+                                    step="0.50"
+                                />
+                                {formData.hourly_rate_min && formData.hourly_rate_min >= 5 && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <div className="bg-green-500 rounded-full p-1">
+                                            <Check className="h-3 w-3 text-white" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             <p className="text-xs text-gray-500 mt-1">
-                                Your lowest acceptable rate
+                                Your lowest acceptable rate ($5 - $999)
                             </p>
                             {validationErrors.hourly_rate_min && (
                                 <p className="text-red-600 text-sm mt-1">{validationErrors.hourly_rate_min}</p>
@@ -513,44 +766,37 @@ export default function LocationPreferencesStep({
                             <Label htmlFor="hourly_rate_max" className="text-sm font-medium">
                                 Maximum Preferred Rate (Optional) ($CAD)
                             </Label>
-                            <Input
-                                id="hourly_rate_max"
-                                type="number"
-                                value={formData.hourly_rate_max || ''}
-                                onChange={(e) => handleBasicFieldChange('hourly_rate_max', parseFloat(e.target.value) || 0)}
-                                className="mt-1"
-                                placeholder="35.00"
-                                min={formData.hourly_rate_min || 15}
-                                step="0.50"
-                            />
+                            <div className="relative mt-1">
+                                <Input
+                                    id="hourly_rate_max"
+                                    type="number"
+                                    value={formData.hourly_rate_max || ''}
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        // Restrict to 4 digits (max 9999)
+                                        if (value === '' || (parseFloat(value) >= 0 && parseFloat(value) <= 9999)) {
+                                            handleBasicFieldChange('hourly_rate_max', parseFloat(value) || 0);
+                                        }
+                                    }}
+                                    className="pr-10"
+                                    placeholder="35.00"
+                                    min={formData.hourly_rate_min || 5}
+                                    max="9999"
+                                    step="0.50"
+                                />
+                                {formData.hourly_rate_max && formData.hourly_rate_max > 0 && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                        <div className="bg-green-500 rounded-full p-1">
+                                            <Check className="h-3 w-3 text-white" />
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                             <p className="text-xs text-gray-500 mt-1">
-                                Your ideal hourly rate
+                                Your ideal hourly rate ($5 - $9999)
                             </p>
                         </div>
                     </div>
-
-                    {/* Rate Display */}
-                    {formData.hourly_rate_min && (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div className="flex items-center space-x-3">
-                                <DollarSign className="h-5 w-5 text-green-600" />
-                                <div>
-                                    <p className="font-medium text-green-800">
-                                        Your Rate Range: ${formData.hourly_rate_min}
-                                        {formData.hourly_rate_max && formData.hourly_rate_max > formData.hourly_rate_min 
-                                            ? ` - $${formData.hourly_rate_max}` 
-                                            : '+'} CAD per hour
-                                    </p>
-                                    <p className="text-sm text-green-700 mt-1">
-                                        {formData.hourly_rate_min >= 20 
-                                            ? 'Great! This is competitive for skilled work.' 
-                                            : 'Consider if this rate reflects your skills and experience.'
-                                        }
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </CardContent>
               </Card>
 

@@ -35,6 +35,7 @@ class WorkerProfileController extends Controller
             'globalIndustries' => GlobalIndustry::active()->ordered()->get(),
             'globalLanguages' => GlobalLanguage::active()->ordered()->get(),
             'globalCertifications' => GlobalCertification::where('is_active', true)->get(),
+            'globalProvinces' => \App\Models\GlobalProvince::with('cities')->get(),
         ];
 
         return Inertia::render('worker/profile', array_merge([
@@ -172,6 +173,14 @@ class WorkerProfileController extends Controller
                 if (!empty($rules)) {
                     $validated = validator($profileData, $rules)->validate();
                     $profile->fill($validated)->save();
+                    
+                    // Sync user.name with worker profile name if first_name or last_name changed
+                    if (isset($validated['first_name']) || isset($validated['last_name'])) {
+                        $fullName = trim(($profile->first_name ?? '') . ' ' . ($profile->last_name ?? ''));
+                        if (!empty($fullName)) {
+                            $user->update(['name' => $fullName]);
+                        }
+                    }
                 }
             }
 
@@ -181,9 +190,21 @@ class WorkerProfileController extends Controller
             return redirect()->route('worker.profile.show')->with('success', 'Profile updated successfully');
         } catch (ValidationException $e) {
             DB::rollBack();
+            Log::error('Profile update validation error', [
+                'user_id' => $user->id,
+                'errors' => $e->errors(),
+            ]);
             throw $e;
         } catch (\Throwable $e) {
             DB::rollBack();
+            
+            Log::error('Profile update unexpected error', [
+                'user_id' => $user->id,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return back()->withErrors(['form' => 'An unexpected error occurred. Please try again.']);
         }
@@ -311,11 +332,11 @@ class WorkerProfileController extends Controller
                     $profile->certifications()->create([
                         'name' => $cert['name'],
                         'issuing_organization' => $cert['issuing_organization'] ?? null,
-                        'issue_date' => $cert['issue_date'] ?? null,
+                        'issued_date' => $cert['issue_date'] ?? null,
                         'expiry_date' => $cert['expiry_date'] ?? null,
                         'credential_id' => $cert['credential_id'] ?? null,
                         'verification_url' => $cert['verification_url'] ?? null,
-                        'is_verified' => false, // Default to false until verified
+                        'verification_status' => 'pending',
                     ]);
                 }
             }

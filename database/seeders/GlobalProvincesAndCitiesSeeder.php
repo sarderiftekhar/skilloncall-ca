@@ -15,10 +15,14 @@ class GlobalProvincesAndCitiesSeeder extends Seeder
     public function run(): void
     {
         // Clear existing data
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        }
         GlobalCity::truncate();
         GlobalProvince::truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
 
         // Province and city data
         $provincesWithCities = [

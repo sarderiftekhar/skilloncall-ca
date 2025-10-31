@@ -2,20 +2,31 @@ import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useSidebar } from '@/components/ui/sidebar';
+import { SubscriptionBadge } from '@/components/subscription-badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useTranslations } from '@/hooks/useTranslations';
 import { cn } from '@/lib/utils';
 // Temporarily using simple route strings to fix import issues
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Activity, Bell, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users } from 'react-feather';
+import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users, Search } from 'react-feather';
 import AppLogoIcon from './app-logo-icon';
 
+// Helper function to add language parameter to URLs
+function addLangParam(href: string, locale: string): string {
+    const urlObj = new URL(href, window.location.origin);
+    urlObj.searchParams.set('lang', locale);
+    return urlObj.pathname + urlObj.search;
+}
+
 // Get role-based navigation items for mobile menu
-function getRoleBasedNavItems(userRole: string): NavItem[] {
+function getRoleBasedNavItems(userRole: string, t: (key: string) => string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
-            title: 'Dashboard',
-            href: '/dashboard',
+            title: t('nav.dashboard'),
+            href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
     ];
@@ -25,27 +36,27 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'User Management',
-                href: '/admin/users',
+                href: addLangParam('/admin/users', locale),
                 icon: Users,
             },
             {
                 title: 'Job Management',
-                href: '/admin/jobs',
+                href: addLangParam('/admin/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Payments & Billing',
-                href: '/admin/payments',
+                href: addLangParam('/admin/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Reports & Analytics',
-                href: '/admin/reports',
+                href: addLangParam('/admin/reports', locale),
                 icon: Activity,
             },
             {
                 title: 'System Settings',
-                href: '/admin/settings',
+                href: addLangParam('/admin/settings', locale),
                 icon: Settings,
             },
         ];
@@ -56,27 +67,37 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'Post Jobs',
-                href: '/employer/jobs/create',
+                href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Manage Jobs',
-                href: '/employer/jobs',
+                href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
                 title: 'Applications',
-                href: '/employer/applications',
+                href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
+            },
+            {
                 title: 'Payments',
-                href: '/employer/payments',
+                href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -86,33 +107,38 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Find Jobs',
-                href: '/employee/jobs',
+                title: t('nav.find_jobs'),
+                href: addLangParam('/employee/jobs', locale),
                 icon: Briefcase,
             },
             {
-                title: 'My Applications',
-                href: '/employee/applications',
+                title: t('nav.saved_jobs'),
+                href: addLangParam('/employee/saved-jobs', locale),
+                icon: Bookmark,
+            },
+            {
+                title: t('nav.my_applications'),
+                href: addLangParam('/employee/applications', locale),
                 icon: Users,
             },
             {
-                title: 'Messages',
-                href: '/employee/messages',
+                title: t('nav.messages'),
+                href: addLangParam('/employee/messages', locale),
                 icon: MessageCircle,
             },
             {
-                title: 'Availability',
-                href: '/employee/availability',
+                title: t('nav.availability'),
+                href: addLangParam('/employee/availability', locale),
                 icon: Clock,
             },
             {
-                title: 'My Profile',
-                href: '/employee/profile',
+                title: t('nav.my_profile'),
+                href: addLangParam('/employee/profile', locale),
                 icon: Settings,
             },
             {
-                title: 'Subscription',
-                href: '/subscriptions',
+                title: t('nav.subscription'),
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -122,10 +148,13 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
 }
 
 export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: BreadcrumbItemType[] }) {
+    const { locale } = useTranslations();
     const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { auth, subscription } = page.props;
+    const { toggleSidebar } = useSidebar();
+    const { t } = useTranslations();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin');
+    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t, locale);
 
     // Notification state - in real app, this would come from props/context/API
     const [notifications] = useState([
@@ -138,8 +167,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border/50 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sm:px-6">
-            {/* Mobile Menu Button - Left side */}
+            {/* Left side - Mobile Menu, Sidebar Toggle, Language Switcher and Breadcrumbs */}
             <div className="flex items-center gap-2">
+                {/* Mobile Menu Button - Only on mobile */}
                 <div className="lg:hidden">
                     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                         <SheetTrigger asChild>
@@ -156,7 +186,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                             SkillOnCall
                                         </span>
                                         <span className="text-xs text-gray-500">
-                                            {auth.user.role === 'admin' ? 'Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Employee'}{' '}
+                                            {auth.user.role === 'admin' ? 'Administrator' : auth.user.role === 'employer' ? 'Employer' : 'Worker'}{' '}
                                             Menu
                                         </span>
                                     </div>
@@ -229,9 +259,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                         style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                                     >
                                         {auth.user.avatar ? (
-                                            <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                            <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                         ) : (
-                                            auth.user.name
+                                            auth.user.display_name || auth.user.name
                                                 .split(' ')
                                                 .map((n) => n[0])
                                                 .join('')
@@ -240,7 +270,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                         )}
                                     </div>
                                     <div className="flex-1">
-                                        <p className="text-sm font-semibold text-gray-900">{auth.user.name}</p>
+                                        <p className="text-sm font-semibold text-gray-900">{auth.user.display_name || auth.user.name}</p>
                                         <p className="text-xs text-gray-500">{auth.user.email}</p>
                                     </div>
                                 </div>
@@ -248,11 +278,30 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         </SheetContent>
                     </Sheet>
                 </div>
+                
+                {/* Sidebar Toggle - Only on desktop */}
+                <div className="hidden lg:block">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-9 w-9 cursor-pointer hover:bg-gray-100"
+                        onClick={toggleSidebar}
+                    >
+                        <Menu className="h-5 w-5 text-gray-700" />
+                    </Button>
+                </div>
+                
+                {/* Language Switcher */}
+                <LanguageSwitcher variant="compact" />
+                
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
 
-            {/* Right side - Notification Bell and User Avatar */}
+            {/* Right side - Subscription Badge, Notification Bell and User Avatar */}
             <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
+                {/* Subscription Badge */}
+                <SubscriptionBadge subscription={subscription} />
+                
                 {/* Notification Bell - Hidden on mobile */}
                 <div className="relative hidden sm:block">
                     <Button
@@ -282,9 +331,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                 style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                             >
                                 {auth.user.avatar ? (
-                                    <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                    <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    auth.user.name
+                                    auth.user.display_name || auth.user.name
                                         .split(' ')
                                         .map((n) => n[0])
                                         .join('')
@@ -294,7 +343,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="hidden flex-col items-start text-left sm:flex">
                                 <span className="max-w-20 truncate text-xs font-medium text-gray-900 sm:max-w-24 sm:text-sm dark:text-white">
-                                    {auth.user.name}
+                                    {auth.user.display_name || auth.user.name}
                                 </span>
                             </div>
                             <ChevronDown className="ml-1 hidden size-3 sm:block sm:size-4" />
@@ -307,9 +356,9 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                                 style={{ backgroundColor: auth.user.avatar ? 'transparent' : '#10B3D6' }}
                             >
                                 {auth.user.avatar ? (
-                                    <img src={auth.user.avatar} alt={auth.user.name} className="h-full w-full object-cover" />
+                                    <img src={auth.user.avatar} alt={auth.user.display_name || auth.user.name} className="h-full w-full object-cover" />
                                 ) : (
-                                    auth.user.name
+                                    auth.user.display_name || auth.user.name
                                         .split(' ')
                                         .map((n) => n[0])
                                         .join('')
@@ -319,7 +368,7 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-medium text-gray-900 dark:text-white">
-                                    {auth.user.name}
+                                    {auth.user.display_name || auth.user.name}
                                 </span>
                                 <span className="text-sm text-gray-500 dark:text-gray-400">{auth.user.email}</span>
                             </div>

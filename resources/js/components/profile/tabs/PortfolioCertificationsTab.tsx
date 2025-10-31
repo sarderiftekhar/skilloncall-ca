@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Image, Plus, X, Edit, Save, Upload, Award, Calendar, CheckCircle, AlertCircle } from 'react-feather';
+import { Image, Plus, X, Edit, Save, Upload, Award, Calendar, CheckCircle, AlertCircle, Trash2 } from 'react-feather';
 
 interface PortfolioCertificationsTabProps {
     profile: any;
@@ -16,8 +16,18 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
     const [isEditingPortfolio, setIsEditingPortfolio] = useState(false);
     const [isEditingCertifications, setIsEditingCertifications] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [certificationToDelete, setCertificationToDelete] = useState<any>(null);
+    const [urlErrors, setUrlErrors] = useState<{[key: number]: string}>({});
     
-    const [portfolioPhotos, setPortfolioPhotos] = useState(profile?.portfolio_photos || []);
+    // Ensure each photo has a unique ID
+    const [portfolioPhotos, setPortfolioPhotos] = useState(() => {
+        const photos = profile?.portfolio_photos || [];
+        return photos.map((photo: any, index: number) => ({
+            ...photo,
+            id: photo.id || Date.now() + index
+        }));
+    });
     const [certifications, setCertifications] = useState(profile?.certifications || []);
 
     const addPortfolioPhoto = () => {
@@ -47,6 +57,43 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
             updatePortfolioPhoto(id, 'preview', e.target?.result);
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleMultipleFileSelect = (files: FileList) => {
+        const maxPhotos = 6;
+        const currentCount = portfolioPhotos.length;
+        const availableSlots = maxPhotos - currentCount;
+        const filesToAdd = Math.min(files.length, availableSlots);
+
+        const newPhotos: any[] = [];
+        
+        for (let i = 0; i < filesToAdd; i++) {
+            const file = files[i];
+            const photoId = Date.now() + i;
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const newPhoto = {
+                    id: photoId,
+                    caption: '',
+                    file: file,
+                    preview: e.target?.result
+                };
+                
+                setPortfolioPhotos(prev => {
+                    // Check if this photo was already added
+                    if (prev.find((p: any) => p.id === photoId)) {
+                        return prev;
+                    }
+                    return [...prev, newPhoto];
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        if (filesToAdd < files.length) {
+            alert(`You can only upload up to ${maxPhotos} photos. ${filesToAdd} photos will be added.`);
+        }
     };
 
     const savePortfolioPhotos = async () => {
@@ -106,6 +153,37 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
         setCertifications(certifications.map((cert: any) => 
             cert.id === id ? { ...cert, [field]: value } : cert
         ));
+        
+        // Validate URL if the field is verification_url
+        if (field === 'verification_url') {
+            validateUrl(id, value);
+        }
+    };
+
+    const validateUrl = (id: number, url: string) => {
+        if (!url || url.trim() === '') {
+            // Clear error if URL is empty (it's optional)
+            setUrlErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[id];
+                return newErrors;
+            });
+            return;
+        }
+
+        const urlPattern = /^(https?:\/\/|www\.)/i;
+        if (!urlPattern.test(url.trim())) {
+            setUrlErrors(prev => ({
+                ...prev,
+                [id]: 'URL must start with http://, https://, or www.'
+            }));
+        } else {
+            setUrlErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[id];
+                return newErrors;
+            });
+        }
     };
 
     const handlePortfolioSave = async () => {
@@ -139,8 +217,61 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
         return expiryTime - currentTime <= thirtyDaysInMs && expiryTime > currentTime;
     };
 
+    const handleDeleteCertification = async () => {
+        if (certificationToDelete) {
+            const updatedCerts = certifications.filter((c: any) => c.id !== certificationToDelete.id);
+            setCertifications(updatedCerts);
+            await onUpdate({ certifications: updatedCerts });
+            setShowDeleteModal(false);
+            setCertificationToDelete(null);
+        }
+    };
+
     return (
-        <div className="space-y-6">
+        <div className="space-y-6">            {/* Delete Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50 p-4" style={{ backdropFilter: 'blur(8px)', backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+                        <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                                <AlertCircle className="w-6 h-6 text-red-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-lg font-semibold mb-2" style={{ color: '#192341' }}>
+                                    Remove Certification?
+                                </h3>
+                                <p className="text-gray-600 text-sm">
+                                    Are you sure you want to remove <span className="font-medium text-gray-900">"{certificationToDelete?.name}"</span>? This action cannot be undone.
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3 pt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setCertificationToDelete(null);
+                                }}
+                                className="cursor-pointer"
+                                style={{ height: '2.7em' }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleDeleteCertification}
+                                className="text-white cursor-pointer"
+                                style={{ backgroundColor: '#DC2626', height: '2.7em' }}
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Remove
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+
             {/* Portfolio Section */}
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
@@ -196,15 +327,50 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                 <CardContent>
                     {isEditingPortfolio ? (
                         <div className="space-y-6">
-                            {/* Add New Photo Button */}
-                            <Button
-                                onClick={addPortfolioPhoto}
-                                className="text-white cursor-pointer"
-                                style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                            >
-                                <Plus className="h-4 w-4 mr-2" />
-                                Add Portfolio Photo
-                            </Button>
+                            {/* Multiple Photo Upload Button */}
+                            <div className="flex flex-col sm:flex-row gap-3">
+                                <Button
+                                    onClick={() => document.getElementById('multiple-photo-upload')?.click()}
+                                    disabled={portfolioPhotos.length >= 6}
+                                    className="text-white cursor-pointer"
+                                    style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
+                                >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Upload Photos (Max 6)
+                                </Button>
+                                <input
+                                    id="multiple-photo-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    className="hidden"
+                                    onChange={(e) => {
+                                        if (e.target.files && e.target.files.length > 0) {
+                                            handleMultipleFileSelect(e.target.files);
+                                            e.target.value = ''; // Reset input
+                                        }
+                                    }}
+                                />
+                                <Button
+                                    onClick={addPortfolioPhoto}
+                                    disabled={portfolioPhotos.length >= 6}
+                                    variant="outline"
+                                    className="cursor-pointer"
+                                    style={{ height: '2.7em' }}
+                                >
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Add Single Photo
+                                </Button>
+                            </div>
+
+                            {portfolioPhotos.length >= 6 && (
+                                <div className="flex items-center space-x-2 text-orange-600 bg-orange-50 p-3 rounded-lg">
+                                    <AlertCircle className="w-5 h-5" />
+                                    <p className="text-sm font-medium">
+                                        Maximum of 6 portfolio photos reached. Remove a photo to add more.
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Portfolio Photos */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -213,14 +379,26 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                         {/* Photo Upload Area */}
                                         <div className="relative">
                                             <div
-                                                className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-[#10B3D6] transition-colors"
+                                                className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-[#10B3D6] transition-colors overflow-hidden"
                                                 onClick={() => document.getElementById(`photo-upload-${photo.id}`)?.click()}
                                             >
-                                                {photo.preview ? (
+                                                {(photo.preview || photo.url || photo.path) ? (
                                                     <img
-                                                        src={photo.preview}
+                                                        src={photo.preview || photo.url || `/storage/${photo.path}`}
                                                         alt={`Portfolio ${index + 1}`}
                                                         className="w-full h-full object-cover rounded-lg"
+                                                        onError={(e) => {
+                                                            // If image fails to load, show upload placeholder
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const parent = target.parentElement;
+                                                            if (parent && !parent.querySelector('.upload-placeholder')) {
+                                                                const placeholder = document.createElement('div');
+                                                                placeholder.className = 'upload-placeholder text-center';
+                                                                placeholder.innerHTML = '<svg class="h-8 w-8 mx-auto mb-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg><p class="text-sm text-gray-500">Click to upload photo</p><p class="text-xs text-gray-400">JPG, PNG up to 5MB</p>';
+                                                                parent.appendChild(placeholder);
+                                                            }
+                                                        }}
                                                     />
                                                 ) : (
                                                     <div className="text-center">
@@ -284,7 +462,11 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                 <Button
                                     variant="outline"
                                     onClick={() => {
-                                        setPortfolioPhotos(profile?.portfolio_photos || []);
+                                        const photos = profile?.portfolio_photos || [];
+                                        setPortfolioPhotos(photos.map((photo: any, index: number) => ({
+                                            ...photo,
+                                            id: photo.id || Date.now() + index
+                                        })));
                                         setIsEditingPortfolio(false);
                                     }}
                                     className="cursor-pointer"
@@ -306,13 +488,25 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                             {portfolioPhotos.length > 0 ? (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                     {portfolioPhotos.map((photo: any, index: number) => (
-                                        <div key={photo.id} className="relative group">
+                                        <div key={photo.id || index} className="relative group">
                                             <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-                                                {photo.url ? (
+                                                {(photo.url || photo.path || photo.preview) ? (
                                                     <img
-                                                        src={photo.url}
+                                                        src={photo.url || `/storage/${photo.path}` || photo.preview}
                                                         alt={photo.caption || `Portfolio ${index + 1}`}
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                                        onError={(e) => {
+                                                            // If image fails to load, show placeholder
+                                                            const target = e.target as HTMLImageElement;
+                                                            target.style.display = 'none';
+                                                            const parent = target.parentElement;
+                                                            if (parent && !parent.querySelector('.placeholder-icon')) {
+                                                                const placeholder = document.createElement('div');
+                                                                placeholder.className = 'placeholder-icon w-full h-full flex items-center justify-center';
+                                                                placeholder.innerHTML = '<svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>';
+                                                                parent.appendChild(placeholder);
+                                                            }
+                                                        }}
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center">
@@ -394,7 +588,7 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                     <div key={certification.id} className="p-4 border border-gray-200 rounded-lg space-y-4">
                                         {/* Header */}
                                         <div className="flex items-center justify-between">
-                                            <h4 className="font-medium text-gray-900">Certification #{index + 1}</h4>
+                                            <h4 className="font-medium" style={{ color: '#192341' }}>Certification #{index + 1}</h4>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -470,8 +664,20 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                                         value={certification.verification_url || ''}
                                                         onChange={(e) => updateCertification(certification.id, 'verification_url', e.target.value)}
                                                         placeholder="https://verify.example.com"
-                                                        className="mt-1"
+                                                        className={`mt-1 ${urlErrors[certification.id] ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                                                     />
+                                                    {urlErrors[certification.id] && (
+                                                        <p className="text-sm text-red-600 mt-1 flex items-center">
+                                                            <AlertCircle className="w-4 h-4 mr-1" />
+                                                            {urlErrors[certification.id]}
+                                                        </p>
+                                                    )}
+                                                    {!urlErrors[certification.id] && certification.verification_url && certification.verification_url.trim() !== '' && (
+                                                        <p className="text-sm text-green-600 mt-1 flex items-center">
+                                                            <CheckCircle className="w-4 h-4 mr-1" />
+                                                            Valid URL format
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -518,7 +724,7 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                             <div className="flex items-start justify-between">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="font-medium text-gray-900">{certification.name}</h4>
+                                                        <h4 className="font-medium" style={{ color: '#192341' }}>{certification.name}</h4>
                                                         {certification.expiry_date && (
                                                             <>
                                                                 {isExpired(certification.expiry_date) ? (
@@ -571,7 +777,21 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                                         </a>
                                                     )}
                                                 </div>
-                                                <Award className="w-5 h-5 text-gray-400" />
+                                                <div className="flex items-center space-x-2">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => {
+                                                            setCertificationToDelete(certification);
+                                                            setShowDeleteModal(true);
+                                                        }}
+                                                        className="text-red-500 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                                                        title="Remove certification"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
+                                                    <Award className="w-5 h-5 text-gray-400" />
+                                                </div>
                                             </div>
                                         </div>
                                     ))}

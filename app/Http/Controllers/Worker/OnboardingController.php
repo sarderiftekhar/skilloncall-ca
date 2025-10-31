@@ -222,7 +222,7 @@ class OnboardingController extends Controller
             // Log the full exception for debugging
             Log::error('Onboarding save error', [
                 'step' => $step,
-                'user_id' => auth()->id(),
+                'user_id' => $user->id,
                 'data' => $data,
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -414,6 +414,19 @@ class OnboardingController extends Controller
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'emergency_contact_relationship' => 'nullable|string|max:100',
+        ], [
+            // Custom error messages (multi-language support)
+            'first_name.required' => __('validation.personal_info.first_name_required'),
+            'last_name.required' => __('validation.personal_info.last_name_required'),
+            'phone.required' => __('validation.personal_info.phone_required'),
+            'date_of_birth.before' => __('validation.personal_info.date_of_birth_before'),
+            'address_line_1.required' => __('validation.personal_info.address_line_1_required'),
+            'city.required' => __('validation.personal_info.city_required'),
+            'province.required' => __('validation.personal_info.province_required'),
+            'province.size' => __('validation.personal_info.province_size'),
+            'postal_code.required' => __('validation.personal_info.postal_code_required'),
+            'postal_code.regex' => __('validation.personal_info.postal_code_regex'),
+            'work_authorization.required' => __('validation.personal_info.work_authorization_required'),
         ])->validate();
 
         // Handle file upload for profile photo
@@ -426,13 +439,21 @@ class OnboardingController extends Controller
         // so that a new profile row can be created at step 1 without violating constraints.
         if (! $profile->exists) {
             $validated = array_merge([
-                'hourly_rate_min' => 15, // temporary until step 4 updates
+                'hourly_rate_min' => 5, // temporary until step 4 updates
                 'travel_distance_max' => 1, // km, temporary
             ], $validated);
         }
 
         $profile->fill($validated);
         $profile->save();
+        
+        // Sync user.name with worker profile name
+        if (isset($validated['first_name']) && isset($validated['last_name'])) {
+            $fullName = trim($validated['first_name'] . ' ' . $validated['last_name']);
+            if (!empty($fullName)) {
+                $profile->user->update(['name' => $fullName]);
+            }
+        }
     }
 
     private function saveSkillsExperience(WorkerProfile $profile, array $data)
@@ -467,6 +488,14 @@ class OnboardingController extends Controller
             'selected_skills.*.id' => 'required|exists:global_skills,id',
             'selected_skills.*.proficiency_level' => 'required|in:beginner,intermediate,advanced,expert',
             'selected_skills.*.is_primary' => 'boolean',
+        ], [
+            // Custom error messages (multi-language support)
+            'overall_experience.required' => __('validation.skills_experience.overall_experience_required'),
+            'selected_skills.required' => __('validation.skills_experience.selected_skills_required'),
+            'selected_skills.min' => __('validation.skills_experience.selected_skills_min'),
+            'selected_skills.*.id.required' => __('validation.skills_experience.skill_id_required'),
+            'selected_skills.*.id.exists' => __('validation.skills_experience.skill_id_exists'),
+            'selected_skills.*.proficiency_level.required' => __('validation.skills_experience.proficiency_level_required'),
         ])->validate();
 
         $profile->update(['overall_experience' => $validated['overall_experience']]);
@@ -538,6 +567,19 @@ class OnboardingController extends Controller
             'references.*.relationship' => 'required_with:references|in:previous_employer,previous_supervisor,satisfied_client,colleague,business_partner',
             'references.*.company_name' => 'nullable|string|max:255',
             'references.*.notes' => 'nullable|string|max:500',
+        ], [
+            // Custom error messages (multi-language support)
+            'employment_status.required' => __('validation.work_history.employment_status_required'),
+            'work_experiences.required' => __('validation.work_history.work_experiences_required'),
+            'work_experiences.min' => __('validation.work_history.work_experiences_min'),
+            'work_experiences.*.company_name.required' => __('validation.work_history.company_name_required'),
+            'work_experiences.*.job_title.required' => __('validation.work_history.job_title_required'),
+            'work_experiences.*.start_date.required' => __('validation.work_history.start_date_required'),
+            'work_experiences.*.end_date.after_or_equal' => __('validation.work_history.end_date_after_or_equal'),
+            'references.*.reference_name.required_with' => __('validation.work_history.reference_name_required'),
+            'references.*.reference_phone.required_with' => __('validation.work_history.reference_phone_required'),
+            'references.*.reference_email.email' => __('validation.work_history.reference_email_email'),
+            'references.*.relationship.required_with' => __('validation.work_history.relationship_required'),
         ])->validate();
 
         // Update employment status
@@ -573,13 +615,25 @@ class OnboardingController extends Controller
             'has_vehicle' => 'required|boolean',
             'has_tools_equipment' => 'required|boolean',
             'travel_distance_max' => 'nullable|integer|min:1|max:999',
-            'hourly_rate_min' => 'required|numeric|min:15|max:200',
-            'hourly_rate_max' => 'nullable|numeric|min:15|max:500|gte:hourly_rate_min',
+            'hourly_rate_min' => 'required|numeric|min:5|max:999',
+            'hourly_rate_max' => 'nullable|numeric|min:5|max:9999|gte:hourly_rate_min',
             'is_insured' => 'nullable|boolean',
             'has_wcb_coverage' => 'nullable|boolean',
             'has_criminal_background_check' => 'nullable|boolean',
             'background_check_date' => 'nullable|date',
             'service_areas' => 'nullable|array',
+        ], [
+            // Custom error messages (multi-language support)
+            'has_vehicle.required' => __('validation.location_rates.has_vehicle_required'),
+            'has_tools_equipment.required' => __('validation.location_rates.has_tools_equipment_required'),
+            'travel_distance_max.min' => __('validation.location_rates.travel_distance_max_min'),
+            'travel_distance_max.max' => __('validation.location_rates.travel_distance_max_max'),
+            'hourly_rate_min.required' => __('validation.location_rates.hourly_rate_min_required'),
+            'hourly_rate_min.min' => __('validation.location_rates.hourly_rate_min_min'),
+            'hourly_rate_min.max' => __('validation.location_rates.hourly_rate_min_max'),
+            'hourly_rate_max.min' => __('validation.location_rates.hourly_rate_max_min'),
+            'hourly_rate_max.max' => __('validation.location_rates.hourly_rate_max_max'),
+            'hourly_rate_max.gte' => __('validation.location_rates.hourly_rate_max_gte'),
         ])->validate();
 
         $profile->fill($validated);
@@ -637,11 +691,19 @@ class OnboardingController extends Controller
                 'has_vehicle' => 'nullable|boolean',
                 'has_tools_equipment' => 'nullable|boolean', 
                 'travel_distance_max' => 'nullable|integer|min:1|max:999',
-                'hourly_rate_min' => 'nullable|numeric|min:15|max:200',
-                'hourly_rate_max' => 'nullable|numeric|min:15|max:500',
+                'hourly_rate_min' => 'nullable|numeric|min:5|max:999',
+                'hourly_rate_max' => 'nullable|numeric|min:5|max:9999',
                 'is_insured' => 'nullable|boolean',
                 'has_wcb_coverage' => 'nullable|boolean',
                 'has_criminal_background_check' => 'nullable|boolean',
+            ], [
+                // Custom error messages (multi-language support)
+                'travel_distance_max.min' => __('validation.location_rates.travel_distance_max_min'),
+                'travel_distance_max.max' => __('validation.location_rates.travel_distance_max_max'),
+                'hourly_rate_min.min' => __('validation.location_rates.hourly_rate_min_min'),
+                'hourly_rate_min.max' => __('validation.location_rates.hourly_rate_min_max'),
+                'hourly_rate_max.min' => __('validation.location_rates.hourly_rate_max_min'),
+                'hourly_rate_max.max' => __('validation.location_rates.hourly_rate_max_max'),
             ])->validate();
 
             $profile->fill($validated);
@@ -668,6 +730,16 @@ class OnboardingController extends Controller
             'availability_by_month.*.availability.*.end_time' => 'required|date_format:H:i',
             'availability_by_month.*.availability.*.is_available' => 'boolean',
             'availability_by_month.*.availability.*.rate_multiplier' => 'numeric|min:1|max:3',
+        ], [
+            // Custom error messages (multi-language support)
+            'availability_by_month.required' => __('validation.availability.availability_by_month_required'),
+            'availability_by_month.min' => __('validation.availability.availability_by_month_min'),
+            'availability_by_month.*.month.required' => __('validation.availability.month_required'),
+            'availability_by_month.*.availability.*.day_of_week.required' => __('validation.availability.day_of_week_required'),
+            'availability_by_month.*.availability.*.start_time.required' => __('validation.availability.start_time_required'),
+            'availability_by_month.*.availability.*.end_time.required' => __('validation.availability.end_time_required'),
+            'availability_by_month.*.availability.*.rate_multiplier.min' => __('validation.availability.rate_multiplier_min'),
+            'availability_by_month.*.availability.*.rate_multiplier.max' => __('validation.availability.rate_multiplier_max'),
         ])->validate();
 
         // Delete existing availability for the months being updated
@@ -686,7 +758,7 @@ class OnboardingController extends Controller
                 // Validate end_time is after start_time
                 if (strtotime($slot['end_time']) <= strtotime($slot['start_time'])) {
                     throw ValidationException::withMessages([
-                        'availability_by_month' => 'End time must be after start time for all days.',
+                        'availability_by_month' => __('validation.availability.end_time_after_start'),
                     ]);
                 }
                 

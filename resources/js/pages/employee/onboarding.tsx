@@ -47,6 +47,7 @@ export default function EmployeeOnboarding({
     const [modalMessage, setModalMessage] = useState('');
     const [modalType, setModalType] = useState<'success' | 'error' | 'info' | 'warning'>('info');
     const [modalDetails, setModalDetails] = useState<string | string[] | undefined>(undefined);
+    const [firstErrorField, setFirstErrorField] = useState<string | null>(null);
 
     // Language switcher function
     const switchLang = (next: 'en' | 'fr') => {
@@ -228,6 +229,12 @@ export default function EmployeeOnboarding({
                         }
                     });
 
+                    // Explicitly add CSRF token to FormData to prevent 419 errors
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    if (csrfToken) {
+                        formDataObj.append('_token', csrfToken);
+                    }
+
                     submitData = formDataObj;
                     console.log('Using FormData for file upload');
                 } else {
@@ -255,6 +262,18 @@ export default function EmployeeOnboarding({
                         console.log('Stringified errors:', JSON.stringify(errors, null, 2));
                         console.error('Validation errors:', errors);
                         
+                        // Check for 419 Page Expired error (CSRF token expired)
+                        const isCsrfError = errors.form === '419 Page Expired' || 
+                                           errors.message === '419 Page Expired' ||
+                                           (typeof errors.form === 'string' && errors.form.includes('419'));
+                        
+                        if (isCsrfError) {
+                            console.warn('CSRF token expired - reloading page to refresh token');
+                            // Reload the page to get a fresh CSRF token and session
+                            window.location.reload();
+                            return;
+                        }
+                        
                         // Check for debug info to show detailed development errors
                         if (errors.debug_file || errors.debug_line || errors.debug_step || errors.debug_data) {
                             console.group('🐛 DEBUG INFO');
@@ -270,6 +289,64 @@ export default function EmployeeOnboarding({
                         
                         setValidationErrors(errors);
                         
+                        // Helper function to convert field names to user-friendly labels
+                        const getFieldLabel = (fieldName: string): string => {
+                            const fieldLabels: Record<string, string> = {
+                                'hourly_rate_min': 'Minimum Hourly Rate',
+                                'hourly_rate_max': 'Maximum Hourly Rate',
+                                'travel_distance_max': 'Maximum Travel Distance',
+                                'has_vehicle': 'Vehicle Ownership',
+                                'has_tools_equipment': 'Tools & Equipment',
+                                'first_name': 'First Name',
+                                'last_name': 'Last Name',
+                                'phone': 'Phone Number',
+                                'email': 'Email Address',
+                                'address_line_1': 'Address',
+                                'city': 'City',
+                                'province': 'Province',
+                                'postal_code': 'Postal Code',
+                                'work_authorization': 'Work Authorization',
+                                'date_of_birth': 'Date of Birth',
+                                'employment_status': 'Employment Status',
+                                'overall_experience': 'Experience Level',
+                                'selected_skills': 'Skills',
+                                'work_experiences': 'Work Experience',
+                                'selected_languages': 'Languages',
+                                'availability_by_month': 'Availability Schedule',
+                                // Reference fields
+                                'references.reference_name': 'Reference Name',
+                                'references.reference_phone': 'Reference Phone',
+                                'references.reference_email': 'Reference Email',
+                                'references.relationship': 'Relationship with Reference',
+                                'references.company_name': 'Reference Company',
+                                // Work experience fields
+                                'work_experiences.company_name': 'Company Name',
+                                'work_experiences.job_title': 'Job Title',
+                                'work_experiences.start_date': 'Start Date',
+                                'work_experiences.end_date': 'End Date',
+                                // Skill fields
+                                'selected_skills.id': 'Skill',
+                                'selected_skills.proficiency_level': 'Skill Proficiency',
+                            };
+                            
+                            // Remove array indexes like ".0.", ".1.", etc.
+                            const cleanFieldName = fieldName.replace(/\.\d+\./g, '.');
+                            
+                            // Check if we have a label for the clean field name
+                            if (fieldLabels[cleanFieldName]) {
+                                return fieldLabels[cleanFieldName];
+                            }
+                            
+                            // Check if we have a label for the original field name
+                            if (fieldLabels[fieldName]) {
+                                return fieldLabels[fieldName];
+                            }
+                            
+                            // For nested fields with indexes, extract the last part and make it readable
+                            const lastPart = cleanFieldName.split('.').pop() || cleanFieldName;
+                            return lastPart.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        };
+                        
                         // Create error list with better formatting
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const errorList: string[] = [];
@@ -281,8 +358,10 @@ export default function EmployeeOnboarding({
                             } else if (key === 'form' && isDevelopmentError) {
                                 // Show development error prominently
                                 errorList.unshift(`🚨 ${value}`);
-                            } else {
-                                errorList.push(`${key}: ${String(value)}`);
+                            } else if (key !== 'form') {
+                                // Convert field names to user-friendly labels
+                                const fieldLabel = getFieldLabel(key);
+                                errorList.push(`${fieldLabel}: ${String(value)}`);
                             }
                         });
                         
@@ -295,15 +374,9 @@ export default function EmployeeOnboarding({
                         setModalDetails(errorList.slice(0, 15)); // Show more details in dev mode
                         setModalOpen(true);
                         
-                        // Scroll to first field with an error slowly
+                        // Store the first error field for scrolling after modal closes
                         const firstKey = Object.keys(errors).find(key => !key.startsWith('debug_') && key !== 'form') || Object.keys(errors)[0];
-                        if (firstKey) {
-                            const el = document.getElementById(firstKey);
-                            if (el) {
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                scrollToElementSlowly(el as any, 1400);
-                            }
-                        }
+                        setFirstErrorField(firstKey || null);
                     },
                 });
             } catch (error) {
@@ -358,6 +431,18 @@ export default function EmployeeOnboarding({
                     },
                     onError: (errors) => {
                         console.error('Completion errors:', errors);
+                        
+                        // Check for 419 Page Expired error (CSRF token expired)
+                        const isCsrfError = errors.form === '419 Page Expired' || 
+                                           errors.message === '419 Page Expired' ||
+                                           (typeof errors.form === 'string' && errors.form.includes('419'));
+                        
+                        if (isCsrfError) {
+                            console.warn('CSRF token expired during completion - reloading page to refresh token');
+                            window.location.reload();
+                            return;
+                        }
+                        
                         const errorMessage = errors?.message || (typeof errors === 'string' ? errors : t('modal.complete_error.message', 'An error occurred while completing your profile.'));
                         const details = errors && typeof errors === 'object' && !errors?.message 
                             ? Object.entries(errors).map(([key, value]) => `${key}: ${String(value)}`)
@@ -444,6 +529,19 @@ export default function EmployeeOnboarding({
                 isOpen={modalOpen}
                 onClose={() => {
                     setModalOpen(false);
+                    
+                    // Scroll to first error field after modal closes
+                    if (modalType === 'error' && firstErrorField) {
+                        setTimeout(() => {
+                            const el = document.getElementById(firstErrorField);
+                            if (el) {
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                scrollToElementSlowly(el as any, 1400);
+                            }
+                            setFirstErrorField(null);
+                        }, 300); // Small delay to ensure modal is closed
+                    }
+                    
                     if (modalType === 'success') {
                         router.visit('/employee/dashboard');
                     }

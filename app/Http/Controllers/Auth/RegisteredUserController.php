@@ -48,6 +48,15 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Redirect workers and employers directly to onboarding, others to dashboard
+        if ($user->role === 'worker') {
+            return redirect()->route('worker.onboarding.index');
+        }
+
+        if ($user->role === 'employer') {
+            return redirect()->route('employer.onboarding.index');
+        }
+
         return redirect()->intended(route('dashboard', absolute: false));
     }
 }

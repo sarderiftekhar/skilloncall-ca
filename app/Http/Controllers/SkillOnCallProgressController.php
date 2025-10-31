@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProgressEntry;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -66,7 +67,7 @@ class SkillOnCallProgressController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $validator = Validator::make($request->all(), [
             'main_section' => ['required', 'string', 'max:255'],
@@ -84,10 +85,14 @@ class SkillOnCallProgressController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            return back()->withErrors($validator)->withInput();
         }
 
         $data = $validator->validated();
@@ -105,10 +110,14 @@ class SkillOnCallProgressController extends Controller
 
         $entry = ProgressEntry::create($data);
 
-        return response()->json([
-            'message' => 'Progress entry created successfully',
-            'entry' => $entry
-        ], 201);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Progress entry created successfully',
+                'entry' => $entry
+            ], 201);
+        }
+
+        return redirect()->route('progress.index')->with('success', 'Progress entry created successfully!');
     }
 
     /**
@@ -142,11 +151,15 @@ class SkillOnCallProgressController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ProgressEntry $progressEntry): JsonResponse
+    public function update(Request $request, ProgressEntry $progressEntry): JsonResponse|RedirectResponse
     {
         // Ensure the entry belongs to the skilloncall project
         if ($progressEntry->project !== $this->project) {
-            return response()->json(['message' => 'Entry not found'], 404);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Entry not found'], 404);
+            }
+            
+            return redirect()->route('progress.index')->withErrors(['error' => 'Entry not found']);
         }
 
         $validator = Validator::make($request->all(), [
@@ -166,10 +179,14 @@ class SkillOnCallProgressController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors()
-            ], 422);
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            return back()->withErrors($validator)->withInput();
         }
 
         $data = $validator->validated();
@@ -201,20 +218,28 @@ class SkillOnCallProgressController extends Controller
 
         $progressEntry->update($data);
 
-        return response()->json([
-            'message' => 'Progress entry updated successfully',
-            'entry' => $progressEntry
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Progress entry updated successfully',
+                'entry' => $progressEntry
+            ]);
+        }
+
+        return redirect()->route('progress.index')->with('success', 'Progress entry updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ProgressEntry $progressEntry): JsonResponse
+    public function destroy(Request $request, ProgressEntry $progressEntry): JsonResponse|RedirectResponse
     {
         // Ensure the entry belongs to the skilloncall project
         if ($progressEntry->project !== $this->project) {
-            return response()->json(['message' => 'Entry not found'], 404);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Entry not found'], 404);
+            }
+            
+            return redirect()->route('progress.index')->withErrors(['error' => 'Entry not found']);
         }
 
         // Delete associated screenshots
@@ -226,9 +251,13 @@ class SkillOnCallProgressController extends Controller
 
         $progressEntry->delete();
 
-        return response()->json([
-            'message' => 'Progress entry deleted successfully'
-        ]);
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Progress entry deleted successfully'
+            ]);
+        }
+
+        return redirect()->route('progress.index')->with('success', 'Progress entry deleted successfully!');
     }
 
     /**

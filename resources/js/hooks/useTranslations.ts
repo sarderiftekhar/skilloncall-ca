@@ -1,6 +1,6 @@
 import { usePage } from '@inertiajs/react';
 
-type Translations = Record<string, string>;
+type Translations = Record<string, any>;
 
 export function useTranslations() {
     const page = usePage();
@@ -9,10 +9,19 @@ export function useTranslations() {
     const locale: string = (props as any).locale || 'en';
 
     const t = (key: string, fallback?: string) => {
-        if (Object.prototype.hasOwnProperty.call(translations, key)) {
-            return translations[key];
+        // Handle nested keys like 'stats.total_applications'
+        const keys = key.split('.');
+        let value = translations;
+        
+        for (const k of keys) {
+            if (value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, k)) {
+                value = value[k];
+            } else {
+                return fallback ?? key;
+            }
         }
-        return fallback ?? key;
+        
+        return typeof value === 'string' ? value : (fallback ?? key);
     };
 
     return { t, locale };

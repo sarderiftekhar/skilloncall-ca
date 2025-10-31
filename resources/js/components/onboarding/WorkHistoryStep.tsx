@@ -440,6 +440,7 @@ export default function WorkHistoryStep({
                                                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                                                     {globalIndustries
                                                         .filter(industry => industry.name.toLowerCase().includes(industrySearches[experience.id].toLowerCase()))
+                                                        .sort((a, b) => a.name.localeCompare(b.name))
                                                         .slice(0, 10)
                                                         .map((industry) => (
                                                             <div
@@ -580,7 +581,7 @@ export default function WorkHistoryStep({
                     <CardTitle className="text-lg flex items-center justify-between">
                         <span className="flex items-center">
                             <User className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                            Professional References
+                            Professional References <span className="ml-2 text-sm font-normal text-gray-500">(Optional)</span>
                         </span>
                         <Button
                             onClick={addReference}
@@ -593,7 +594,7 @@ export default function WorkHistoryStep({
                         </Button>
                     </CardTitle>
                     <p className="text-sm text-gray-600">
-                        Add 2-3 people who can speak about your work. These can be previous employers, supervisors, or satisfied clients.
+                        Add 2-3 people who can speak about your work. These can be previous employers, supervisors, or satisfied clients. You can skip this section and add references later.
                     </p>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -601,7 +602,7 @@ export default function WorkHistoryStep({
                         <div className="text-center py-8 text-gray-500">
                             <User className="h-12 w-12 mx-auto mb-3 text-gray-300" />
                             <p>No references added yet</p>
-                            <p className="text-sm">Add people who can vouch for your work quality</p>
+                            <p className="text-sm">This section is optional. You can add references now or skip and add them later.</p>
                         </div>
                     ) : (
                         references.map((reference, index) => (
@@ -623,7 +624,7 @@ export default function WorkHistoryStep({
                                     {/* Name and Relationship */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <Label className="text-sm font-medium">Full Name *</Label>
+                                            <Label className="text-sm font-medium">Full Name</Label>
                                             <Input
                                                 value={reference.reference_name || ''}
                                                 onChange={(e) => updateReference(reference.id, 'reference_name', e.target.value)}
@@ -632,7 +633,7 @@ export default function WorkHistoryStep({
                                             />
                                         </div>
                                         <div>
-                                            <Label className="text-sm font-medium">Relationship *</Label>
+                                            <Label className="text-sm font-medium">Relationship</Label>
                                             <Select
                                                 value={reference.relationship || ''}
                                                 onValueChange={(value) => updateReference(reference.id, 'relationship', value)}
@@ -654,7 +655,7 @@ export default function WorkHistoryStep({
                                     {/* Contact Details */}
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <Label className="text-sm font-medium">Phone Number *</Label>
+                                            <Label className="text-sm font-medium">Phone Number</Label>
                                             <Input
                                                 value={reference.reference_phone || ''}
                                                 onChange={(e) => {

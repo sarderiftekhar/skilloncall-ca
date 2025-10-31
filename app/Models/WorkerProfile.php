@@ -20,6 +20,7 @@ class WorkerProfile extends Model
         'profile_photo',
         'date_of_birth',
         'bio',
+        'overall_experience',
         'address_line_1',
         'address_line_2',
         'city',
@@ -184,22 +185,23 @@ class WorkerProfile extends Model
             }
         }
 
-        // Check relationships
+        // Always count relationship fields towards total, only count as completed if they have data
+        $totalFields += 5; // skills, languages, work experiences, availability, references
+
         if ($this->skills()->count() > 0) {
             $completedFields++;
-            $totalFields++;
         }
         if ($this->languages()->count() > 0) {
             $completedFields++;
-            $totalFields++;
         }
         if ($this->workExperiences()->count() > 0) {
             $completedFields++;
-            $totalFields++;
         }
         if ($this->availability()->where('is_available', true)->count() > 0) {
             $completedFields++;
-            $totalFields++;
+        }
+        if ($this->references()->count() > 0) {
+            $completedFields++;
         }
 
         return round(($completedFields / $totalFields) * 100);

@@ -34,12 +34,22 @@ class EmployerJobController extends Controller
     /**
      * Show the form for creating a new job.
      */
-    public function create(): Response
+    public function create(Request $request): Response|\Illuminate\Http\RedirectResponse
     {
+        $user = $request->user();
+        
+        // Check if profile is complete, redirect to onboarding if not
+        $employerProfile = \App\Models\EmployerProfile::where('user_id', $user->id)->first();
+        
+        if (!$employerProfile || !$employerProfile->is_profile_complete) {
+            return redirect()->route('employer.onboarding.index');
+        }
+
         $categories = $this->jobService->getJobCategories();
 
         return Inertia::render('employer/jobs/create', [
             'categories' => $categories,
+            'globalSkills' => \App\Models\GlobalSkill::active()->ordered()->get(),
         ]);
     }
 
@@ -80,6 +90,7 @@ class EmployerJobController extends Controller
         return Inertia::render('employer/jobs/edit', [
             'job' => $job,
             'categories' => $categories,
+            'globalSkills' => \App\Models\GlobalSkill::active()->ordered()->get(),
         ]);
     }
 

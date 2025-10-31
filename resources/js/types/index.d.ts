@@ -33,8 +33,20 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
+    subscription: SubscriptionInfo | null;
+    locale: string;
+    translations: Record<string, any>;
     sidebarOpen: boolean;
     [key: string]: unknown;
+}
+
+export interface SubscriptionInfo {
+    plan_name: string;
+    plan_type: string;
+    status: string;
+    ends_at: string | null;
+    days_until_expiration: number | null;
+    is_cancelled: boolean;
 }
 
 export interface User {

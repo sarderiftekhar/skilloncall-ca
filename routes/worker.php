@@ -10,6 +10,7 @@ use App\Http\Controllers\Worker\WorkerProfileController;
 use App\Http\Controllers\Worker\WorkerProfileController as WorkerProfileCrudController;
 use App\Http\Controllers\Worker\WorkerSkillController;
 use App\Http\Controllers\Worker\WorkerAvailabilityController;
+use App\Http\Controllers\Worker\WorkerMessageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,8 +24,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Worker Onboarding Routes (no profile completion required)
-Route::middleware(['auth', 'verified', 'worker'])->prefix('worker')->name('worker.')->group(function () {
+// Worker Onboarding Routes (no profile completion or email verification required)
+Route::middleware(['auth', 'worker'])->prefix('worker')->name('worker.')->group(function () {
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/', [OnboardingController::class, 'index'])->name('index');
         Route::post('/save', [OnboardingController::class, 'save'])->name('save');
@@ -50,11 +51,22 @@ Route::middleware(['auth', 'verified', 'worker', 'ensure.worker.profile.complete
     Route::post('jobs/{job}/apply', [WorkerJobController::class, 'apply'])->name('jobs.apply');
     Route::get('jobs/search', [WorkerJobController::class, 'search'])->name('jobs.search');
 
+    // Saved Jobs
+    Route::get('saved-jobs', [WorkerJobController::class, 'savedJobs'])->name('saved-jobs');
+    Route::post('jobs/{job}/save', [WorkerJobController::class, 'saveJob'])->name('jobs.save');
+    Route::delete('jobs/{job}/unsave', [WorkerJobController::class, 'unsaveJob'])->name('jobs.unsave');
+
     // Application Management
     Route::get('applications', [WorkerApplicationController::class, 'index'])->name('applications.index');
     Route::get('applications/{application}', [WorkerApplicationController::class, 'show'])->name('applications.show');
     Route::put('applications/{application}/withdraw', [WorkerApplicationController::class, 'withdraw'])->name('applications.withdraw');
     Route::put('applications/{application}/complete', [WorkerApplicationController::class, 'complete'])->name('applications.complete');
+
+    // Messages Management
+    Route::get('messages', [WorkerMessageController::class, 'index'])->name('messages.index');
+    Route::get('messages/{message}', [WorkerMessageController::class, 'show'])->name('messages.show');
+    Route::post('messages', [WorkerMessageController::class, 'store'])->name('messages.store');
+    Route::put('messages/{message}/read', [WorkerMessageController::class, 'markAsRead'])->name('messages.read');
 
     // Profile Management (CRUD for profile view/edit)
     Route::get('profile', [WorkerProfileCrudController::class, 'show'])->name('profile.show');

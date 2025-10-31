@@ -17,6 +17,7 @@ import {
     PlusCircle
 } from 'react-feather';
 import { useState, useEffect } from 'react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -85,6 +86,7 @@ export default function EmployerDashboard({
     activeWorkers,
     chartData 
 }: EmployerDashboardProps) {
+    const { t } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
     
     useEffect(() => {
@@ -129,7 +131,15 @@ export default function EmployerDashboard({
             <Head title="Employer Dashboard">
                 <style>{`
                     * { cursor: default; }
-                    a, button, [role="button"], .cursor-pointer { cursor: pointer !important; }
+                    a, button, [role="button"], .cursor-pointer, 
+                    [onclick], [onClick], select, input[type="button"],
+                    input[type="submit"], input[type="reset"] { 
+                        cursor: pointer !important; 
+                    }
+                    
+                    /* Ensure cards with onClick show pointer cursor */
+                    [onclick], [onClick] { cursor: pointer !important; }
+                    [onclick] *, [onClick] * { cursor: inherit !important; }
                     
                     .employer-title {
                         color: #192341 !important;

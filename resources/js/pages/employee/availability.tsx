@@ -58,8 +58,123 @@ const TIME_SLOTS = [
     '22:00',
 ];
 
+// Loading Skeleton Components
+const HeaderSkeleton = () => (
+    <div className="mb-8 text-center animate-pulse">
+        <div className="h-8 md:h-10 bg-gray-300 rounded w-64 mx-auto mb-4"></div>
+        <div className="h-5 bg-gray-200 rounded w-96 mx-auto"></div>
+    </div>
+);
+
+const MonthTabsSkeleton = () => (
+    <div className="mb-6 overflow-hidden border-2 border-gray-200 rounded-lg animate-pulse">
+        <div className="grid grid-cols-2 gap-0">
+            <div className="py-4 px-4 bg-gray-100">
+                <div className="flex flex-col items-center space-y-2">
+                    <div className="flex items-center space-x-2">
+                        <div className="h-5 w-5 bg-gray-300 rounded"></div>
+                        <div className="h-4 bg-gray-300 rounded w-32"></div>
+                    </div>
+                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                </div>
+            </div>
+            <div className="py-4 px-4 bg-gray-50 border-l-2 border-gray-200">
+                <div className="flex flex-col items-center space-y-2">
+                    <div className="flex items-center space-x-2">
+                        <div className="h-5 w-5 bg-gray-300 rounded"></div>
+                        <div className="h-4 bg-gray-300 rounded w-32"></div>
+                    </div>
+                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const AvailabilityCardSkeleton = () => (
+    <div className="border border-gray-200 rounded-lg animate-pulse">
+        <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center mb-2">
+                <div className="h-6 w-6 bg-gray-300 rounded mr-3"></div>
+                <div className="h-6 bg-gray-300 rounded w-64"></div>
+            </div>
+            <div className="h-4 bg-gray-200 rounded w-full"></div>
+        </div>
+        <div className="p-6 space-y-6">
+            {/* Quick Schedule Options */}
+            <div>
+                <div className="h-4 bg-gray-300 rounded w-48 mb-4"></div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-16 bg-gray-100 rounded border-2 border-gray-200"></div>
+                    ))}
+                </div>
+            </div>
+            
+            {/* Custom Schedule */}
+            <div>
+                <div className="h-4 bg-gray-300 rounded w-64 mb-4"></div>
+                <div className="space-y-4">
+                    {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <div key={i} className="rounded-lg border-2 border-gray-200 bg-gray-50 p-4">
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center">
+                                    <div className="h-5 w-5 bg-gray-300 rounded mr-3"></div>
+                                    <div className="h-4 bg-gray-300 rounded w-20"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Schedule Summary */}
+                <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-5">
+                    <div className="flex items-center space-x-4">
+                        <div className="h-6 w-6 bg-gray-300 rounded"></div>
+                        <div>
+                            <div className="h-4 bg-gray-300 rounded w-48 mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded w-32"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+const ButtonsSkeleton = () => (
+    <div className="space-y-6">
+        <div className="flex justify-center py-4">
+            <div className="h-11 bg-gray-300 rounded w-48 animate-pulse"></div>
+        </div>
+        <div className="flex justify-center py-6">
+            <div className="h-11 bg-gray-300 rounded w-40 animate-pulse"></div>
+        </div>
+    </div>
+);
+
+const TipsSkeleton = () => (
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 animate-pulse">
+        <div className="flex items-start space-x-3">
+            <div className="mt-0.5 h-5 w-5 bg-gray-300 rounded"></div>
+            <div className="flex-1">
+                <div className="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                <div className="space-y-1">
+                    <div className="h-3 bg-gray-200 rounded w-full"></div>
+                    <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
 export default function EmployeeAvailability({ profileData }: AvailabilityProps) {
     const { t } = useTranslations('availability');
+    const [isLoading, setIsLoading] = useState(true);
+    const [showContent, setShowContent] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const { props } = usePage();
     const [modal, setModal] = useState<{
@@ -122,6 +237,17 @@ export default function EmployeeAvailability({ profileData }: AvailabilityProps)
     const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth);
     const [quickSchedule, setQuickSchedule] = useState<string>('');
     const [isCopying, setIsCopying] = useState(false);
+
+    // Loading animation effect
+    useEffect(() => {
+        const loadingTimer = setTimeout(() => {
+            setIsLoading(false);
+            // Quick content reveal
+            setTimeout(() => setShowContent(true), 50);
+        }, 800);
+
+        return () => clearTimeout(loadingTimer);
+    }, []);
 
     // Handle flash messages from backend
     useEffect(() => {
@@ -294,18 +420,32 @@ export default function EmployeeAvailability({ profileData }: AvailabilityProps)
             <div className="min-h-screen" style={{ backgroundColor: '#F6FBFD' }}>
                 <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
                     {/* Page Header */}
-                    <div className="mb-8 text-center">
-                        <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-4" style={{ color: '#10B3D6' }}>
-                            Manage Your Availability
-                        </h1>
-                        <p className="text-lg text-gray-600 leading-relaxed">
-                            Update your schedule to help employers know when you're available for work.
-                        </p>
+                    <div className={`transition-all duration-400 ease-out ${
+                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                    }`}>
+                        {isLoading ? (
+                            <HeaderSkeleton />
+                        ) : (
+                            <div className="mb-8 text-center">
+                                <h1 className="text-2xl md:text-3xl font-bold leading-tight mb-4" style={{ color: '#10B3D6' }}>
+                                    Manage Your Availability
+                                </h1>
+                                <p className="text-lg text-gray-600 leading-relaxed">
+                                    Update your schedule to help employers know when you're available for work.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-6">
                         {/* Month Tabs */}
-                        <Card className="mb-6 overflow-hidden border-2" style={{ borderColor: '#10B3D6' }}>
+                        <div className={`transition-all duration-400 ease-out ${
+                            showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}>
+                            {isLoading ? (
+                                <MonthTabsSkeleton />
+                            ) : (
+                                <Card className="mb-6 overflow-hidden border-2" style={{ borderColor: '#10B3D6' }}>
                             <div className="grid grid-cols-2 gap-0">
                                 <button
                                     type="button"
@@ -376,10 +516,18 @@ export default function EmployeeAvailability({ profileData }: AvailabilityProps)
                                     )}
                                 </button>
                             </div>
-                        </Card>
+                                </Card>
+                            )}
+                        </div>
 
                         {/* Availability Schedule */}
-                        <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
+                        <div className={`transition-all duration-400 ease-out ${
+                            showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}>
+                            {isLoading ? (
+                                <AvailabilityCardSkeleton />
+                            ) : (
+                                <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                             <CardHeader className="pb-4">
                                 <CardTitle className="flex items-center text-xl">
                                     <Clock className="mr-3 h-6 w-6" style={{ color: '#10B3D6' }} />
@@ -544,40 +692,58 @@ export default function EmployeeAvailability({ profileData }: AvailabilityProps)
                                     </div>
                                 </div>
                             </CardContent>
-                        </Card>
-
-                        {/* Copy to Next Month Button */}
-                        {selectedMonth === currentMonth && (
-                            <div className="flex justify-center py-4">
-                                <Button
-                                    type="button"
-                                    onClick={copyToNextMonth}
-                                    disabled={isCopying}
-                                    className="cursor-pointer px-6 py-3"
-                                    style={{ backgroundColor: '#10B3D6', color: 'white', height: '2.7em' }}
-                                >
-                                    <Copy className="mr-2 h-4 w-4" />
-                                    {isCopying ? 'Copied!' : `Copy to ${formatMonthDisplay(nextMonth)}`}
-                                </Button>
-                            </div>
-                        )}
-
-                        {/* Save Button */}
-                        <div className="flex justify-center py-6">
-                            <Button
-                                onClick={saveAvailability}
-                                disabled={isSaving}
-                                className="cursor-pointer px-10 py-3"
-                                style={{ backgroundColor: '#10B3D6', color: 'white', height: '2.7em' }}
-                            >
-                                <Save className="mr-2 h-5 w-5" />
-                                {isSaving ? 'Saving...' : 'Save Availability'}
-                            </Button>
+                                </Card>
+                            )}
                         </div>
 
+                        {/* Copy to Next Month Button & Save Button */}
+                        <div className={`transition-all duration-400 ease-out ${
+                            showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}>
+                            {isLoading ? (
+                                <ButtonsSkeleton />
+                            ) : (
+                                <>
+                                    {/* Copy to Next Month Button */}
+                                    {selectedMonth === currentMonth && (
+                                        <div className="flex justify-center py-4">
+                                            <Button
+                                                type="button"
+                                                onClick={copyToNextMonth}
+                                                disabled={isCopying}
+                                                className="cursor-pointer px-6 py-3"
+                                                style={{ backgroundColor: '#10B3D6', color: 'white', height: '2.7em' }}
+                                            >
+                                                <Copy className="mr-2 h-4 w-4" />
+                                                {isCopying ? 'Copied!' : `Copy to ${formatMonthDisplay(nextMonth)}`}
+                                            </Button>
+                                        </div>
+                                    )}
+
+                                    {/* Save Button */}
+                                    <div className="flex justify-center py-6">
+                                        <Button
+                                            onClick={saveAvailability}
+                                            disabled={isSaving}
+                                            className="cursor-pointer px-10 py-3"
+                                            style={{ backgroundColor: '#10B3D6', color: 'white', height: '2.7em' }}
+                                        >
+                                            <Save className="mr-2 h-5 w-5" />
+                                            {isSaving ? 'Saving...' : 'Save Availability'}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+                        </div>
 
                         {/* Schedule Tips */}
-                        <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                        <div className={`transition-all duration-400 ease-out ${
+                            showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                        }`}>
+                            {isLoading ? (
+                                <TipsSkeleton />
+                            ) : (
+                                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                             <div className="flex items-start space-x-3">
                                 <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-600" />
                                 <div className="text-sm">
@@ -594,6 +760,8 @@ export default function EmployeeAvailability({ profileData }: AvailabilityProps)
                                     </p>
                                 </div>
                             </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

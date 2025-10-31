@@ -268,7 +268,7 @@ export default function LanguagesTab({ profile, globalLanguages = [], onUpdate }
                                             <div className="flex items-start justify-between mb-3">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h4 className="font-medium text-gray-900">{language.name}</h4>
+                                                        <h4 className="font-medium" style={{ color: '#192341' }}>{language.name}</h4>
                                                         {language.pivot?.is_primary && (
                                                             <Badge className="text-xs px-2 py-0.5" style={{ backgroundColor: '#10B3D6', color: 'white' }}>
                                                                 Primary Language

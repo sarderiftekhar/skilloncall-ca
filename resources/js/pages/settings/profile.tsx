@@ -3,6 +3,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
 import { Form } from '@inertiajs/react';
 import { useRef } from 'react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 import DeleteUser from '@/components/delete-user';
 import InputError from '@/components/input-error';
@@ -21,6 +22,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
+    const { t } = useTranslations();
     const { auth } = usePage<SharedData>().props;
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);

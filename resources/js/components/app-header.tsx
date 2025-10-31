@@ -7,23 +7,29 @@ import { NavigationMenu, NavigationMenuItem, NavigationMenuList, navigationMenuT
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
+import { SubscriptionBadge } from '@/components/subscription-badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 import { Book, Folder, Grid, Menu, Search, X, MessageCircle, Briefcase, Users, CreditCard, Settings, Clock, Shield, Activity } from 'react-feather';
 import { useState } from 'react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: Grid,
-    },
-];
+// Generate main nav items dynamically with language parameters
+function getMainNavItems(locale: string): NavItem[] {
+    return [
+        {
+            title: 'Dashboard',
+            href: addLangParam('/dashboard', locale),
+            icon: Grid,
+        },
+    ];
+}
 
 const rightNavItems: NavItem[] = [
     {
@@ -44,12 +50,19 @@ interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
 }
 
+// Helper function to add language parameter to URLs
+function addLangParam(href: string, locale: string): string {
+    const urlObj = new URL(href, window.location.origin);
+    urlObj.searchParams.set('lang', locale);
+    return urlObj.pathname + urlObj.search;
+}
+
 // Get role-based navigation items
-function getRoleBasedNavItems(userRole: string): NavItem[] {
+function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: '/dashboard',
+            href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
     ];
@@ -59,32 +72,32 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'User Management',
-                href: '/admin/users',
+                href: addLangParam('/admin/users', locale),
                 icon: Users,
             },
             {
                 title: 'Job Management',
-                href: '/admin/jobs',
+                href: addLangParam('/admin/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Payments & Billing',
-                href: '/admin/payments',
+                href: addLangParam('/admin/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Reports & Analytics',
-                href: '/admin/reports',
+                href: addLangParam('/admin/reports', locale),
                 icon: Activity,
             },
             {
                 title: 'Subscriptions',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: CreditCard,
             },
             {
                 title: 'System Settings',
-                href: '/admin/settings',
+                href: addLangParam('/admin/settings', locale),
                 icon: Settings,
             },
         ];
@@ -95,27 +108,37 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'Post Jobs',
-                href: '/employer/jobs/create',
+                href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Manage Jobs',
-                href: '/employer/jobs',
+                href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
                 title: 'Applications',
-                href: '/employer/applications',
+                href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
+            },
+            {
                 title: 'Payments',
-                href: '/employer/payments',
+                href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -126,32 +149,32 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'Find Jobs',
-                href: '/employee/jobs',
+                href: addLangParam('/employee/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'My Applications',
-                href: '/employee/applications',
+                href: addLangParam('/employee/applications', locale),
                 icon: Users,
             },
             {
                 title: 'Messages',
-                href: '/employee/messages',
+                href: addLangParam('/employee/messages', locale),
                 icon: MessageCircle,
             },
             {
                 title: 'Availability',
-                href: '/employee/availability',
+                href: addLangParam('/employee/availability', locale),
                 icon: Clock,
             },
             {
                 title: 'My Profile',
-                href: '/employee/profile',
+                href: addLangParam('/employee/profile', locale),
                 icon: Settings,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -162,10 +185,12 @@ function getRoleBasedNavItems(userRole: string): NavItem[] {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
-    const { auth } = page.props;
+    const { locale } = useTranslations();
+    const mainNavItems = getMainNavItems(locale);
+    const { auth, subscription } = page.props;
     const getInitials = useInitials();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin');
+    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', locale);
 
     return (
         <>
@@ -238,7 +263,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     {/* Logo */}
-                    <Link href={dashboard()} prefetch className="items-center space-x-2 hidden lg:flex">
+                    <Link href={addLangParam('/dashboard', locale)} prefetch className="items-center space-x-2 hidden lg:flex">
                         <AppLogo />
                     </Link>
 
@@ -270,6 +295,12 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {/* Right Side Controls */}
                     <div className="ml-auto flex items-center gap-1 lg:gap-2">
+                        {/* Language Switcher */}
+                        <LanguageSwitcher variant="compact" />
+                        
+                        {/* Subscription Badge */}
+                        <SubscriptionBadge subscription={subscription} />
+                        
                         <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-9 lg:w-9 hidden sm:flex">
                             <Search className="h-4 w-4 lg:h-5 lg:w-5 opacity-80 hover:opacity-100" />
                         </Button>

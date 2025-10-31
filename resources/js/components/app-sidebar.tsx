@@ -1,6 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { useTranslations } from '@/hooks/useTranslations';
 // Temporarily using simple route strings to fix import issues
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -14,16 +15,25 @@ import {
     Shield,
     MessageCircle,
     Calendar,
-    Clock
+    Clock,
+    Bookmark,
+    Search
 } from 'react-feather';
 import AppLogo from './app-logo';
 
+// Helper function to add language parameter to URLs
+function addLangParam(href: string, locale: string): string {
+    const urlObj = new URL(href, window.location.origin);
+    urlObj.searchParams.set('lang', locale);
+    return urlObj.pathname + urlObj.search;
+}
+
 // Navigation items - role-based navigation
-function getNavItems(userRole: string): NavItem[] {
+function getNavItems(userRole: string, t: (key: string) => string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
-            title: 'Dashboard',
-            href: '/dashboard',
+            title: t('nav.dashboard'),
+            href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
     ];
@@ -33,32 +43,32 @@ function getNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'User Management',
-                href: '/admin/users',
+                href: addLangParam('/admin/users', locale),
                 icon: Users,
             },
             {
                 title: 'Job Management',
-                href: '/admin/jobs',
+                href: addLangParam('/admin/jobs', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Payments & Billing',
-                href: '/admin/payments',
+                href: addLangParam('/admin/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Reports & Analytics',
-                href: '/admin/reports',
+                href: addLangParam('/admin/reports', locale),
                 icon: Activity,
             },
             {
                 title: 'Subscriptions',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: CreditCard,
             },
             {
                 title: 'System Settings',
-                href: '/admin/settings',
+                href: addLangParam('/admin/settings', locale),
                 icon: Settings,
             },
         ];
@@ -69,27 +79,37 @@ function getNavItems(userRole: string): NavItem[] {
             ...baseItems,
             {
                 title: 'Post Jobs',
-                href: '/employer/jobs/create',
+                href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
                 title: 'Manage Jobs',
-                href: '/employer/jobs',
+                href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
                 title: 'Applications',
-                href: '/employer/applications',
+                href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
+                title: 'Find Employee',
+                href: addLangParam('/employer/workers', locale),
+                icon: Search,
+            },
+            {
+                title: 'Messages',
+                href: addLangParam('/employer/messages', locale),
+                icon: MessageCircle,
+            },
+            {
                 title: 'Payments',
-                href: '/employer/payments',
+                href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
                 title: 'Subscription',
-                href: '/subscriptions',
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -99,33 +119,38 @@ function getNavItems(userRole: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Find Jobs',
-                href: '/employee/jobs',
+                title: t('nav.find_jobs'),
+                href: addLangParam('/employee/jobs', locale),
                 icon: Briefcase,
             },
             {
-                title: 'My Applications',
-                href: '/employee/applications',
+                title: t('nav.saved_jobs'),
+                href: addLangParam('/employee/saved-jobs', locale),
+                icon: Bookmark,
+            },
+            {
+                title: t('nav.my_applications'),
+                href: addLangParam('/employee/applications', locale),
                 icon: Users,
             },
             {
-                title: 'Messages',
-                href: '/employee/messages',
+                title: t('nav.messages'),
+                href: addLangParam('/employee/messages', locale),
                 icon: MessageCircle,
             },
             {
-                title: 'Availability',
-                href: '/employee/availability',
+                title: t('nav.availability'),
+                href: addLangParam('/employee/availability', locale),
                 icon: Clock,
             },
             {
-                title: 'My Profile',
-                href: '/employee/profile',
+                title: t('nav.my_profile'),
+                href: addLangParam('/employee/profile', locale),
                 icon: Settings,
             },
             {
-                title: 'Subscription',
-                href: '/subscriptions',
+                title: t('nav.subscription'),
+                href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
         ];
@@ -138,7 +163,8 @@ const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
-    const navItems = getNavItems(auth.user.role || 'admin');
+    const { t, locale } = useTranslations();
+    const navItems = getNavItems(auth.user.role || 'admin', t, locale);
 
     return (
         <Sidebar variant="inset" className="hidden lg:flex w-64 min-w-64" style={{width: '256px', minWidth: '256px'}}>
@@ -146,7 +172,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild style={{height: '2.7em', width: '100%', justifyContent: 'flex-start'}}>
-                            <Link href="/dashboard" className="flex items-center gap-2 px-2 w-full">
+                            <Link href={addLangParam("/dashboard", locale)} className="flex items-center gap-2 px-2 w-full cursor-pointer">
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

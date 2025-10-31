@@ -17,9 +17,18 @@ class EmployerDashboardController extends Controller
     /**
      * Display the employer dashboard.
      */
-    public function index(Request $request): Response
+    public function index(Request $request): Response|\Illuminate\Http\RedirectResponse
     {
-        $dashboardData = $this->dashboardService->getDashboardData(auth()->user());
+        $user = $request->user();
+        
+        // Check if profile is complete, redirect to onboarding if not
+        $employerProfile = \App\Models\EmployerProfile::where('user_id', $user->id)->first();
+        
+        if (!$employerProfile || !$employerProfile->is_profile_complete) {
+            return redirect()->route('employer.onboarding.index');
+        }
+
+        $dashboardData = $this->dashboardService->getDashboardData($user);
 
         return Inertia::render('employer/dashboard', [
             'stats' => $dashboardData['stats'],

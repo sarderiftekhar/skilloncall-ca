@@ -143,6 +143,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->isEmployer()) {
+            // For employers, check if profile is complete before redirecting
+            $employerProfile = \App\Models\EmployerProfile::where('user_id', $user->id)->first();
+
+            if (! $employerProfile || ! $employerProfile->is_profile_complete) {
+                return redirect()->route('employer.onboarding.index');
+            }
+
             return redirect()->route('employer.dashboard');
         } else {
             // For employees, check if profile is complete before redirecting

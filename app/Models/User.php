@@ -63,6 +63,11 @@ class User extends Authenticatable
         return $this->hasOne(EmployerProfile::class);
     }
 
+    public function employerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EmployerProfile::class);
+    }
+
     /**
      * Role helpers
      */
@@ -143,6 +148,14 @@ class User extends Authenticatable
     public function portfolios(): HasMany
     {
         return $this->hasMany(Portfolio::class, 'user_id');
+    }
+
+    /**
+     * Get the jobs saved by the worker.
+     */
+    public function savedJobs(): HasMany
+    {
+        return $this->hasMany(SavedJob::class);
     }
 
     // Subscription relationships

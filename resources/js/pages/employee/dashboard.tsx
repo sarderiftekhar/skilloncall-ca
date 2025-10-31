@@ -1,8 +1,9 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from '@/hooks/useTranslations';
 import { 
     Briefcase, 
     DollarSign, 
@@ -204,6 +205,7 @@ export default function EmployeeDashboard({
     activeJobs, 
     upcomingAvailability 
 }: EmployeeDashboardProps) {
+    const { t } = useTranslations();
     const [isLoading, setIsLoading] = useState(true);
     const [showContent, setShowContent] = useState(false);
 
@@ -265,7 +267,7 @@ export default function EmployeeDashboard({
 
     return (
         <AppLayout>
-            <Head title="Employee Dashboard" />
+            <Head title={t('title')} />
 
             <div className="w-full px-6 py-8">
                 <div className="flex h-full flex-1 flex-col gap-8">
@@ -285,30 +287,34 @@ export default function EmployeeDashboard({
                         <>
                             <div className="animate-[slideInLeft_0.3s_ease-out]">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight" style={{color: '#192341'}}>
-                                    Employee Dashboard
+                                    {t('page_title')}
                                 </h1>
                                 <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 mt-1">
-                                    Welcome back! Here's your activity overview.
+                                    {t('welcome_message')}
                                 </p>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 animate-[slideInRight_0.3s_ease-out]">
-                                {safeStats.profileCompletion < 100 ? (
-                                    <Badge className="text-orange-700 bg-orange-50 border-orange-200 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1" variant="outline">
-                                        <Clock className="h-3 w-3 sm:h-3 sm:w-3 mr-1" />
-                                        <span className="hidden sm:inline">{safeStats.profileCompletion}% Complete</span>
-                                        <span className="sm:hidden">{safeStats.profileCompletion}%</span>
-                                    </Badge>
+                                {safeStats.profileCompletion >= 100 ? (
+                                    <Link href="/employee/profile" className="cursor-pointer">
+                                        <Badge className="text-white text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1 hover:scale-105 transition-all duration-200" style={{backgroundColor: '#16a34a'}}>
+                                            <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1 text-white" />
+                                            <span className="hidden sm:inline">{t('profile_complete')}</span>
+                                            <span className="sm:hidden">{t('profile_complete_short')}</span>
+                                        </Badge>
+                                    </Link>
                                 ) : (
-                                    <Badge className="text-white text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1" style={{backgroundColor: '#16a34a'}}>
-                                        <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1 text-white" />
-                                        <span className="hidden sm:inline">Profile complete</span>
-                                        <span className="sm:hidden">Complete</span>
-                                    </Badge>
+                                    <Link href="/employee/profile" className="cursor-pointer">
+                                        <Badge className="text-orange-800 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1 hover:scale-105 transition-all duration-200" style={{backgroundColor: '#fed7aa', borderColor: '#fb923c'}}>
+                                            <AlertCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1 text-orange-800" />
+                                            <span className="hidden sm:inline">{safeStats.profileCompletion}% Complete</span>
+                                            <span className="sm:hidden">{safeStats.profileCompletion}%</span>
+                                        </Badge>
+                                    </Link>
                                 )}
                                 <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1">
                                     <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1" />
-                                    <span className="hidden sm:inline">Active Employee</span>
-                                    <span className="sm:hidden">Active</span>
+                                    <span className="hidden sm:inline">{t('active_employee')}</span>
+                                    <span className="sm:hidden">{t('active_employee_short')}</span>
                                 </Badge>
                             </div>
                         </>
@@ -331,7 +337,7 @@ export default function EmployeeDashboard({
                             <div className="animate-[fadeInUp_0.4s_ease-out_0.05s_both]">
                                 <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105" style={{borderTop: '.5px solid #192341'}}>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>Total Applications</CardTitle>
+                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>{t('stats.total_applications')}</CardTitle>
                                         <div className="p-2 rounded-lg animate-[float_3s_ease-in-out_infinite]" style={{backgroundColor: '#FCF2F0'}}>
                                             <FileText className="h-4 w-4" style={{color: '#10B3D6'}} />
                                         </div>
@@ -340,7 +346,7 @@ export default function EmployeeDashboard({
                                         <div className="text-2xl font-bold animate-[countUp_0.4s_ease-out]" style={{color: '#192341'}}>{safeStats.totalApplications}</div>
                                         <div className="flex items-center space-x-1 text-xs text-gray-600 mt-1">
                                             <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.1s_both]">+12%</span>
-                                            <span>from last month</span>
+                                            <span>{t('stats.from_last_month')}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -349,7 +355,7 @@ export default function EmployeeDashboard({
                             <div className="animate-[fadeInUp_0.4s_ease-out_0.1s_both]">
                                 <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105" style={{borderTop: '.5px solid #192341'}}>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>Completed Jobs</CardTitle>
+                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>{t('stats.completed_jobs')}</CardTitle>
                                         <div className="p-2 rounded-lg animate-[float_3s_ease-in-out_infinite_0.5s]" style={{backgroundColor: '#FCF2F0'}}>
                                             <CheckCircle className="h-4 w-4" style={{color: '#10B3D6'}} />
                                         </div>
@@ -358,7 +364,7 @@ export default function EmployeeDashboard({
                                         <div className="text-2xl font-bold animate-[countUp_0.4s_ease-out_0.05s_both]" style={{color: '#192341'}}>{safeStats.completedJobs}</div>
                                         <div className="flex items-center space-x-1 text-xs text-gray-600 mt-1">
                                             <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.15s_both]">+8%</span>
-                                            <span>from last month</span>
+                                            <span>{t('stats.from_last_month')}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -367,7 +373,7 @@ export default function EmployeeDashboard({
                             <div className="animate-[fadeInUp_0.4s_ease-out_0.15s_both]">
                                 <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105" style={{borderTop: '.5px solid #192341'}}>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>Active Bookings</CardTitle>
+                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>{t('stats.active_bookings')}</CardTitle>
                                         <div className="p-2 rounded-lg animate-[float_3s_ease-in-out_infinite_1s]" style={{backgroundColor: '#FCF2F0'}}>
                                             <Calendar className="h-4 w-4" style={{color: '#10B3D6'}} />
                                         </div>
@@ -375,7 +381,7 @@ export default function EmployeeDashboard({
                                     <CardContent>
                                         <div className="text-2xl font-bold animate-[countUp_0.4s_ease-out_0.1s_both]" style={{color: '#192341'}}>{safeStats.activeBookings}</div>
                                         <div className="flex items-center space-x-1 text-xs text-gray-600 mt-1">
-                                            <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.2s_both]">Current bookings</span>
+                                            <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.2s_both]">{t('current_bookings')}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -384,7 +390,7 @@ export default function EmployeeDashboard({
                             <div className="animate-[fadeInUp_0.4s_ease-out_0.2s_both]">
                                 <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-200 hover:scale-105" style={{borderTop: '.5px solid #192341'}}>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>Average Rating</CardTitle>
+                                        <CardTitle className="text-sm font-semibold" style={{color: '#10B3D6'}}>{t('stats.average_rating')}</CardTitle>
                                         <div className="p-2 rounded-lg animate-[float_3s_ease-in-out_infinite_1.5s]" style={{backgroundColor: '#FCF2F0'}}>
                                             <Star className="h-4 w-4" style={{color: '#10B3D6'}} />
                                         </div>
@@ -399,7 +405,7 @@ export default function EmployeeDashboard({
                                             )}
                                         </div>
                                         <div className="flex items-center space-x-1 text-xs text-gray-600 mt-1">
-                                            <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.25s_both]">{safeStats.totalReviews} reviews</span>
+                                            <span style={{color: '#10B3D6'}} className="font-medium animate-[slideInLeft_0.3s_ease-out_0.25s_both]">{safeStats.totalReviews} {t('stats.reviews')}</span>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -439,7 +445,7 @@ export default function EmployeeDashboard({
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold flex items-center">
                                             <Clock className="h-5 w-5 mr-2 animate-[float_3s_ease-in-out_infinite]" style={{color: '#10B3D6'}} />
-                                            Recent Applications
+                                            {t('recent_applications')}
                                         </CardTitle>
                                     </CardHeader>
                                 <CardContent>
@@ -468,7 +474,7 @@ export default function EmployeeDashboard({
                                                 style={{height: '2.7em'}}
                                                 onClick={() => window.location.href = '/employee/applications'}
                                             >
-                                                View All Applications
+                                                {t('view_all')} Applications
                                             </Button>
                                         </div>
                                         </div>
@@ -481,7 +487,7 @@ export default function EmployeeDashboard({
                                                 style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                                                 onClick={() => window.location.href = '/employee/jobs'}
                                             >
-                                                Browse Jobs
+                                                {t('browse_jobs')}
                                             </Button>
                                         </div>
                                     )}
@@ -518,7 +524,7 @@ export default function EmployeeDashboard({
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold flex items-center">
                                             <Calendar className="h-5 w-5 mr-2 animate-[float_3s_ease-in-out_infinite_0.5s]" style={{color: '#10B3D6'}} />
-                                            Booking Requests
+                                            {t('booking_requests')}
                                         </CardTitle>
                                     </CardHeader>
                                 <CardContent>
@@ -553,16 +559,16 @@ export default function EmployeeDashboard({
                                                 style={{height: '2.7em'}}
                                                 onClick={() => window.location.href = '/employee/bookings'}
                                             >
-                                                View All Requests
+                                                {t('view_all')} Requests
                                             </Button>
                                         </div>
                                         </div>
                                     ) : (
                                         <div className="text-center py-8 animate-[fadeInUp_0.8s_ease-out_0.8s_both]">
                                             <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-[float_3s_ease-in-out_infinite]" />
-                                            <p className="text-gray-600">No booking requests yet</p>
+                                            <p className="text-gray-600">{t('no_bookings_message')}</p>
                                             <p className="text-sm text-gray-500 mt-2">
-                                                Complete your profile and set your availability to receive booking requests
+                                                {t('no_bookings_description')}
                                             </p>
                                         </div>
                                     )}
@@ -627,7 +633,7 @@ export default function EmployeeDashboard({
                                                             className="cursor-pointer hover:scale-105 transition-all duration-200"
                                                             onClick={() => window.location.href = `/employee/applications/${application.id}`}
                                                         >
-                                                            View Details
+                                                            {t('view_details')}
                                                         </Button>
                                                         <Button 
                                                             size="sm" 
@@ -722,16 +728,16 @@ export default function EmployeeDashboard({
                                                         style={{height: '2.7em'}}
                                                         onClick={() => window.location.href = '/employee/messages'}
                                                     >
-                                                        View All Messages
+                                                        {t('view_all')} Messages
                                                     </Button>
                                                 </div>
                                             </div>
                                         ) : (
                                             <div className="text-center py-8 animate-[fadeInUp_0.8s_ease-out_1.1s_both]">
                                                 <Mail className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-[float_3s_ease-in-out_infinite]" />
-                                                <p className="text-gray-600">No messages yet</p>
+                                                <p className="text-gray-600">{t('no_messages_message')}</p>
                                                 <p className="text-sm text-gray-500 mt-2">
-                                                    Employers will be able to contact you here
+                                                    {t('no_messages_description')}
                                                 </p>
                                             </div>
                                         )}
@@ -802,18 +808,18 @@ export default function EmployeeDashboard({
                                     <CardContent>
                                         <div className="grid grid-cols-2 gap-4 mb-6">
                                             <div className="text-center p-3 bg-gray-50 rounded-lg animate-[fadeInUp_0.6s_ease-out_1.2s_both]">
-                                                <p className="text-sm text-gray-600">This Week</p>
+                                                <p className="text-sm text-gray-600">{t('this_week')}</p>
                                                 <p className="text-2xl font-bold" style={{color: '#192341'}}>
                                                     {safeUpcomingAvailability.filter(slot => !slot.is_booked).length}
                                                 </p>
-                                                <p className="text-xs text-gray-500">Open Slots</p>
+                                                <p className="text-xs text-gray-500">{t('open_slots')}</p>
                                             </div>
                                             <div className="text-center p-3 bg-blue-50 rounded-lg animate-[fadeInUp_0.6s_ease-out_1.3s_both]">
-                                                <p className="text-sm text-gray-600">Booked</p>
+                                                <p className="text-sm text-gray-600">{t('booked')}</p>
                                                 <p className="text-2xl font-bold text-blue-600">
                                                     {safeUpcomingAvailability.filter(slot => slot.is_booked).length}
                                                 </p>
-                                                <p className="text-xs text-gray-500">This Week</p>
+                                                <p className="text-xs text-gray-500">{t('this_week')}</p>
                                             </div>
                                         </div>
                                         
@@ -849,13 +855,13 @@ export default function EmployeeDashboard({
                                         ) : (
                                             <div className="text-center py-6 animate-[fadeInUp_0.8s_ease-out_1.4s_both]">
                                                 <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-4 animate-[float_3s_ease-in-out_infinite]" />
-                                                <p className="text-gray-600">No availability set</p>
+                                                <p className="text-gray-600">{t('no_availability_message')}</p>
                                                 <Button 
                                                     className="mt-3 cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                                     style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                                                     onClick={() => window.location.href = '/employee/availability'}
                                                 >
-                                                    Set Availability
+                                                    {t('set_availability')}
                                                 </Button>
                                             </div>
                                         )}

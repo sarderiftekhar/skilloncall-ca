@@ -13,10 +13,14 @@ class WorkerCertification extends Model
     protected $fillable = [
         'worker_profile_id',
         'global_certification_id',
+        'name',
+        'issuing_organization',
         'certificate_number',
         'issued_date',
         'expiry_date',
         'certificate_file',
+        'credential_id',
+        'verification_url',
         'verification_status',
         'verified_at',
     ];

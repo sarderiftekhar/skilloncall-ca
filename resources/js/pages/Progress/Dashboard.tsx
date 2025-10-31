@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import PublicLayout from '@/layouts/public-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +78,9 @@ interface FormData {
 }
 
 export default function ProgressDashboard({ entries, filters }: ProgressDashboardProps) {
+    const { props } = usePage();
+    const flash = props.flash as any;
+    
     const [isLoading, setIsLoading] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -85,6 +88,7 @@ export default function ProgressDashboard({ entries, filters }: ProgressDashboar
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [statusFilter, setStatusFilter] = useState(filters.status_filter || '');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState<FormData>({
@@ -269,6 +273,15 @@ export default function ProgressDashboard({ entries, filters }: ProgressDashboar
         }
     }, [showCreateForm]);
 
+    useEffect(() => {
+        if (flash?.success) {
+            setShowSuccessMessage(true);
+            setTimeout(() => {
+                setShowSuccessMessage(false);
+            }, 5000);
+        }
+    }, [flash]);
+
     return (
         <PublicLayout title="SkillOnCall Progress Tracker">
             
@@ -293,6 +306,22 @@ export default function ProgressDashboard({ entries, filters }: ProgressDashboar
                             New Entry
                         </Button>
                     </div>
+
+                    {/* Success Message */}
+                    {showSuccessMessage && flash?.success && (
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-center justify-between animate-[slideInDown_0.3s_ease-out]">
+                            <div className="flex items-center gap-3">
+                                <CheckCircle className="h-5 w-5 text-green-600" />
+                                <span className="text-green-800 font-medium">{flash.success}</span>
+                            </div>
+                            <button
+                                onClick={() => setShowSuccessMessage(false)}
+                                className="text-green-600 hover:text-green-800 cursor-pointer"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        </div>
+                    )}
 
                     {/* Filters */}
                     <Card className="bg-white rounded-xl shadow-sm" style={{borderTop: '0.5px solid #192341'}}>

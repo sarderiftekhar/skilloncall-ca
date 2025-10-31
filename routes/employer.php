@@ -6,6 +6,8 @@ use App\Http\Controllers\Employer\EmployerWorkerController;
 use App\Http\Controllers\Employer\EmployerApplicationController;
 use App\Http\Controllers\Employer\EmployerPaymentController;
 use App\Http\Controllers\Employer\EmployerProfileController;
+use App\Http\Controllers\Employer\OnboardingController;
+use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,6 +21,23 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Employer Onboarding Routes (no profile completion or email verification required)
+Route::middleware(['auth', 'employer'])->prefix('employer')->name('employer.')->group(function () {
+    Route::prefix('onboarding')->name('onboarding.')->group(function () {
+        Route::get('/', [OnboardingController::class, 'index'])->name('index');
+        Route::post('/save', [OnboardingController::class, 'save'])->name('save');
+        Route::post('/complete', [OnboardingController::class, 'complete'])->name('complete');
+    });
+
+    // Location API routes
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::get('/provinces', [LocationController::class, 'getProvinces'])->name('provinces');
+        Route::get('/provinces/{provinceId}/cities', [LocationController::class, 'getCitiesByProvince'])->name('cities');
+        Route::get('/provinces/code/{provinceCode}/cities', [LocationController::class, 'getCitiesByProvinceCode'])->name('cities.by.code');
+    });
+});
+
+// Employer Routes (require profile completion and email verification)
 Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('employer.')->group(function () {
     // Dashboard
     Route::get('dashboard', [EmployerDashboardController::class, 'index'])->name('dashboard');

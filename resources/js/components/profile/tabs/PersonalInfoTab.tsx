@@ -148,9 +148,79 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
         }
     }, [editForm.city, citySearch]);
 
+    // Validation functions
+    const validateField = (field: string, value: any): string | undefined => {
+        switch (field) {
+            case 'first_name':
+                if (!value || value.trim() === '') return 'First name is required';
+                if (value.length < 2) return 'First name must be at least 2 characters';
+                if (value.length > 50) return 'First name cannot exceed 50 characters';
+                if (!/^[a-zA-Z\s'-]+$/.test(value)) return 'First name can only contain letters, spaces, hyphens, and apostrophes';
+                break;
+            case 'last_name':
+                if (!value || value.trim() === '') return 'Last name is required';
+                if (value.length < 2) return 'Last name must be at least 2 characters';
+                if (value.length > 50) return 'Last name cannot exceed 50 characters';
+                if (!/^[a-zA-Z\s'-]+$/.test(value)) return 'Last name can only contain letters, spaces, hyphens, and apostrophes';
+                break;
+            case 'phone':
+                if (!value || value.trim() === '') return 'Phone number is required';
+                const cleanedPhone = value.replace(/\D/g, '');
+                if (cleanedPhone.length !== 10) return 'Phone number must be 10 digits';
+                break;
+            case 'date_of_birth':
+                // Optional field - only validate if a value is provided
+                if (value) {
+                    const birthDate = new Date(value);
+                    const today = new Date();
+                    const age = today.getFullYear() - birthDate.getFullYear();
+                    if (age < 16) return 'You must be at least 16 years old';
+                    if (age > 100) return 'Please enter a valid date of birth';
+                }
+                break;
+            case 'address_line_1':
+                if (!value || value.trim() === '') return 'Street address is required';
+                if (value.length < 5) return 'Street address must be at least 5 characters';
+                if (value.length > 100) return 'Street address cannot exceed 100 characters';
+                break;
+            case 'city':
+                if (!value || value.trim() === '') return 'City is required';
+                if (value.length < 2) return 'City must be at least 2 characters';
+                break;
+            case 'province':
+                if (!value || value.trim() === '') return 'Province is required';
+                break;
+            case 'postal_code':
+                if (!value || value.trim() === '') return 'Postal code is required';
+                const postalPattern = /^[A-Z]\d[A-Z]\s?\d[A-Z]\d$/;
+                if (!postalPattern.test(value)) return 'Please enter a valid Canadian postal code (e.g., M5V 3A8)';
+                break;
+            case 'work_authorization':
+                if (!value || value.trim() === '') return 'Work authorization is required';
+                break;
+            case 'emergency_contact_name':
+                if (!value || value.trim() === '') return 'Emergency contact name is required';
+                if (value.length < 2) return 'Contact name must be at least 2 characters';
+                break;
+            case 'emergency_contact_phone':
+                if (!value || value.trim() === '') return 'Emergency contact phone is required';
+                const cleanedEmergencyPhone = value.replace(/\D/g, '');
+                if (cleanedEmergencyPhone.length !== 10) return 'Phone number must be 10 digits';
+                break;
+            case 'emergency_contact_relationship':
+                if (!value || value.trim() === '') return 'Relationship is required';
+                if (value.length < 2) return 'Relationship must be at least 2 characters';
+                break;
+        }
+        return undefined;
+    };
+
     const handleInputChange = (field: string, value: any) => {
         setEditForm(prev => ({ ...prev, [field]: value }));
-        setErrors((prev: any) => ({ ...prev, [field]: undefined }));
+        
+        // Perform real-time validation
+        const error = validateField(field, value);
+        setErrors((prev: any) => ({ ...prev, [field]: error }));
     };
 
     const handleSave = async () => {
@@ -331,7 +401,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                     <Input
                                         value={editForm.first_name}
                                         onChange={(e) => handleInputChange('first_name', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.first_name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="Enter your first name"
                                     />
                                     {errors.first_name && (
@@ -345,7 +415,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                     <Input
                                         value={editForm.last_name}
                                         onChange={(e) => handleInputChange('last_name', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.last_name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="Enter your last name"
                                     />
                                     {errors.last_name && (
@@ -366,7 +436,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                             const formatted = formatPhoneNumber(e.target.value);
                                             handleInputChange('phone', formatted);
                                         }}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="(416) 555-0123"
                                         maxLength={14}
                                     />
@@ -376,13 +446,13 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                 </div>
                                 <div>
                                     <Label className="text-sm font-medium">
-                                        Date of Birth <span className="text-red-500">*</span>
+                                        Date of Birth
                                     </Label>
                                     <Input
                                         type="date"
                                         value={editForm.date_of_birth}
                                         onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.date_of_birth ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         max={new Date().toISOString().split('T')[0]}
                                     />
                                     {errors.date_of_birth && (
@@ -419,7 +489,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                     <Input
                                         value={editForm.address_line_1}
                                         onChange={(e) => handleInputChange('address_line_1', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.address_line_1 ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="123 Main Street"
                                     />
                                     {errors.address_line_1 && (
@@ -438,113 +508,99 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     <div>
                                         <Label className="text-sm font-medium">
+                                            Province <span className="text-red-500">*</span>
+                                        </Label>
+                                        <Select
+                                            value={editForm.province}
+                                            onValueChange={(value) => handleInputChange('province', value)}
+                                        >
+                                            <SelectTrigger className={`mt-1 ${errors.province ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}>
+                                                <SelectValue placeholder="Select province" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {CANADIAN_PROVINCES.map((province) => (
+                                                    <SelectItem key={province.value} value={province.value}>
+                                                        {province.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.province && (
+                                            <p className="text-red-600 text-sm mt-1">{errors.province}</p>
+                                        )}
+                                    </div>
+                                    <div ref={cityInputRef} className="relative">
+                                        <Label className="text-sm font-medium">
                                             City <span className="text-red-500">*</span>
                                         </Label>
-                                        <Input
-                                            value={editForm.city}
-                                            onChange={(e) => handleInputChange('city', e.target.value)}
-                                            className="mt-1"
-                                            placeholder="Toronto"
-                                        />
+                                        <div className="relative mt-1">
+                                            <Input
+                                                type="text"
+                                                value={citySearch || editForm.city || ''}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    setCitySearch(value);
+                                                    setShowCitySuggestions(true);
+                                                    if (!value) {
+                                                        handleInputChange('city', '');
+                                                    }
+                                                }}
+                                                onFocus={() => {
+                                                    if (editForm.province && !citiesLoaded) {
+                                                        fetchCities();
+                                                    }
+                                                    setShowCitySuggestions(true);
+                                                }}
+                                                placeholder={editForm.province ? "Start typing city name..." : "Select province first"}
+                                                disabled={!editForm.province}
+                                                className={`w-full ${errors.city ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
+                                            />
+                                            
+                                            {/* City suggestions dropdown */}
+                                            {showCitySuggestions && editForm.province && (
+                                                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                                    {loadingCities ? (
+                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                            Loading cities...
+                                                        </div>
+                                                    ) : cities.length > 0 ? (
+                                                        cities.map((city) => (
+                                                            <div
+                                                                key={city.id}
+                                                                className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
+                                                                onClick={() => {
+                                                                    handleInputChange('city', city.name);
+                                                                    setCitySearch(city.name);
+                                                                    setShowCitySuggestions(false);
+                                                                }}
+                                                            >
+                                                                {city.name}
+                                                            </div>
+                                                        ))
+                                                    ) : citySearch ? (
+                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                            No cities found matching "{citySearch}"
+                                                        </div>
+                                                    ) : (
+                                                        <div className="px-3 py-2 text-sm text-gray-500">
+                                                            Start typing to search cities...
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                         {errors.city && (
                                             <p className="text-red-600 text-sm mt-1">{errors.city}</p>
                                         )}
                                     </div>
-                                <div>
-                                    <Label className="text-sm font-medium">
-                                        Province <span className="text-red-500">*</span>
-                                    </Label>
-                                    <Select
-                                        value={editForm.province}
-                                        onValueChange={(value) => handleInputChange('province', value)}
-                                    >
-                                        <SelectTrigger className="mt-1">
-                                            <SelectValue placeholder="Select province" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {CANADIAN_PROVINCES.map((province) => (
-                                                <SelectItem key={province.value} value={province.value}>
-                                                    {province.label}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.province && (
-                                        <p className="text-red-600 text-sm mt-1">{errors.province}</p>
-                                    )}
-                                </div>
-                                <div ref={cityInputRef} className="relative">
-                                    <Label className="text-sm font-medium">
-                                        City <span className="text-red-500">*</span>
-                                    </Label>
-                                    <div className="relative mt-1">
-                                        <Input
-                                            type="text"
-                                            value={citySearch || editForm.city || ''}
-                                            onChange={(e) => {
-                                                const value = e.target.value;
-                                                setCitySearch(value);
-                                                setShowCitySuggestions(true);
-                                                if (!value) {
-                                                    handleInputChange('city', '');
-                                                }
-                                            }}
-                                            onFocus={() => {
-                                                if (editForm.province && !citiesLoaded) {
-                                                    fetchCities();
-                                                }
-                                                setShowCitySuggestions(true);
-                                            }}
-                                            placeholder={editForm.province ? "Start typing city name..." : "Select province first"}
-                                            disabled={!editForm.province}
-                                            className="w-full"
-                                        />
-                                        
-                                        {/* City suggestions dropdown */}
-                                        {showCitySuggestions && editForm.province && (
-                                            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                                                {loadingCities ? (
-                                                    <div className="px-3 py-2 text-sm text-gray-500">
-                                                        Loading cities...
-                                                    </div>
-                                                ) : cities.length > 0 ? (
-                                                    cities.map((city) => (
-                                                        <div
-                                                            key={city.id}
-                                                            className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-900"
-                                                            onClick={() => {
-                                                                handleInputChange('city', city.name);
-                                                                setCitySearch(city.name);
-                                                                setShowCitySuggestions(false);
-                                                            }}
-                                                        >
-                                                            {city.name}
-                                                        </div>
-                                                    ))
-                                                ) : citySearch ? (
-                                                    <div className="px-3 py-2 text-sm text-gray-500">
-                                                        No cities found matching "{citySearch}"
-                                                    </div>
-                                                ) : (
-                                                    <div className="px-3 py-2 text-sm text-gray-500">
-                                                        Start typing to search cities...
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
-                                    </div>
-                                    {errors.city && (
-                                        <p className="text-red-600 text-sm mt-1">{errors.city}</p>
-                                    )}
-                                </div>
-                                <div>
+                                    <div>
                                     <Label className="text-sm font-medium">
                                         Postal Code <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
                                         value={editForm.postal_code}
                                         onChange={(e) => handleInputChange('postal_code', e.target.value.toUpperCase())}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.postal_code ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="M5V 3A8"
                                         maxLength={7}
                                     />
@@ -564,7 +620,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                     value={editForm.work_authorization}
                                     onValueChange={(value) => handleInputChange('work_authorization', value)}
                                 >
-                                    <SelectTrigger className="mt-1">
+                                    <SelectTrigger className={`mt-1 ${errors.work_authorization ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}>
                                         <SelectValue placeholder="Select work authorization" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -591,7 +647,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                         <Input
                                             value={editForm.emergency_contact_name}
                                             onChange={(e) => handleInputChange('emergency_contact_name', e.target.value)}
-                                            className="mt-1"
+                                            className={`mt-1 ${errors.emergency_contact_name ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                             placeholder="John Smith"
                                         />
                                         {errors.emergency_contact_name && (
@@ -608,7 +664,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                                 const formatted = formatPhoneNumber(e.target.value);
                                                 handleInputChange('emergency_contact_phone', formatted);
                                             }}
-                                            className="mt-1"
+                                            className={`mt-1 ${errors.emergency_contact_phone ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                             placeholder="(416) 555-0123"
                                             maxLength={14}
                                         />
@@ -624,7 +680,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                     <Input
                                         value={editForm.emergency_contact_relationship}
                                         onChange={(e) => handleInputChange('emergency_contact_relationship', e.target.value)}
-                                        className="mt-1"
+                                        className={`mt-1 ${errors.emergency_contact_relationship ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
                                         placeholder="Spouse, Parent, Sibling, Friend"
                                     />
                                     {errors.emergency_contact_relationship && (
@@ -697,17 +753,20 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                                 </p>
                                             </div>
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-gray-600">Emergency Contact</p>
-                                            <p className="font-medium">
-                                                {profile?.emergency_contact_name ? 
-                                                    `${profile.emergency_contact_name} (${profile.emergency_contact_relationship})` : 
-                                                    'Not provided'
-                                                }
-                                            </p>
-                                            {profile?.emergency_contact_phone && (
-                                                <p className="text-sm text-gray-500">{profile.emergency_contact_phone}</p>
-                                            )}
+                                        <div className="flex items-start space-x-3">
+                                            <User className="w-5 h-5 text-gray-400 mt-0.5" />
+                                            <div>
+                                                <p className="text-sm text-gray-600">Emergency Contact</p>
+                                                <p className="font-medium">
+                                                    {profile?.emergency_contact_name ? 
+                                                        `${profile.emergency_contact_name} (${profile.emergency_contact_relationship})` : 
+                                                        'Not provided'
+                                                    }
+                                                </p>
+                                                {profile?.emergency_contact_phone && (
+                                                    <p className="text-sm text-gray-500">{profile.emergency_contact_phone}</p>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
