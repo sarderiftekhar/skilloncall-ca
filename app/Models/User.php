@@ -58,6 +58,11 @@ class User extends Authenticatable
         return $this->hasOne(WorkerProfile::class);
     }
 
+    public function employerProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(EmployerProfile::class);
+    }
+
     /**
      * Role helpers
      */

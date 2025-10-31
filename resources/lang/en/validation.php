@@ -27,6 +27,19 @@ return [
         'work_authorization_required' => 'Please select your work authorization status.',
     ],
 
+    // Employer Onboarding
+    'employer' => [
+        'business_name_required' => 'Business name is required.',
+        'phone_required' => 'Phone number is required.',
+        'industry_exists' => 'Please select a valid industry.',
+        'address_line_1_required' => 'Street address is required.',
+        'city_required' => 'City is required.',
+        'province_required' => 'Province is required.',
+        'province_size' => 'Please select a valid province.',
+        'postal_code_required' => 'Postal code is required.',
+        'postal_code_regex' => 'Please enter a valid Canadian postal code (e.g., A1A 1A1).',
+    ],
+
     // Step 2: Skills & Experience
     'skills_experience' => [
         'overall_experience_required' => 'Please select your overall experience level.',

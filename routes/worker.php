@@ -24,8 +24,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Worker Onboarding Routes (no profile completion required)
-Route::middleware(['auth', 'verified', 'worker'])->prefix('worker')->name('worker.')->group(function () {
+// Worker Onboarding Routes (no profile completion or email verification required)
+Route::middleware(['auth', 'worker'])->prefix('worker')->name('worker.')->group(function () {
     Route::prefix('onboarding')->name('onboarding.')->group(function () {
         Route::get('/', [OnboardingController::class, 'index'])->name('index');
         Route::post('/save', [OnboardingController::class, 'save'])->name('save');

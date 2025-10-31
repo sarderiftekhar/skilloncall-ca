@@ -28,6 +28,19 @@ return [
         'work_authorization_required' => 'Veuillez sélectionner votre statut d\'autorisation de travail.',
     ],
 
+    // Configuration de l'employeur
+    'employer' => [
+        'business_name_required' => 'Le nom de l\'entreprise est requis.',
+        'phone_required' => 'Le numéro de téléphone est requis.',
+        'industry_exists' => 'Veuillez sélectionner une industrie valide.',
+        'address_line_1_required' => 'L\'adresse est requise.',
+        'city_required' => 'La ville est requise.',
+        'province_required' => 'La province est requise.',
+        'province_size' => 'Veuillez sélectionner une province valide.',
+        'postal_code_required' => 'Le code postal est requis.',
+        'postal_code_regex' => 'Veuillez entrer un code postal canadien valide (ex: A1A 1A1).',
+    ],
+
     // Étape 2 : Compétences et expérience
     'skills_experience' => [
         'overall_experience_required' => 'Veuillez sélectionner votre niveau d\'expérience global.',
