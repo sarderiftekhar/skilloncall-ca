@@ -58,7 +58,7 @@ const TIME_SLOTS = [
     '22:00',
 ];
 
-export default function WorkerAvailability({ profileData }: AvailabilityProps) {
+export default function EmployeeAvailability({ profileData }: AvailabilityProps) {
     const { t } = useTranslations('availability');
     const [isSaving, setIsSaving] = useState(false);
     const { props } = usePage();
@@ -269,7 +269,7 @@ export default function WorkerAvailability({ profileData }: AvailabilityProps) {
     const saveAvailability = () => {
         setIsSaving(true);
 
-        router.put('/worker/availability', {
+        router.put('/employee/availability', {
             data: {
                 availability_by_month: availabilityByMonth,
             },

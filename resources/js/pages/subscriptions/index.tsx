@@ -11,7 +11,7 @@ interface Plan {
     name: string;
     slug: string;
     description: string;
-    type: 'employer' | 'worker';
+    type: 'employer' | 'employee';
     price: number;
     yearly_price: number;
     currency: string;
@@ -43,17 +43,17 @@ interface CurrentSubscription {
 
 interface Props {
     employerPlans: Plan[];
-    workerPlans: Plan[];
+    employeePlans: Plan[];
     currentSubscription: CurrentSubscription | null;
     userRole: string;
 }
 
-export default function SubscriptionsIndex({ employerPlans, workerPlans, currentSubscription, userRole }: Props) {
+export default function SubscriptionsIndex({ employerPlans, employeePlans, currentSubscription, userRole }: Props) {
     const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
     const [isSubscribing, setIsSubscribing] = useState<string | null>(null);
 
-    const plans = userRole === 'admin' ? [...employerPlans, ...workerPlans] : 
-                  userRole === 'employer' ? employerPlans : workerPlans;
+    const plans = userRole === 'admin' ? [...employerPlans, ...employeePlans] : 
+                  userRole === 'employer' ? employerPlans : employeePlans;
 
     const handleSubscribe = async (planId: number) => {
         setIsSubscribing(planId.toString());

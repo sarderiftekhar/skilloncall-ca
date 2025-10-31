@@ -28,7 +28,7 @@ interface OnboardingProps {
     globalCertifications: any[];
 }
 
-export default function WorkerOnboarding({
+export default function EmployeeOnboarding({
     currentStep,
     profileData,
     globalSkills = [],
@@ -238,7 +238,7 @@ export default function WorkerOnboarding({
                 }
 
                 // Save current step data
-                await router.post('/worker/onboarding/save', submitData, {
+                await router.post('/employee/onboarding/save', submitData, {
                     preserveState: true,
                     preserveScroll: true,
                     forceFormData: shouldUseFormData,
@@ -339,7 +339,7 @@ export default function WorkerOnboarding({
 
         try {
             // Use Inertia router to handle CSRF automatically
-            router.post('/worker/onboarding/complete', 
+            router.post('/employee/onboarding/complete', 
                 { data: formData }, 
                 {
                     preserveState: true,
@@ -414,7 +414,7 @@ export default function WorkerOnboarding({
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
-            <Head title={`${t('title', 'Worker Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
+            <Head title={`${t('title', 'Employee Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
             
             {/* Language Switcher - Fixed at top right */}
             <div className="fixed top-4 right-4 z-50 flex items-center space-x-1 border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
@@ -445,14 +445,14 @@ export default function WorkerOnboarding({
                 onClose={() => {
                     setModalOpen(false);
                     if (modalType === 'success') {
-                        router.visit('/worker/dashboard');
+                        router.visit('/employee/dashboard');
                     }
                 }}
                 title={modalTitle}
                 message={modalMessage}
                 type={modalType}
                 details={modalDetails}
-                primaryAction={modalType === 'success' ? { label: t('modal.action.dashboard', 'Go to dashboard'), onClick: () => router.visit('/worker/dashboard') } : undefined}
+                primaryAction={modalType === 'success' ? { label: t('modal.action.dashboard', 'Go to dashboard'), onClick: () => router.visit('/employee/dashboard') } : undefined}
             />
 
             {/* Responsive container */}

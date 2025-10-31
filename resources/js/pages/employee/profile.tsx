@@ -25,7 +25,7 @@ type PageProps = {
   globalProvinces?: any[];
 };
 
-export default function WorkerProfilePage(props: PageProps) {
+export default function EmployeeProfilePage(props: PageProps) {
   const { profile, profileCompletion, globalSkills = [], globalLanguages = [], globalCertifications = [], globalProvinces = [] } = props;
   
   const [activeTab, setActiveTab] = useState('personal');
@@ -108,7 +108,7 @@ export default function WorkerProfilePage(props: PageProps) {
         });
       }
 
-      await router.post('/worker/profile', {
+      await router.post('/employee/profile', {
         _method: 'PUT',
         ...data
       }, {

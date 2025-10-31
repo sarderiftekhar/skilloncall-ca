@@ -93,7 +93,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
         setLoadingCities(true);
         try {
             const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/worker/api/provinces/code/${editForm.province}/cities${searchParam}`);
+            const response = await fetch(`/employee/api/provinces/code/${editForm.province}/cities${searchParam}`);
             if (response.ok) {
                 const data = await response.json();
                 setCities(data);

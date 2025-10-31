@@ -64,7 +64,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         setLoadingCities(true);
         try {
             const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/worker/api/provinces/code/${formData.province}/cities${searchParam}`);
+            const response = await fetch(`/employee/api/provinces/code/${formData.province}/cities${searchParam}`);
             if (response.ok) {
                 const data = await response.json();
                 setCities(data);
@@ -329,7 +329,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
             <Card className="border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                 <CardHeader className="pb-3">
                     <CardTitle className="text-lg">{t('step1.address.title', 'Address Information')}</CardTitle>
-                    <p className="text-sm text-gray-600">{t('step1.address.subtitle', 'This helps employers find workers in their area')}</p>
+                    <p className="text-sm text-gray-600">{t('step1.address.subtitle', 'This helps employers find employees in their area')}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     {/* Street Address */}

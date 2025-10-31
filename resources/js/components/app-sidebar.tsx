@@ -95,32 +95,32 @@ function getNavItems(userRole: string): NavItem[] {
         ];
     }
 
-    if (userRole === 'worker') {
+    if (userRole === 'employee') {
         return [
             ...baseItems,
             {
                 title: 'Find Jobs',
-                href: '/worker/jobs',
+                href: '/employee/jobs',
                 icon: Briefcase,
             },
             {
                 title: 'My Applications',
-                href: '/worker/applications',
+                href: '/employee/applications',
                 icon: Users,
             },
             {
                 title: 'Messages',
-                href: '/worker/messages',
+                href: '/employee/messages',
                 icon: MessageCircle,
             },
             {
                 title: 'Availability',
-                href: '/worker/availability',
+                href: '/employee/availability',
                 icon: Clock,
             },
             {
                 title: 'My Profile',
-                href: '/worker/profile',
+                href: '/employee/profile',
                 icon: Settings,
             },
             {

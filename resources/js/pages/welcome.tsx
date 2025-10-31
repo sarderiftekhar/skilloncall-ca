@@ -91,16 +91,16 @@ export default function Welcome() {
     };
 
     const skillCategories = [
-        { name: 'Food Service', icon: Coffee, count: '453 Workers', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
-        { name: 'Retail', icon: ShoppingCart, count: '324 Workers', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
-        { name: 'Grocery', icon: ShoppingCart, count: '267 Workers', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_3.png' },
-        { name: 'Hospitality', icon: Coffee, count: '189 Workers', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_sm.png' },
-        { name: 'Maintenance', icon: Tool, count: '145 Workers', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
-        { name: 'Security', icon: Shield, count: '98 Workers', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
+        { name: 'Food Service', icon: Coffee, count: '453 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
+        { name: 'Retail', icon: ShoppingCart, count: '324 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
+        { name: 'Grocery', icon: ShoppingCart, count: '267 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_3.png' },
+        { name: 'Hospitality', icon: Coffee, count: '189 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_sm.png' },
+        { name: 'Maintenance', icon: Tool, count: '145 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
+        { name: 'Security', icon: Shield, count: '98 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
     ];
 
     const statistics = [
-        { label: t('stats.active_workers', 'Active Workers'), value: '2,450', change: '+12%', color: 'text-green-600' },
+        { label: t('stats.active_employees', 'Active Employees'), value: '2,450', change: '+12%', color: 'text-green-600' },
         { label: t('stats.jobs_posted', 'Jobs Posted'), value: '1,230', change: '+8%', color: 'text-blue-600' },
         { label: t('stats.successful_matches', 'Successful Matches'), value: '980', change: '+15%', color: 'text-purple-600' },
         { label: t('stats.verified_employers', 'Verified Employers'), value: '340', change: '+5%', color: 'text-orange-600' },
@@ -264,7 +264,7 @@ export default function Welcome() {
                                                 <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400">{t('auth.dashboard', 'Dashboard')}</Button>
                                             </Link>
                                         ) : (
-                                            <Link href={`/worker/onboarding${queryLang}`}>
+                                            <Link href={`/employee/onboarding${queryLang}`}>
                                                 <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.complete_profile', 'Complete Profile')}</Button>
                                             </Link>
                                         )}
@@ -359,7 +359,7 @@ export default function Welcome() {
                                     {t('hero.title', 'SkillOnCall — Where Skills Meet Opportunity')}
                                 </h1>
                                 <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-                                    {t('hero.subtitle', 'Find answers, ask questions, and connect with our community of skilled workers from around Canada.')}
+                                    {t('hero.subtitle', 'Find answers, ask questions, and connect with our community of skilled professionals from around Canada.')}
                                 </p>
                                 
                                 {/* Prominent Search Bar - KbDoc Style - HIDDEN FOR NOW */}
@@ -440,7 +440,7 @@ export default function Welcome() {
                                 </div>
                             </div>
                             
-                            {/* Workers Column */}
+                            {/* Employees Column */}
                             <div className="flex items-center justify-center">
                                 <div className="text-left">
                                     <div className="flex items-center mb-4">
@@ -449,7 +449,7 @@ export default function Welcome() {
                                             <Star className="h-6 w-6 text-white" />
                                         </div>
                                         <h3 className="text-lg md:text-xl font-bold text-white">
-                                            {t('workers.title', 'For Workers')}
+                                            {t('employees.title', 'For Employees')}
                                         </h3>
                                     </div>
                                     <ul className="space-y-2">
@@ -458,21 +458,21 @@ export default function Welcome() {
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.unlimited_apps', 'Unlimited job applications')}</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employees.unlimited_apps', 'Unlimited job applications')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.featured', 'Featured profile & priority visibility')}</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employees.featured', 'Featured profile & priority visibility')}</span>
                                         </li>
                                         <li className="flex items-center">
                                             <div className="w-5 h-5 rounded-full flex items-center justify-center mr-3 flex-shrink-0" 
                                                  style={{backgroundColor: '#10B3D6'}}>
                                                 <div className="w-1.5 h-1.5 rounded-full bg-white"></div>
                                             </div>
-                                            <span className="text-gray-200 text-sm md:text-base">{t('workers.portfolio', 'Advanced portfolio tools')}</span>
+                                            <span className="text-gray-200 text-sm md:text-base">{t('employees.portfolio', 'Advanced portfolio tools')}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -556,7 +556,7 @@ export default function Welcome() {
                                 {t('sections.platform_performance', 'Platform Performance')}
                             </h2>
                             <p className="text-lg text-gray-600">
-                                {t('sections.trusted', 'Trusted by businesses and workers across Canada')}
+                                {t('sections.trusted', 'Trusted by businesses and employees across Canada')}
                             </p>
                         </div>
 
@@ -676,7 +676,7 @@ export default function Welcome() {
                                 </Avatar>
                             </div>
                             <blockquote className="text-xl font-bold mb-6" style={{color: '#10B3D6'}}>
-                                "SkillOnCall.ca has revolutionized how we connect Canadian businesses with skilled workers. 
+                                "SkillOnCall.ca has revolutionized how we connect Canadian businesses with skilled employees. 
                                 The platform's focus on local communities and instant connectivity makes it invaluable for 
                                 supporting Canada's workforce ecosystem."
                             </blockquote>
@@ -705,7 +705,7 @@ export default function Welcome() {
                                     </div>
                                 </div>
                                 <p className="text-gray-100 mb-6 max-w-md">
-                                    Canada's premier platform for connecting skilled workers with local businesses. 
+                                    Canada's premier platform for connecting skilled employees with local businesses. 
                                     Built for Canadians, by Canadians.
                                 </p>
                                 <div>
@@ -744,7 +744,7 @@ export default function Welcome() {
                                 <h3 className="text-lg font-semibold mb-4">{t('footer.for_employers', 'For Employers')}</h3>
                                 <ul className="space-y-2 text-gray-100">
                                     <li><a href="#" className="hover:text-white cursor-pointer">Post Jobs</a></li>
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Find Workers</a></li>
+                                    <li><a href="#" className="hover:text-white cursor-pointer">Find Employees</a></li>
                                     <li><Link href={`/subscriptions${queryLang}`} className="hover:text-white cursor-pointer font-semibold text-yellow-300">💎 {t('cta.view_plans', 'Subscription Plans')}</Link></li>
                                     <li><a href="#" className="hover:text-white cursor-pointer">Success Stories</a></li>
                             </ul>

@@ -30,12 +30,12 @@ class SubscriptionController extends Controller
         $user = auth()->user();
         
         $employerPlans = $this->subscriptionService->getEmployerPlans();
-        $workerPlans = $this->subscriptionService->getWorkerPlans();
+        $employeePlans = $this->subscriptionService->getEmployeePlans();
         $currentSubscription = $user->activeSubscription();
 
         return Inertia::render('subscriptions/index', [
             'employerPlans' => $employerPlans,
-            'workerPlans' => $workerPlans,
+            'employeePlans' => $employeePlans,
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'plan' => $currentSubscription->plan,

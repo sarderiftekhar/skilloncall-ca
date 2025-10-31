@@ -104,7 +104,7 @@ interface AvailabilitySlot {
     is_booked: boolean;
 }
 
-interface WorkerDashboardProps {
+interface EmployeeDashboardProps {
     stats: DashboardStats;
     recentApplications: Application[];
     recentMessages?: Message[]; // Made optional for backward compatibility
@@ -196,14 +196,14 @@ const BookingRequestSkeleton = () => (
     </div>
 );
 
-export default function WorkerDashboard({ 
+export default function EmployeeDashboard({ 
     stats, 
     recentApplications, 
     recentMessages, 
     bookingRequests, 
     activeJobs, 
     upcomingAvailability 
-}: WorkerDashboardProps) {
+}: EmployeeDashboardProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [showContent, setShowContent] = useState(false);
 
@@ -265,7 +265,7 @@ export default function WorkerDashboard({
 
     return (
         <AppLayout>
-            <Head title="Worker Dashboard" />
+            <Head title="Employee Dashboard" />
 
             <div className="w-full px-6 py-8">
                 <div className="flex h-full flex-1 flex-col gap-8">
@@ -285,7 +285,7 @@ export default function WorkerDashboard({
                         <>
                             <div className="animate-[slideInLeft_0.3s_ease-out]">
                                 <h1 className="text-xl sm:text-2xl md:text-3xl font-bold leading-tight" style={{color: '#192341'}}>
-                                    Worker Dashboard
+                                    Employee Dashboard
                                 </h1>
                                 <p className="text-sm sm:text-base md:text-lg leading-relaxed text-gray-600 mt-1">
                                     Welcome back! Here's your activity overview.
@@ -301,7 +301,7 @@ export default function WorkerDashboard({
                                 )}
                                 <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1 animate-[bounce_2s_ease-in-out_infinite]">
                                     <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1" />
-                                    <span className="hidden sm:inline">Active Worker</span>
+                                    <span className="hidden sm:inline">Active Employee</span>
                                     <span className="sm:hidden">Active</span>
                                 </Badge>
                             </div>
@@ -426,7 +426,7 @@ export default function WorkerDashboard({
                                             <AlertCircle className="h-8 w-8 text-orange-600 animate-[float_3s_ease-in-out_infinite]" />
                                             <div className="flex-1">
                                                 <h3 className="font-semibold text-orange-900">
-                                                    Complete Your Worker Profile ({safeStats.profileCompletion}%)
+                                                    Complete Your Employee Profile ({safeStats.profileCompletion}%)
                                                 </h3>
                                                 <p className="text-orange-700 mt-1">
                                                     Add your skills, work experience, availability schedule, and hourly rates to get more booking requests.
@@ -435,7 +435,7 @@ export default function WorkerDashboard({
                                             <Button 
                                                 variant="outline" 
                                                 className="border-orange-300 text-orange-700 hover:bg-orange-100 cursor-pointer hover:scale-105 transition-all duration-200"
-                                                onClick={() => window.location.href = '/worker/profile/edit'}
+                                                onClick={() => window.location.href = '/employee/profile/edit'}
                                                 style={{height: '2.7em'}}
                                             >
                                                 Complete Profile
@@ -506,7 +506,7 @@ export default function WorkerDashboard({
                                                 variant="outline" 
                                                 className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
                                                 style={{height: '2.7em'}}
-                                                onClick={() => window.location.href = '/worker/applications'}
+                                                onClick={() => window.location.href = '/employee/applications'}
                                             >
                                                 View All Applications
                                             </Button>
@@ -519,7 +519,7 @@ export default function WorkerDashboard({
                                             <Button 
                                                 className="mt-4 cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                                 style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                                                onClick={() => window.location.href = '/worker/jobs'}
+                                                onClick={() => window.location.href = '/employee/jobs'}
                                             >
                                                 Browse Jobs
                                             </Button>
@@ -566,7 +566,7 @@ export default function WorkerDashboard({
                                         <div className="space-y-4">
                                             {safeBookingRequests.map((booking, index) => (
                                                 <div key={booking.id} className={`p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer rounded-lg transition-all duration-200 hover:scale-105 animate-[fadeInUp_0.3s_ease-out_${0.4 + index * 0.05}s_both]`}
-                                                     onClick={() => window.location.href = `/worker/bookings/${booking.id}`}>
+                                                     onClick={() => window.location.href = `/employee/bookings/${booking.id}`}>
                                                     <div className="flex items-start justify-between">
                                                         <div className="flex-1">
                                                             <h4 className="text-sm font-medium" style={{color: '#192341'}}>{booking.title}</h4>
@@ -591,7 +591,7 @@ export default function WorkerDashboard({
                                                 variant="outline" 
                                                 className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
                                                 style={{height: '2.7em'}}
-                                                onClick={() => window.location.href = '/worker/bookings'}
+                                                onClick={() => window.location.href = '/employee/bookings'}
                                             >
                                                 View All Requests
                                             </Button>
@@ -665,7 +665,7 @@ export default function WorkerDashboard({
                                                             size="sm" 
                                                             variant="outline" 
                                                             className="cursor-pointer hover:scale-105 transition-all duration-200"
-                                                            onClick={() => window.location.href = `/worker/applications/${application.id}`}
+                                                            onClick={() => window.location.href = `/employee/applications/${application.id}`}
                                                         >
                                                             View Details
                                                         </Button>
@@ -673,7 +673,7 @@ export default function WorkerDashboard({
                                                             size="sm" 
                                                             className="cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                                             style={{ backgroundColor: '#10B3D6' }}
-                                                            onClick={() => window.location.href = `/worker/applications/${application.id}`}
+                                                            onClick={() => window.location.href = `/employee/applications/${application.id}`}
                                                         >
                                                             Mark Complete
                                                         </Button>
@@ -739,7 +739,7 @@ export default function WorkerDashboard({
                                             <div className="space-y-3">
                                                 {safeRecentMessages.slice(0, 4).map((message, index) => (
                                                     <div key={message.id} className={`flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-all duration-200 cursor-pointer border-l-3 ${!message.is_read ? 'border-l-blue-400 bg-blue-50' : 'border-l-gray-200'} animate-[fadeInUp_0.6s_ease-out_${1.1 + index * 0.1}s_both]`}
-                                                         onClick={() => window.location.href = `/worker/messages/${message.id}`}>
+                                                         onClick={() => window.location.href = `/employee/messages/${message.id}`}>
                                                         <div className="flex items-center gap-3 flex-1">
                                                             <div className={`h-3 w-3 rounded-full ${!message.is_read ? 'bg-blue-400 animate-pulse' : 'bg-gray-300'}`}></div>
                                                             <div className="flex-1 min-w-0">
@@ -760,7 +760,7 @@ export default function WorkerDashboard({
                                                         variant="outline" 
                                                         className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
                                                         style={{height: '2.7em'}}
-                                                        onClick={() => window.location.href = '/worker/messages'}
+                                                        onClick={() => window.location.href = '/employee/messages'}
                                                     >
                                                         View All Messages
                                                     </Button>
@@ -880,7 +880,7 @@ export default function WorkerDashboard({
                                                         variant="outline" 
                                                         className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
                                                         style={{height: '2.7em'}}
-                                                        onClick={() => router.visit('/worker/availability')}
+                                                        onClick={() => router.visit('/employee/availability')}
                                                     >
                                                         Manage Availability
                                                     </Button>
@@ -893,7 +893,7 @@ export default function WorkerDashboard({
                                                 <Button 
                                                     className="mt-3 cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                                     style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                                                    onClick={() => window.location.href = '/worker/availability'}
+                                                    onClick={() => window.location.href = '/employee/availability'}
                                                 >
                                                     Set Availability
                                                 </Button>
