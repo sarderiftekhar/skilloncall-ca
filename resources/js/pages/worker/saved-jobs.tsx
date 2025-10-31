@@ -13,7 +13,7 @@ import {
     ChevronRight,
     Lock,
 } from 'react-feather';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { SharedData } from '@/types';
 import { useTranslations } from '@/hooks/useTranslations';
 
@@ -51,9 +51,85 @@ interface SavedJobsProps {
     jobs: PaginatedJobs;
 }
 
+// Loading Skeleton Components
+const SavedJobCardSkeleton = () => (
+    <Card className="hover:shadow-md transition-shadow animate-pulse">
+        <CardContent className="p-4 lg:p-5">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
+                {/* Job Info */}
+                <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <div className="h-5 lg:h-6 bg-gray-300 rounded w-48 animate-pulse"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-4 mb-3">
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 lg:w-4 lg:h-4 bg-gray-300 rounded animate-pulse"></div>
+                            <div className="h-3 lg:h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 lg:w-4 lg:h-4 bg-gray-300 rounded animate-pulse"></div>
+                            <div className="h-3 lg:h-4 bg-gray-200 rounded w-16 animate-pulse"></div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 lg:w-4 lg:h-4 bg-gray-300 rounded animate-pulse"></div>
+                            <div className="h-3 lg:h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+                        </div>
+                    </div>
+
+                    <div className="h-4 bg-gray-200 rounded w-full mb-2 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-3 animate-pulse"></div>
+
+                    <div className="flex items-center gap-4">
+                        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse"></div>
+                        <div className="h-3 bg-gray-200 rounded w-16 animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex sm:flex-col gap-2 w-full sm:w-auto flex-shrink-0">
+                    <div className="h-8 bg-gray-300 rounded w-20 animate-pulse"></div>
+                    <div className="h-8 bg-gray-200 rounded w-12 animate-pulse"></div>
+                </div>
+            </div>
+        </CardContent>
+    </Card>
+);
+
+const HeaderSkeleton = () => (
+    <div className="mb-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+                <div className="h-8 lg:h-9 bg-gray-300 rounded w-40 lg:w-48 mb-2 animate-pulse"></div>
+                <div className="h-4 lg:h-5 bg-gray-200 rounded w-64 lg:w-80 animate-pulse"></div>
+            </div>
+            <div className="text-right">
+                <div className="h-8 lg:h-9 bg-gray-300 rounded w-12 mb-1 animate-pulse"></div>
+                <div className="h-3 lg:h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+);
+
 export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
     const { subscription } = usePage<SharedData>().props;
     const { t } = useTranslations();
+    
+    // Loading states
+    const [isLoading, setIsLoading] = useState(true);
+    const [showContent, setShowContent] = useState(false);
+
+    useEffect(() => {
+        // Loading timer similar to dashboard
+        const loadingTimer = setTimeout(() => {
+            setIsLoading(false);
+            // Quick content reveal
+            setTimeout(() => setShowContent(true), 50);
+        }, 800);
+
+        return () => clearTimeout(loadingTimer);
+    }, []);
 
     // Check if user is on free tier (no subscription or Basic plan)
     const isFreeTier = !subscription || subscription.plan_name === 'Basic' || !subscription.plan_name;
@@ -106,49 +182,89 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
             
             <div className="flex-1 min-w-0 max-w-7xl mx-auto px-4 py-6">
                 {/* Header */}
-                <div className="mb-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl lg:text-3xl font-bold mb-1" style={{ color: '#10B3D6' }}>
-                                {t('nav.saved_jobs')}
-                            </h1>
-                            <p className="text-sm lg:text-base text-gray-600">
-                                {t('your_bookmarked_jobs')}
-                            </p>
+                <div className={`transition-all duration-400 ease-out ${
+                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}>
+                    {isLoading ? (
+                        <HeaderSkeleton />
+                    ) : (
+                        <div className="mb-6">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                <div>
+                                    <h1 className="text-2xl lg:text-3xl font-bold mb-1" style={{ color: '#10B3D6' }}>
+                                        {t('nav.saved_jobs')}
+                                    </h1>
+                                    <p className="text-sm lg:text-base text-gray-600">
+                                        {t('your_bookmarked_jobs')}
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-2xl lg:text-3xl font-bold" style={{ color: '#192341' }}>{initialJobs.total || 0}</div>
+                                    <p className="text-xs lg:text-sm text-gray-600">{t('saved_jobs_count')}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <div className="text-2xl lg:text-3xl font-bold" style={{ color: '#192341' }}>{initialJobs.total || 0}</div>
-                            <p className="text-xs lg:text-sm text-gray-600">{t('saved_jobs_count')}</p>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
-                {/* Info Notice */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm" style={{ borderColor: '#10B3D6' }}>
-                    <p className="text-gray-700">
-                        <strong style={{ color: '#10B3D6' }}>💾 {t('saved_jobs_info')}</strong> {t('saved_jobs_description')}
-                    </p>
-                </div>
+                {/* Info Notices */}
+                <div className={`transition-all duration-400 ease-out ${
+                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}>
+                    {isLoading ? (
+                        <>
+                            <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 lg:p-4 mb-6 animate-pulse">
+                                <div className="h-4 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                            </div>
+                            {isFreeTier && (
+                                <div className="bg-gray-100 border border-gray-200 rounded-lg p-3 lg:p-4 mb-6 animate-pulse">
+                                    <div className="h-4 bg-gray-300 rounded w-5/6 animate-pulse"></div>
+                                </div>
+                            )}
+                        </>
+                    ) : (
+                        <>
+                            {/* Info Notice */}
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm" style={{ borderColor: '#10B3D6' }}>
+                                <p className="text-gray-700">
+                                    <strong style={{ color: '#10B3D6' }}>💾 {t('saved_jobs_info')}</strong> {t('saved_jobs_description')}
+                                </p>
+                            </div>
 
-                {/* Free Tier Restriction Notice */}
-                {isFreeTier && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm">
-                        <p className="text-amber-800">
-                            <strong className="text-amber-700">⚠️ {t('free_plan_limitations')}</strong> {t('free_plan_description')} 
-                            <span className="ml-1">
-                                <a href="/subscriptions" className="text-amber-700 underline hover:text-amber-900 cursor-pointer">
-                                    {t('upgrade_to_pro')}
-                                </a>
-                            </span> {t('upgrade_message')}
-                        </p>
-                    </div>
-                )}
+                            {/* Free Tier Restriction Notice */}
+                            {isFreeTier && (
+                                <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 lg:p-4 mb-6 text-xs lg:text-sm">
+                                    <p className="text-amber-800">
+                                        <strong className="text-amber-700">⚠️ {t('free_plan_limitations')}</strong> {t('free_plan_description')} 
+                                        <span className="ml-1">
+                                            <a href="/subscriptions" className="text-amber-700 underline hover:text-amber-900 cursor-pointer">
+                                                {t('upgrade_to_pro')}
+                                            </a>
+                                        </span> {t('upgrade_message')}
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
 
                 {/* Jobs List */}
-                <div className="space-y-3 lg:space-y-4 pb-8">
-                    {initialJobs.data.length > 0 ? (
-                        initialJobs.data.map(job => (
-                            <Card key={job.id} className="hover:shadow-md transition-shadow">
+                <div className={`transition-all duration-400 ease-out ${
+                    showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}>
+                    {isLoading ? (
+                        <div className="space-y-3 lg:space-y-4 pb-8">
+                            <SavedJobCardSkeleton />
+                            <SavedJobCardSkeleton />
+                            <SavedJobCardSkeleton />
+                            <SavedJobCardSkeleton />
+                        </div>
+                    ) : (
+                        <div className="space-y-3 lg:space-y-4 pb-8">
+                            {initialJobs.data.length > 0 ? (
+                                initialJobs.data.map((job, index) => (
+                            <div key={job.id} className={`animate-[fadeInUp_0.4s_ease-out_${0.1 + index * 0.05}s_both]`}>
+                                <Card className="hover:shadow-md transition-shadow hover:scale-105 duration-200">
                                 <CardContent className="p-4 lg:p-5">
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-4">
                                         {/* Job Info */}
@@ -229,7 +345,8 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                                         </div>
                                     </div>
                                 </CardContent>
-                            </Card>
+                                </Card>
+                            </div>
                         ))
                     ) : (
                         <Card>
@@ -247,10 +364,12 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
                             </CardContent>
                         </Card>
                     )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Pagination */}
-                {initialJobs.last_page > 1 && (
+                {!isLoading && initialJobs.last_page > 1 && (
                     <div className="flex items-center justify-between px-4 py-4 border-t border-gray-200 bg-white rounded-lg mb-6">
                         <div className="text-sm text-gray-600">
                             {t('showing')} {initialJobs.from} {t('to')} {initialJobs.to} {t('of')} {initialJobs.total} {t('saved_jobs_count')}
