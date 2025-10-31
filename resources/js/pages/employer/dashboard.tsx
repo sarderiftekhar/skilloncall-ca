@@ -17,6 +17,7 @@ import {
     PlusCircle
 } from 'react-feather';
 import { useState, useEffect } from 'react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -85,6 +86,7 @@ export default function EmployerDashboard({
     activeWorkers,
     chartData 
 }: EmployerDashboardProps) {
+    const { t } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
     
     useEffect(() => {

@@ -15,6 +15,7 @@ import {
 } from 'react-feather';
 import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import { useTranslations } from '@/hooks/useTranslations';
 
 // Define types for the subscription data
 interface SubscriptionPlan {
@@ -111,6 +112,7 @@ export default function SubscriptionsIndex({
     userRole = 'worker',
     error
 }: SubscriptionsPageProps) {
+    const { t } = useTranslations();
     const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
     const [isLoading, setIsLoading] = useState(true);
     const [showContent, setShowContent] = useState(false);

@@ -6,6 +6,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Briefcase, CheckCircle, Clock, DollarSign, MapPin, Shield, Star, TrendingUp, Users } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,6 +16,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AdminDashboard() {
+    const { t } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
