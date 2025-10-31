@@ -292,7 +292,13 @@ export default function EmployeeDashboard({
                                 </p>
                             </div>
                             <div className="flex items-center gap-2 sm:gap-3 animate-[slideInRight_0.3s_ease-out]">
-                                {safeStats.profileCompletion >= 100 && (
+                                {safeStats.profileCompletion < 100 ? (
+                                    <Badge className="text-orange-700 bg-orange-50 border-orange-200 text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1" variant="outline">
+                                        <Clock className="h-3 w-3 sm:h-3 sm:w-3 mr-1" />
+                                        <span className="hidden sm:inline">{safeStats.profileCompletion}% Complete</span>
+                                        <span className="sm:hidden">{safeStats.profileCompletion}%</span>
+                                    </Badge>
+                                ) : (
                                     <Badge className="text-white text-xs sm:text-sm px-2 py-0.5 sm:px-3 sm:py-1" style={{backgroundColor: '#16a34a'}}>
                                         <CheckCircle className="h-3 w-3 sm:h-3 sm:w-3 mr-1 text-white" />
                                         <span className="hidden sm:inline">Profile complete</span>
@@ -401,52 +407,6 @@ export default function EmployeeDashboard({
                         </>
                     )}
                 </div>
-
-                {/* Profile Completion Alert */}
-                {safeStats.profileCompletion < 100 && (
-                    <div className={`transition-all duration-400 ease-out ${
-                        showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                    }`}>
-                        {isLoading ? (
-                            <div className="border-2 border-gray-200 bg-gray-50 rounded-xl p-6 animate-pulse">
-                                <div className="flex items-center gap-4">
-                                    <div className="h-8 w-8 bg-gray-300 rounded-full animate-pulse"></div>
-                                    <div className="flex-1 space-y-2">
-                                        <div className="h-5 bg-gray-300 rounded w-48 animate-pulse"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-96 animate-pulse"></div>
-                                    </div>
-                                    <div className="h-10 bg-gray-300 rounded w-32 animate-pulse"></div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="animate-[slideInLeft_0.4s_ease-out_0.3s_both]">
-                                <Card className="border-orange-200 bg-orange-50 hover:shadow-lg transition-all duration-200">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <AlertCircle className="h-8 w-8 text-orange-600 animate-[float_3s_ease-in-out_infinite]" />
-                                            <div className="flex-1">
-                                                <h3 className="font-semibold text-orange-900">
-                                                    Complete Your Employee Profile ({safeStats.profileCompletion}%)
-                                                </h3>
-                                                <p className="text-orange-700 mt-1">
-                                                    Add your skills, work experience, availability schedule, and hourly rates to get more booking requests.
-                                                </p>
-                                            </div>
-                                            <Button 
-                                                variant="outline" 
-                                                className="border-orange-300 text-orange-700 hover:bg-orange-100 cursor-pointer hover:scale-105 transition-all duration-200"
-                                                onClick={() => window.location.href = '/employee/profile/edit'}
-                                                style={{height: '2.7em'}}
-                                            >
-                                                Complete Profile
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-                        )}
-                    </div>
-                )}
 
                 {/* Main Content Grid */}
                 <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 transition-all duration-400 ease-out ${
