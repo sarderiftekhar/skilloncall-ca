@@ -24,8 +24,18 @@ class WorkerJobController extends Controller
             ->published()
             ->get(['title']); // Only need titles for profession extraction
 
-        // Extract professions from all jobs
-        $allProfessions = $this->extractProfessions($allActiveJobs);
+        // Extract professions from all jobs inline
+        $professionsCollection = collect();
+        foreach ($allActiveJobs as $job) {
+            $titleParts = preg_split('/[\s\-\/]+/', strtolower($job->title));
+            foreach ($titleParts as $part) {
+                $part = trim($part);
+                if (strlen($part) > 2 && !in_array($part, ['the', 'for', 'and', 'or', 'a', 'an', 'in', 'on', 'at', 'to', 'from', 'with', 'by'])) {
+                    $professionsCollection->push(ucfirst($part));
+                }
+            }
+        }
+        $allProfessions = $professionsCollection->unique()->sort()->values()->toArray();
 
         $query = Job::query()
             ->with(['employer:id,name'])
@@ -174,26 +184,5 @@ class WorkerJobController extends Controller
             ->delete();
 
         return redirect()->back()->with('success', 'Job removed from saved jobs!');
-    }
-
-    /**
-     * Extract unique professions from job titles.
-     */
-    private function extractProfessions($jobs): array
-    {
-        $professions = collect();
-        
-        foreach ($jobs as $job) {
-            $titleParts = preg_split('/[\s\-\/]+/', strtolower($job->title));
-            
-            foreach ($titleParts as $part) {
-                $part = trim($part);
-                if (strlen($part) > 2 && !in_array($part, ['the', 'for', 'and', 'or', 'a', 'an', 'in', 'on', 'at', 'to', 'from', 'with', 'by'])) {
-                    $professions->push(ucfirst($part));
-                }
-            }
-        }
-        
-        return $professions->unique()->sort()->values()->toArray();
     }
 }
