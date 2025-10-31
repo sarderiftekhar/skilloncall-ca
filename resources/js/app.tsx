@@ -34,11 +34,16 @@ router.on('before', (event) => {
 // Handle errors - refresh CSRF token on 419 errors
 router.on('error', (event) => {
     // If we get a 419 error, refresh the CSRF token
-    if (event.detail.errors && event.detail.errors.form === '419 Page Expired' || 
-        event.detail.response?.status === 419) {
-        console.warn('419 Page Expired - CSRF token may have expired. Attempting to refresh...');
-        // Reload the page to get a fresh CSRF token
-        // This will be handled by Inertia's default error handling
+    const is419Error = (event.detail.errors?.form === '419 Page Expired') || 
+                       (event.detail.errors?.message === '419 Page Expired') ||
+                       (event.detail.response?.status === 419);
+    
+    if (is419Error) {
+        console.warn('419 Page Expired - CSRF token expired. Reloading page to refresh token...');
+        // Force reload after a short delay to allow error message to display
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500);
     }
 });
 

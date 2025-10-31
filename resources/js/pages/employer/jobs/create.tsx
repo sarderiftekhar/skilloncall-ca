@@ -92,7 +92,12 @@ export default function CreateJobPage({ categories, globalSkills = [] }: CreateJ
         setLoadingCities(true);
         try {
             // First, fetch province to get global_province_id
-            const provinceResponse = await fetch(`/employer/api/provinces`);
+            const provinceResponse = await fetch(`/employer/api/provinces`, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
             if (provinceResponse.ok) {
                 const provinces = await provinceResponse.json();
                 const selectedProvince = provinces.find((p: { code: string }) => p.code === data.province);
@@ -103,7 +108,12 @@ export default function CreateJobPage({ categories, globalSkills = [] }: CreateJ
 
             // Then fetch cities
             const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/employer/api/provinces/code/${data.province}/cities${searchParam}`);
+            const response = await fetch(`/employer/api/provinces/code/${data.province}/cities${searchParam}`, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
             if (response.ok) {
                 const citiesData = await response.json();
                 setCities(citiesData);

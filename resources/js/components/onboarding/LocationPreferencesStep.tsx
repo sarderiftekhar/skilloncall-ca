@@ -133,7 +133,12 @@ export default function LocationPreferencesStep({
         setLoadingCitiesByArea(prev => ({ ...prev, [areaId]: true }));
         try {
             const searchParam = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
-            const response = await fetch(`/worker/api/provinces/code/${province}/cities${searchParam}`);
+            const response = await fetch(`/worker/api/provinces/code/${province}/cities${searchParam}`, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCitiesByArea(prev => ({ ...prev, [areaId]: data }));

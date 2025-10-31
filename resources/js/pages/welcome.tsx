@@ -63,9 +63,11 @@ export default function Welcome() {
             // Send newsletter subscription email
             const response = await fetch('/contact', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify({
                     name: 'Newsletter Subscriber',

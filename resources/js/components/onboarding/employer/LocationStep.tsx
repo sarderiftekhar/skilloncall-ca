@@ -62,7 +62,12 @@ export default function LocationStep({
         setLoadingCities(true);
         try {
             const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/employer/api/provinces/code/${formData.province}/cities${searchParam}`);
+            const response = await fetch(`/employer/api/provinces/code/${formData.province}/cities${searchParam}`, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCities(data);

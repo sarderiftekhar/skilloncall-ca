@@ -32,11 +32,13 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
         const formData = new FormData(e.target as HTMLFormElement);
         
         try {
-            await fetch('/settings/password', {
+            const response = await fetch('/settings/password', {
                 method: 'PUT',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify({
                     current_password: formData.get('current_password'),
@@ -44,8 +46,18 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     password_confirmation: formData.get('password_confirmation'),
                 }),
             });
+
+            if (!response.ok) {
+                const result = await response.json();
+                if (result.message) {
+                    alert(result.message);
+                }
+            } else {
+                alert('Password updated successfully!');
+            }
         } catch (error) {
             console.error('Password update failed:', error);
+            alert('Failed to update password. Please try again.');
         }
     };
 

@@ -64,7 +64,12 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         setLoadingCities(true);
         try {
             const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/employee/api/provinces/code/${formData.province}/cities${searchParam}`);
+            const response = await fetch(`/employee/api/provinces/code/${formData.province}/cities${searchParam}`, {
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
             if (response.ok) {
                 const data = await response.json();
                 setCities(data);

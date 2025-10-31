@@ -34,9 +34,11 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
         try {
             const response = await fetch('/contact', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify(formData),
             });
