@@ -250,10 +250,10 @@ export default function EmployerDashboard({
                             description: 'Total received'
                         },
                         {
-                            title: 'Active Workers',
+                            title: 'Total Employees',
                             value: stats.activeWorkers,
                             icon: Users,
-                            description: 'Currently working'
+                            description: 'Total employees'
                         }
                     ].map((stat, index) => (
                         <Card 
@@ -451,17 +451,17 @@ export default function EmployerDashboard({
                     </div>
                 </div>
 
-                {/* Active Workers */}
+                {/* Total Employees */}
                 {activeWorkers.length > 0 && (
                     <div className={`transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`} style={{transitionDelay: '900ms'}}>
                         <Card className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 card-with-border">
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold flex items-center">
                                     <Users className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                                    Active Workers
+                                    Total Employees
                                 </CardTitle>
                                 <CardDescription className="text-sm text-gray-600">
-                                    Workers currently engaged on your jobs
+                                    Employees currently engaged on your jobs
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
