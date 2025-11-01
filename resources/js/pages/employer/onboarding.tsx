@@ -115,6 +115,20 @@ export default function EmployerOnboarding({
                     },
                     onError: (errors) => {
                         console.error('Validation errors:', errors);
+                        
+                        // Check for 419 Page Expired error (CSRF token expired)
+                        const isCsrfError = errors.form === '419 Page Expired' || 
+                                           errors.message === '419 Page Expired' ||
+                                           (typeof errors.form === 'string' && errors.form.includes('419')) ||
+                                           (typeof errors.message === 'string' && errors.message.includes('419'));
+                        
+                        if (isCsrfError) {
+                            console.warn('CSRF token expired - reloading page to refresh token');
+                            // Reload the page to get a fresh CSRF token and session
+                            window.location.reload();
+                            return;
+                        }
+                        
                         setValidationErrors(errors);
 
                         // Find first error field and scroll to it
@@ -204,6 +218,20 @@ export default function EmployerOnboarding({
                         },
                         onError: (errors) => {
                             console.error('Completion errors:', errors);
+                            
+                            // Check for 419 Page Expired error (CSRF token expired)
+                            const isCsrfError = errors.form === '419 Page Expired' || 
+                                               errors.message === '419 Page Expired' ||
+                                               (typeof errors.form === 'string' && errors.form.includes('419')) ||
+                                               (typeof errors.message === 'string' && errors.message.includes('419'));
+                            
+                            if (isCsrfError) {
+                                console.warn('CSRF token expired - reloading page to refresh token');
+                                // Reload the page to get a fresh CSRF token and session
+                                window.location.reload();
+                                return;
+                            }
+                            
                             setValidationErrors(errors);
 
                             const errorMessages = Object.values(errors).filter((msg) => 
@@ -223,6 +251,20 @@ export default function EmployerOnboarding({
                 },
                 onError: (errors) => {
                     console.error('Save errors:', errors);
+                    
+                    // Check for 419 Page Expired error (CSRF token expired)
+                    const isCsrfError = errors.form === '419 Page Expired' || 
+                                       errors.message === '419 Page Expired' ||
+                                       (typeof errors.form === 'string' && errors.form.includes('419')) ||
+                                       (typeof errors.message === 'string' && errors.message.includes('419'));
+                    
+                    if (isCsrfError) {
+                        console.warn('CSRF token expired - reloading page to refresh token');
+                        // Reload the page to get a fresh CSRF token and session
+                        window.location.reload();
+                        return;
+                    }
+                    
                     setValidationErrors(errors);
                     setIsSubmitting(false);
                     

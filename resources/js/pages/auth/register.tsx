@@ -2,6 +2,7 @@ import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/Regist
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { Loader } from 'react-feather';
+import { useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -13,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AuthLayout from '@/layouts/auth-layout';
 
 export default function Register() {
+    const [role, setRole] = useState<'employer' | 'employee'>('employee');
     return (
         <AuthLayout title="Create an account" description="Enter your details below to create your account">
             <Head title="Register" />
@@ -62,7 +64,8 @@ export default function Register() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="role">Register as</Label>
-                                <Select name="role" defaultValue="employee" onValueChange={(value) => {
+                                <Select value={role} onValueChange={(value) => {
+                                    setRole(value as 'employer' | 'employee');
                                     const input = document.querySelector('input[name="role"]') as HTMLInputElement | null;
                                     if (input) input.value = value;
                                 }}>
@@ -75,7 +78,7 @@ export default function Register() {
                                     </SelectContent>
                                 </Select>
                                 {/* Hidden input to submit Select value */}
-                                <input type="hidden" name="role" defaultValue="employee" />
+                                <input type="hidden" name="role" value={role} />
                                 <InputError message={errors.role} />
                             </div>
 

@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { logout } from '@/routes';
 import { 
     Users, 
     MapPin, 
@@ -25,7 +27,8 @@ import {
     Bell,
     Plus,
     Triangle,
-    ShoppingCart
+    ShoppingCart,
+    LogOut
 } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 
@@ -255,18 +258,32 @@ export default function Welcome() {
                         {auth.user ? (
                                     <div className="flex items-center space-x-3">
                                         <Bell className="h-5 w-5 text-gray-300 hover:text-white cursor-pointer transition-colors" />
-                                        <Avatar className="h-8 w-8 cursor-pointer">
-                                            <AvatarImage src="" />
-                                            <AvatarFallback className="text-white text-xs" style={{backgroundColor: '#10B3D6'}}>
-                                                {(auth.user.display_name || auth.user.name)?.split(' ').map(n => n[0]).join('')}
-                                            </AvatarFallback>
-                                        </Avatar>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <button className="cursor-pointer">
+                                                    <Avatar className="h-8 w-8 cursor-pointer">
+                                                        <AvatarImage src="" />
+                                                        <AvatarFallback className="text-white text-xs" style={{backgroundColor: '#10B3D6'}}>
+                                                            {(auth.user.display_name || auth.user.name)?.split(' ').map(n => n[0]).join('')}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" className="w-56">
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={logout()} method="post" className="cursor-pointer">
+                                                        <LogOut className="mr-2 h-4 w-4" />
+                                                        Log out
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                         {isProfileComplete ? (
                                             <Link href={`/dashboard${queryLang}`}>
                                                 <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400">{t('auth.dashboard', 'Dashboard')}</Button>
                                             </Link>
                                         ) : (
-                                            <Link href={`/employee/onboarding${queryLang}`}>
+                                            <Link href={auth.user?.role === 'employer' ? `/employer/onboarding${queryLang}` : `/employee/onboarding${queryLang}`}>
                                                 <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.complete_profile', 'Complete Profile')}</Button>
                                             </Link>
                                         )}

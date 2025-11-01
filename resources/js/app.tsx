@@ -34,9 +34,16 @@ router.on('before', (event) => {
 // Handle errors - refresh CSRF token on 419 errors
 router.on('error', (event) => {
     // If we get a 419 error, refresh the CSRF token
-    const is419Error = (event.detail.errors?.form === '419 Page Expired') || 
-                       (event.detail.errors?.message === '419 Page Expired') ||
-                       (event.detail.response?.status === 419);
+    const errors = event.detail.errors || {};
+    const response = event.detail.response;
+    
+    const is419Error = 
+        errors.form === '419 Page Expired' || 
+        errors.message === '419 Page Expired' ||
+        (typeof errors.form === 'string' && errors.form.includes('419')) ||
+        (typeof errors.message === 'string' && errors.message.includes('419')) ||
+        response?.status === 419 ||
+        (response?.statusText && response.statusText.includes('419'));
     
     if (is419Error) {
         console.warn('419 Page Expired - CSRF token expired. Reloading page to refresh token...');
