@@ -1,7 +1,7 @@
 import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
-import { Loader } from 'react-feather';
+import { Loader, Briefcase, User } from 'react-feather';
 import { useState } from 'react';
 
 import InputError from '@/components/input-error';
@@ -69,12 +69,48 @@ export default function Register() {
                                     const input = document.querySelector('input[name="role"]') as HTMLInputElement | null;
                                     if (input) input.value = value;
                                 }}>
-                                    <SelectTrigger id="role" className="cursor-pointer">
-                                        <SelectValue placeholder="Select role" />
+                                    <SelectTrigger id="role" className="cursor-pointer h-auto py-2">
+                                        {role ? (
+                                            <div className="flex items-center gap-3 w-full">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-full flex-shrink-0" 
+                                                     style={role === 'employer' ? {backgroundColor: '#FCF2F0'} : {backgroundColor: '#10B3D6'}}>
+                                                    {role === 'employer' ? (
+                                                        <Briefcase className="h-4 w-4" style={{color: '#10B3D6'}} />
+                                                    ) : (
+                                                        <User className="h-4 w-4 text-white" />
+                                                    )}
+                                                </div>
+                                                <span className="font-semibold" style={role === 'employer' ? {color: '#10B3D6'} : {}}>
+                                                    {role === 'employer' ? "I'm an Employer" : "I'm an Employee"}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-500">Select role</span>
+                                        )}
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="employer">Employer</SelectItem>
-                                        <SelectItem value="employee">Employee</SelectItem>
+                                        <SelectItem value="employer" className="cursor-pointer py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full" style={{backgroundColor: '#FCF2F0'}}>
+                                                    <Briefcase className="h-5 w-5" style={{color: '#10B3D6'}} />
+                                                </div>
+                                                <div className="flex flex-col items-start">
+                                                    <span className="font-semibold text-base" style={{color: '#10B3D6'}}>I'm an Employer</span>
+                                                    <span className="text-xs text-gray-500">Hiring skilled workers</span>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="employee" className="cursor-pointer py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full" style={{backgroundColor: '#10B3D6'}}>
+                                                    <User className="h-5 w-5 text-white" />
+                                                </div>
+                                                <div className="flex flex-col items-start">
+                                                    <span className="font-semibold text-base">I'm an Employee</span>
+                                                    <span className="text-xs text-gray-500">Looking for work</span>
+                                                </div>
+                                            </div>
+                                        </SelectItem>
                                     </SelectContent>
                                 </Select>
                                 {/* Hidden input to submit Select value */}
