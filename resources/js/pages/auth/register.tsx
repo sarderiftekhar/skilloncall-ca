@@ -32,7 +32,7 @@ export default function Register() {
                             <>
                                 <div className="grid gap-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                                <Label htmlFor="name" className="font-bold">Name</Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -48,7 +48,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                                <Label htmlFor="email" className="font-bold">Email address</Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -63,7 +63,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="role">Register as</Label>
+                                <Label htmlFor="role" className="font-bold">Register as</Label>
                                 <Select value={role} onValueChange={(value) => {
                                     setRole(value as 'employer' | 'employee');
                                     const input = document.querySelector('input[name="role"]') as HTMLInputElement | null;
@@ -119,7 +119,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                                <Label htmlFor="password" className="font-bold">Password</Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -134,7 +134,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">Confirm password</Label>
+                                <Label htmlFor="password_confirmation" className="font-bold">Confirm password</Label>
                                 <Input
                                     id="password_confirmation"
                                     type="password"
