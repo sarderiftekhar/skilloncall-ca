@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Models\User;
+use App\Events\Employee\EmployeeRegistered;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -18,6 +19,11 @@ class UserObserver
             'email' => $user->email,
             'role' => $user->role,
         ]);
+
+        // Fire role-specific events
+        if ($user->role === 'employee') {
+            event(new EmployeeRegistered($user));
+        }
 
         // Send welcome email based on role
         $this->sendWelcomeEmail($user);

@@ -10,6 +10,16 @@ use App\Jobs\SendEmailJob;
 class EmailService
 {
     /**
+     * Get the from email address from config
+     */
+    private function getFromAddress(): string
+    {
+        $fromAddress = config('mail.from.address', 'noreply@skilloncall.ca');
+        $fromName = config('mail.from.name', 'SkillOnCall');
+        return $fromName . ' <' . $fromAddress . '>';
+    }
+
+    /**
      * Send contact form email (queued for better performance)
      */
     public function sendContactFormEmail(array $data): bool
@@ -33,7 +43,7 @@ class EmailService
 
             // Fallback: try to send directly with timeout
             return $this->sendEmailDirectlyWithTimeout([
-                'from' => 'SkillOnCall <onboarding@resend.dev>',
+                'from' => $this->getFromAddress(),
                 'to' => [$data['email']],
                 'subject' => '🎉 Contact Form Received - SkillOnCall.ca',
                 'html' => $this->buildContactEmailHtml($data),
@@ -66,7 +76,7 @@ class EmailService
 
             // Fallback: try to send directly with timeout
             return $this->sendEmailDirectlyWithTimeout([
-                'from' => 'SkillOnCall <onboarding@resend.dev>',
+                'from' => $this->getFromAddress(),
                 'to' => [$data['email']],
                 'subject' => '📧 Welcome to SkillOnCall.ca Newsletter!',
                 'html' => $this->buildNewsletterConfirmationHtml($data),
@@ -82,7 +92,7 @@ class EmailService
     {
         try {
             $result = Resend::emails()->send([
-                'from' => 'SkillOnCall <onboarding@resend.dev>',
+                'from' => $this->getFromAddress(),
                 'to' => [$data['user_email']],
                 'subject' => '🎉 Subscription Confirmed - Welcome to ' . $data['plan_name'] . '!',
                 'html' => $this->buildSubscriptionConfirmationHtml($data),
@@ -106,6 +116,44 @@ class EmailService
 
             if (app()->runningInConsole()) {
                 echo "Subscription Email Error: " . $e->getMessage() . "\n";
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Send employee registration congratulations email
+     */
+    public function sendEmployeeRegistrationEmail(string $userEmail, string $userName): bool
+    {
+        try {
+            $result = Resend::emails()->send([
+                'from' => $this->getFromAddress(),
+                'to' => [$userEmail],
+                'subject' => '🎉 Congratulations! Welcome to SkillOnCall.ca as an Employee',
+                'html' => $this->buildEmployeeRegistrationEmailHtml($userName),
+                'text' => $this->buildEmployeeRegistrationEmailText($userName),
+            ]);
+
+            Log::info('Employee registration email sent successfully', [
+                'email_id' => $result['id'] ?? null,
+                'to' => $userEmail,
+                'user_name' => $userName
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send employee registration email', [
+                'error' => $e->getMessage(),
+                'error_class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+                'to' => $userEmail,
+                'user_name' => $userName
+            ]);
+
+            if (app()->runningInConsole()) {
+                echo "Employee Registration Email Error: " . $e->getMessage() . "\n";
             }
 
             return false;
@@ -140,7 +188,7 @@ class EmailService
 
             // Fallback: try to send directly with timeout
             return $this->sendEmailDirectlyWithTimeout([
-                'from' => 'welcome@skilloncall.ca',
+                'from' => $this->getFromAddress(),
                 'to' => [$userEmail],
                 'subject' => 'Welcome to SkillOnCall.ca!',
                 'html' => $this->buildWelcomeEmailHtml($userName),
@@ -570,5 +618,338 @@ class EmailService
                "© 2025 SkillOnCall.ca. All rights reserved. Made with 🍁 in Canada.\n" .
                "You're receiving this because you subscribed to our newsletter at SkillOnCall.ca\n" .
                "Don't want to receive these emails? Unsubscribe here: https://skilloncall.ca/unsubscribe";
+    }
+
+    /**
+     * Build HTML content for employee registration email
+     */
+    private function buildEmployeeRegistrationEmailHtml(string $userName): string
+    {
+        return "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='utf-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>Welcome to SkillOnCall.ca - Employee Registration</title>
+            <style>
+                body { 
+                    font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; 
+                    line-height: 1.6; 
+                    color: #192341; 
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f6fbfd;
+                }
+                .email-container { 
+                    max-width: 600px; 
+                    margin: 0 auto; 
+                    background-color: #ffffff;
+                }
+                .header { 
+                    background: linear-gradient(135deg, #10B3D6 0%, #0a8ba8 100%);
+                    color: white; 
+                    padding: 40px 30px; 
+                    text-align: center; 
+                    border-radius: 10px 10px 0 0;
+                }
+                .header h1 { 
+                    margin: 0 0 10px 0; 
+                    font-size: 32px; 
+                    font-weight: 700;
+                }
+                .header p { 
+                    margin: 0; 
+                    font-size: 18px; 
+                    opacity: 0.95;
+                }
+                .content { 
+                    background-color: #ffffff; 
+                    padding: 40px 30px; 
+                }
+                .congratulations-box {
+                    background-color: #FCF2F0;
+                    padding: 25px;
+                    border-radius: 10px;
+                    margin: 25px 0;
+                    border-left: 4px solid #10B3D6;
+                    text-align: center;
+                }
+                .congratulations-box h2 {
+                    color: #10B3D6;
+                    margin: 0 0 10px 0;
+                    font-size: 24px;
+                    font-weight: 600;
+                }
+                .congratulations-box p {
+                    margin: 0;
+                    color: #192341;
+                    font-size: 16px;
+                }
+                .feature-list { 
+                    background-color: #f6fbfd; 
+                    padding: 25px; 
+                    border-radius: 10px; 
+                    margin: 25px 0; 
+                }
+                .feature-item { 
+                    display: flex; 
+                    align-items: flex-start; 
+                    margin: 15px 0; 
+                }
+                .feature-icon { 
+                    color: #10B3D6; 
+                    font-weight: bold; 
+                    margin-right: 12px; 
+                    font-size: 20px;
+                    flex-shrink: 0;
+                    margin-top: 2px;
+                }
+                .feature-text {
+                    flex: 1;
+                }
+                .feature-text strong {
+                    color: #192341;
+                    display: block;
+                    margin-bottom: 5px;
+                    font-weight: 600;
+                }
+                .feature-text p {
+                    margin: 0;
+                    color: #555;
+                    font-size: 15px;
+                }
+                .button { 
+                    display: inline-block; 
+                    background-color: #10B3D6; 
+                    color: white; 
+                    padding: 16px 32px; 
+                    text-decoration: none; 
+                    border-radius: 8px; 
+                    margin: 25px 0; 
+                    font-weight: 600;
+                    font-size: 16px;
+                    text-align: center;
+                    transition: background-color 0.3s;
+                }
+                .button:hover {
+                    background-color: #0a8ba8;
+                }
+                .button-container {
+                    text-align: center;
+                    margin: 30px 0;
+                }
+                .next-steps {
+                    background-color: #ffffff;
+                    border: 2px solid #10B3D6;
+                    border-radius: 10px;
+                    padding: 25px;
+                    margin: 25px 0;
+                }
+                .next-steps h3 {
+                    color: #10B3D6;
+                    margin: 0 0 15px 0;
+                    font-size: 20px;
+                    font-weight: 600;
+                }
+                .next-steps ul {
+                    margin: 0;
+                    padding-left: 20px;
+                }
+                .next-steps li {
+                    margin: 10px 0;
+                    color: #192341;
+                    line-height: 1.6;
+                }
+                .footer { 
+                    text-align: center; 
+                    padding: 30px; 
+                    background-color: #f6fbfd;
+                    color: #666; 
+                    font-size: 13px; 
+                    border-radius: 0 0 10px 10px;
+                }
+                .footer p {
+                    margin: 8px 0;
+                }
+                .footer a {
+                    color: #10B3D6;
+                    text-decoration: none;
+                }
+                .maple-leaf {
+                    display: inline-block;
+                    font-size: 20px;
+                    margin: 0 5px;
+                }
+                @media only screen and (max-width: 600px) {
+                    .content, .header {
+                        padding: 25px 20px;
+                    }
+                    .header h1 {
+                        font-size: 26px;
+                    }
+                    .button {
+                        display: block;
+                        margin: 20px auto;
+                    }
+                }
+            </style>
+        </head>
+        <body>
+            <div class='email-container'>
+                <div class='header'>
+                    <h1>🎉 Congratulations!</h1>
+                    <p>Welcome to SkillOnCall.ca</p>
+                </div>
+                <div class='content'>
+                    <p style='font-size: 18px; color: #192341; margin-bottom: 20px;'>Hello <strong>" . htmlspecialchars($userName) . "</strong>,</p>
+                    
+                    <div class='congratulations-box'>
+                        <h2>🎊 You're Now an Employee!</h2>
+                        <p>We're thrilled to have you join Canada's premier platform for skilled workers and local businesses.</p>
+                    </div>
+                    
+                    <p style='color: #192341; font-size: 16px; line-height: 1.7;'>
+                        Thank you for registering as an employee on <strong>SkillOnCall.ca</strong>! You've taken the first step towards connecting with amazing opportunities across Canada. Our platform is designed to help skilled workers like you find flexible, rewarding work with local businesses.
+                    </p>
+                    
+                    <div class='feature-list'>
+                        <h3 style='color: #192341; margin-top: 0; margin-bottom: 20px; font-size: 20px; font-weight: 600;'>✨ What You Can Do Now:</h3>
+                        
+                        <div class='feature-item'>
+                            <span class='feature-icon'>📋</span>
+                            <div class='feature-text'>
+                                <strong>Complete Your Profile</strong>
+                                <p>Build a comprehensive profile showcasing your skills, experience, and certifications. The more complete your profile, the more opportunities you'll discover.</p>
+                            </div>
+                        </div>
+                        
+                        <div class='feature-item'>
+                            <span class='feature-icon'>🔍</span>
+                            <div class='feature-text'>
+                                <strong>Browse Job Opportunities</strong>
+                                <p>Explore thousands of job postings from local businesses looking for skilled workers like you. Filter by location, skills, and availability.</p>
+                            </div>
+                        </div>
+                        
+                        <div class='feature-item'>
+                            <span class='feature-icon'>💼</span>
+                            <div class='feature-text'>
+                                <strong>Apply for Jobs</strong>
+                                <p>Submit applications to businesses that match your skills and interests. Stand out with your detailed profile and portfolio.</p>
+                            </div>
+                        </div>
+                        
+                        <div class='feature-item'>
+                            <span class='feature-icon'>⭐</span>
+                            <div class='feature-text'>
+                                <strong>Build Your Reputation</strong>
+                                <p>Complete jobs successfully and earn great reviews. Build a strong reputation that opens doors to better opportunities.</p>
+                            </div>
+                        </div>
+                        
+                        <div class='feature-item'>
+                            <span class='feature-icon'>📅</span>
+                            <div class='feature-text'>
+                                <strong>Set Your Availability</strong>
+                                <p>Control when and where you work. Set your availability schedule and let employers know when you're ready to work.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class='next-steps'>
+                        <h3>🚀 Your Next Steps:</h3>
+                        <ul>
+                            <li><strong>Step 1:</strong> Complete your employee profile with personal information, skills, and experience</li>
+                            <li><strong>Step 2:</strong> Add your certifications and work history to showcase your expertise</li>
+                            <li><strong>Step 3:</strong> Set your service areas and availability schedule</li>
+                            <li><strong>Step 4:</strong> Upload your portfolio and work samples to stand out</li>
+                            <li><strong>Step 5:</strong> Start browsing and applying for jobs that match your skills!</li>
+                        </ul>
+                    </div>
+                    
+                    <div class='button-container'>
+                        <a href='https://skilloncall.ca/dashboard' class='button'>Complete Your Profile →</a>
+                    </div>
+                    
+                    <p style='color: #192341; font-size: 16px; line-height: 1.7; margin-top: 30px;'>
+                        <strong>Why SkillOnCall.ca?</strong><br>
+                        We're Canada's trusted platform connecting skilled workers with local businesses. Whether you're a chef, barista, retail associate, cleaner, or any other skilled professional, we're here to help you find flexible work opportunities that fit your schedule.
+                    </p>
+                    
+                    <p style='color: #192341; font-size: 16px; line-height: 1.7;'>
+                        Our platform is designed with Canadian workers in mind, supporting work authorization verification, provincial certifications, and local job matching across all provinces and territories.
+                    </p>
+                    
+                    <p style='color: #192341; font-size: 16px; line-height: 1.7; margin-top: 25px;'>
+                        Need help getting started? Our support team is here for you! Simply reply to this email or contact us at <a href='mailto:support@skilloncall.ca' style='color: #10B3D6; text-decoration: none;'>support@skilloncall.ca</a>
+                    </p>
+                    
+                    <p style='color: #192341; font-size: 16px; line-height: 1.7; margin-top: 25px;'>
+                        Welcome aboard, and we can't wait to see you succeed!<br>
+                        <strong style='color: #10B3D6;'>The SkillOnCall.ca Team</strong>
+                    </p>
+                </div>
+                <div class='footer'>
+                    <p><strong>SkillOnCall.ca</strong> - Canada's Premier Platform for Skilled Workers</p>
+                    <p>© 2025 SkillOnCall.ca. All rights reserved. <span class='maple-leaf'>🍁</span> Made with pride in Canada.</p>
+                    <p>
+                        <a href='https://skilloncall.ca'>Visit Website</a> | 
+                        <a href='https://skilloncall.ca/support'>Support</a> | 
+                        <a href='https://skilloncall.ca/privacy'>Privacy Policy</a>
+                    </p>
+                    <p style='font-size: 12px; color: #999; margin-top: 15px;'>
+                        You're receiving this email because you registered as an employee on SkillOnCall.ca.<br>
+                        If you have any questions, please don't hesitate to reach out to our support team.
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+    }
+
+    /**
+     * Build text content for employee registration email
+     */
+    private function buildEmployeeRegistrationEmailText(string $userName): string
+    {
+        return "🎉 Congratulations! Welcome to SkillOnCall.ca as an Employee\n\n" .
+               "Hello " . $userName . ",\n\n" .
+               "We're thrilled to have you join Canada's premier platform for skilled workers and local businesses.\n\n" .
+               "🎊 You're Now an Employee!\n" .
+               "Thank you for registering as an employee on SkillOnCall.ca! You've taken the first step towards connecting with amazing opportunities across Canada.\n\n" .
+               "✨ What You Can Do Now:\n\n" .
+               "📋 Complete Your Profile\n" .
+               "Build a comprehensive profile showcasing your skills, experience, and certifications. The more complete your profile, the more opportunities you'll discover.\n\n" .
+               "🔍 Browse Job Opportunities\n" .
+               "Explore thousands of job postings from local businesses looking for skilled workers like you. Filter by location, skills, and availability.\n\n" .
+               "💼 Apply for Jobs\n" .
+               "Submit applications to businesses that match your skills and interests. Stand out with your detailed profile and portfolio.\n\n" .
+               "⭐ Build Your Reputation\n" .
+               "Complete jobs successfully and earn great reviews. Build a strong reputation that opens doors to better opportunities.\n\n" .
+               "📅 Set Your Availability\n" .
+               "Control when and where you work. Set your availability schedule and let employers know when you're ready to work.\n\n" .
+               "🚀 Your Next Steps:\n\n" .
+               "Step 1: Complete your employee profile with personal information, skills, and experience\n" .
+               "Step 2: Add your certifications and work history to showcase your expertise\n" .
+               "Step 3: Set your service areas and availability schedule\n" .
+               "Step 4: Upload your portfolio and work samples to stand out\n" .
+               "Step 5: Start browsing and applying for jobs that match your skills!\n\n" .
+               "Complete Your Profile: https://skilloncall.ca/dashboard\n\n" .
+               "Why SkillOnCall.ca?\n" .
+               "We're Canada's trusted platform connecting skilled workers with local businesses. Whether you're a chef, barista, retail associate, cleaner, or any other skilled professional, we're here to help you find flexible work opportunities that fit your schedule.\n\n" .
+               "Our platform is designed with Canadian workers in mind, supporting work authorization verification, provincial certifications, and local job matching across all provinces and territories.\n\n" .
+               "Need help getting started? Our support team is here for you! Simply reply to this email or contact us at support@skilloncall.ca\n\n" .
+               "Welcome aboard, and we can't wait to see you succeed!\n" .
+               "The SkillOnCall.ca Team\n\n" .
+               "---\n" .
+               "SkillOnCall.ca - Canada's Premier Platform for Skilled Workers\n" .
+               "© 2025 SkillOnCall.ca. All rights reserved. 🍁 Made with pride in Canada.\n\n" .
+               "Visit Website: https://skilloncall.ca\n" .
+               "Support: https://skilloncall.ca/support\n" .
+               "Privacy Policy: https://skilloncall.ca/privacy\n\n" .
+               "You're receiving this email because you registered as an employee on SkillOnCall.ca.\n" .
+               "If you have any questions, please don't hesitate to reach out to our support team.";
     }
 }

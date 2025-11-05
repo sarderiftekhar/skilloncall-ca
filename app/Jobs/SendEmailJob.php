@@ -22,6 +22,16 @@ class SendEmailJob implements ShouldQueue
     protected string $emailType;
 
     /**
+     * Get the from email address from config
+     */
+    private function getFromAddress(): string
+    {
+        $fromAddress = config('mail.from.address', 'noreply@skilloncall.ca');
+        $fromName = config('mail.from.name', 'SkillOnCall');
+        return $fromName . ' <' . $fromAddress . '>';
+    }
+
+    /**
      * Create a new job instance.
      */
     public function __construct(array $emailData, string $emailType)
@@ -107,7 +117,7 @@ class SendEmailJob implements ShouldQueue
     private function sendContactEmail(): array
     {
         return Resend::emails()->send([
-            'from' => 'SkillOnCall <onboarding@resend.dev>',
+            'from' => $this->getFromAddress(),
             'to' => [$this->emailData['email']],
             'subject' => '🎉 Contact Form Received - SkillOnCall.ca',
             'html' => $this->buildContactEmailHtml($this->emailData),
@@ -121,7 +131,7 @@ class SendEmailJob implements ShouldQueue
     private function sendNewsletterEmail(): array
     {
         return Resend::emails()->send([
-            'from' => 'SkillOnCall <onboarding@resend.dev>',
+            'from' => $this->getFromAddress(),
             'to' => [$this->emailData['email']],
             'subject' => '📧 Welcome to SkillOnCall.ca Newsletter!',
             'html' => $this->buildNewsletterConfirmationHtml($this->emailData),
@@ -135,7 +145,7 @@ class SendEmailJob implements ShouldQueue
     private function sendSubscriptionEmail(): array
     {
         return Resend::emails()->send([
-            'from' => 'SkillOnCall <onboarding@resend.dev>',
+            'from' => $this->getFromAddress(),
             'to' => [$this->emailData['user_email']],
             'subject' => '🎉 Subscription Confirmed - Welcome to ' . $this->emailData['plan_name'] . '!',
             'html' => $this->buildSubscriptionConfirmationHtml($this->emailData),
@@ -149,7 +159,7 @@ class SendEmailJob implements ShouldQueue
     private function sendWelcomeEmail(): array
     {
         return Resend::emails()->send([
-            'from' => 'welcome@skilloncall.ca',
+            'from' => $this->getFromAddress(),
             'to' => [$this->emailData['email']],
             'subject' => 'Welcome to SkillOnCall.ca!',
             'html' => $this->buildWelcomeEmailHtml($this->emailData['name']),
