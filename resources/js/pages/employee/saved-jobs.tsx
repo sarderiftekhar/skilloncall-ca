@@ -138,8 +138,11 @@ export default function SavedJobs({ jobs: initialJobs }: SavedJobsProps) {
     // Function to mask company name for free tier users
     const getMaskedCompanyName = (companyName: string) => {
         if (!isFreeTier) return companyName;
-        if (companyName.length <= 5) return companyName;
-        return companyName.substring(0, 5) + '•••••';
+        if (companyName.length <= 2) return '•••••';
+        // Hide first 2 letters, show next 5 characters, then hide the rest
+        const remaining = companyName.substring(2);
+        const visible = remaining.substring(0, 5);
+        return '••' + visible + '•••••';
     };
 
     // Function to handle apply button click

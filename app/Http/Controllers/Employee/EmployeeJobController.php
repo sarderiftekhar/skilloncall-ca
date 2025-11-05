@@ -48,7 +48,7 @@ class EmployeeJobController extends Controller
         $allProfessions = $professionsCollection->unique()->sort()->values()->toArray();
 
         $query = Job::query()
-            ->with(['employer:id,name'])
+            ->with(['employer:id,name', 'employer.employerProfile:user_id,business_name'])
             ->active()
             ->published()
             ->latest('published_at');
@@ -95,6 +95,14 @@ class EmployeeJobController extends Controller
 
         $jobs = $query->paginate(12)->withQueryString();
 
+        // Transform jobs to use business_name from employer profile, fallback to user name
+        $jobs->getCollection()->transform(function ($job) {
+            if ($job->employer) {
+                $job->employer->name = $job->employer->employerProfile?->business_name ?? $job->employer->name;
+            }
+            return $job;
+        });
+
         // Get saved job IDs for the current user
         $savedJobIds = SavedJob::where('user_id', Auth::id())->pluck('job_id')->toArray();
 
@@ -139,7 +147,7 @@ class EmployeeJobController extends Controller
      */
     public function savedJobs(): Response
     {
-        $savedJobs = SavedJob::with(['job.employer:id,name'])
+        $savedJobs = SavedJob::with(['job.employer:id,name', 'job.employer.employerProfile:user_id,business_name'])
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->paginate(12);
@@ -147,7 +155,11 @@ class EmployeeJobController extends Controller
         // Transform the data to match the expected structure
         $jobsData = [
             'data' => $savedJobs->map(function ($savedJob) {
-                return $savedJob->job;
+                $job = $savedJob->job;
+                if ($job->employer) {
+                    $job->employer->name = $job->employer->employerProfile?->business_name ?? $job->employer->name;
+                }
+                return $job;
             }),
             'current_page' => $savedJobs->currentPage(),
             'last_page' => $savedJobs->lastPage(),

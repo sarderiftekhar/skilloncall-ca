@@ -53,6 +53,7 @@ class DatabaseSeeder extends Seeder
             GlobalPostalCodesSeeder::class,
             SubscriptionPlanSeeder::class,
             JobSeeder::class,
+            CompaniesAndJobsSeeder::class,
         ]);
     }
 }

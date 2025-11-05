@@ -116,8 +116,11 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
     // Function to mask company name for free tier users
     const getMaskedCompanyName = (companyName: string) => {
         if (!isFreeTier) return companyName;
-        if (companyName.length <= 5) return companyName;
-        return companyName.substring(0, 5) + '•••••';
+        if (companyName.length <= 2) return '•••••';
+        // Hide first 2 letters, show next 5 characters, then hide the rest
+        const remaining = companyName.substring(2);
+        const visible = remaining.substring(0, 5);
+        return '••' + visible + '•••••';
     };
 
     // Function to handle apply button click
@@ -258,6 +261,28 @@ export default function FindJobs({ jobs: initialJobs, filters: initialFilters = 
                 {/* Sidebar Filters */}
                 <div className={`${mobileFiltersOpen ? 'block' : 'hidden'} lg:block lg:w-72 flex-shrink-0 mb-6 lg:mb-0`}>
                     <div className="bg-white rounded-lg shadow-sm p-5 lg:p-6 space-y-5 lg:space-y-6 lg:sticky lg:top-20">
+                        
+                        {/* Reset Button */}
+                        <div className="flex justify-end">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSelectedProfessions([]);
+                                    setSelectedShifts([]);
+                                    setSelectedExperience([]);
+                                    setMinRate(16);
+                                    setMaxRate(100);
+                                    setProfessionSearch('');
+                                    router.get(employeeJobsRoute.index.url());
+                                }}
+                                className="text-xs cursor-pointer"
+                                disabled={!searchQuery && selectedProfessions.length === 0 && selectedShifts.length === 0 && selectedExperience.length === 0 && minRate === 16 && maxRate === 100}
+                            >
+                                Reset Filters
+                            </Button>
+                        </div>
                         
                         {/* Search */}
                         <div>
