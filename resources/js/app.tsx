@@ -8,16 +8,24 @@ import { initializeTheme } from './hooks/use-appearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+// Helper function to get fresh CSRF token from meta tag
+function getCsrfToken(): string | null {
+    // Always read fresh from DOM to ensure we have the latest token
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    return metaTag?.getAttribute('content') || null;
+}
+
 // Set up CSRF token for Inertia requests
 router.on('before', (event) => {
-    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    // Always get fresh token from meta tag (don't cache it)
+    const csrfToken = getCsrfToken();
     if (csrfToken && event.detail.visit.method !== 'get') {
         // Ensure headers object exists
         if (!event.detail.visit.headers) {
             event.detail.visit.headers = {};
         }
         
-        // Always set X-CSRF-TOKEN header
+        // Always set X-CSRF-TOKEN header with fresh token
         event.detail.visit.headers['X-CSRF-TOKEN'] = csrfToken;
         event.detail.visit.headers['X-Requested-With'] = 'XMLHttpRequest';
         
@@ -26,6 +34,9 @@ router.on('before', (event) => {
             // Check if token is already in FormData (don't duplicate)
             if (!event.detail.visit.data.has('_token')) {
                 event.detail.visit.data.append('_token', csrfToken);
+            } else {
+                // Update existing token with fresh one
+                event.detail.visit.data.set('_token', csrfToken);
             }
         }
     }
@@ -54,13 +65,50 @@ router.on('error', (event) => {
     }
 });
 
-// Refresh CSRF token after successful requests to prevent expiration
+// Update CSRF token from Inertia page props after any successful request
+// This handles both navigating and non-navigating requests
 router.on('finish', (event) => {
-    // Update CSRF token from response headers if available
-    const metaTag = document.querySelector('meta[name="csrf-token"]');
-    if (metaTag && event.detail.response) {
-        // Laravel will update the meta tag on each request
-        // The token should already be fresh from the response
+    // Update CSRF token from Inertia props if available
+    // This ensures the meta tag always has the latest token after each request
+    try {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (!metaTag) return;
+
+        // Access the Inertia page through the global Inertia instance
+        // The page object is available after requests complete
+        const inertia = (window as any).Inertia;
+        if (inertia && inertia.page && inertia.page.props) {
+            const csrfToken = inertia.page.props.csrfToken;
+            if (csrfToken && typeof csrfToken === 'string') {
+                const currentToken = metaTag.getAttribute('content');
+                if (currentToken !== csrfToken) {
+                    metaTag.setAttribute('content', csrfToken);
+                    console.debug('CSRF token updated from Inertia props (finish event)');
+                }
+            }
+        }
+    } catch (e) {
+        // Silently fail if we can't update the token
+        console.debug('Could not update CSRF token:', e);
+    }
+});
+
+// Also update on success event for navigating requests
+router.on('success', (event) => {
+    // Update the meta tag CSRF token from the Inertia props
+    // This ensures we always have the latest token that matches the session
+    try {
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag && event.detail.page?.props?.csrfToken) {
+            const newToken = event.detail.page.props.csrfToken;
+            const currentToken = metaTag.getAttribute('content');
+            if (currentToken !== newToken) {
+                metaTag.setAttribute('content', newToken);
+                console.debug('CSRF token updated from Inertia props (success event)');
+            }
+        }
+    } catch (e) {
+        console.debug('Could not update CSRF token on success:', e);
     }
 });
 
@@ -69,6 +117,14 @@ createInertiaApp({
     resolve: (name) => resolvePageComponent(`./pages/${name}.tsx`, import.meta.glob('./pages/**/*.tsx')),
     setup({ el, App, props }) {
         const root = createRoot(el);
+
+        // Update CSRF token from initial props on page load
+        if (props.initialPage?.props?.csrfToken) {
+            const metaTag = document.querySelector('meta[name="csrf-token"]');
+            if (metaTag) {
+                metaTag.setAttribute('content', props.initialPage.props.csrfToken);
+            }
+        }
 
         root.render(<App {...props} />);
     },

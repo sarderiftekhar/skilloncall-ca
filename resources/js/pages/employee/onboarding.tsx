@@ -5,6 +5,7 @@ import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Briefcase, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
+import { CsrfTokenUpdater } from '@/components/CsrfTokenUpdater';
 
 // Import step components (we'll create these next)
 import FeedbackModal from '@/components/feedback-modal';
@@ -498,10 +499,12 @@ export default function EmployeeOnboarding({
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
-            <Head title={`${t('title', 'Employee Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
-            
-            {/* Language Switcher - Fixed at top right */}
+        <>
+            <CsrfTokenUpdater />
+            <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
+                <Head title={`${t('title', 'Employee Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
+                
+                {/* Language Switcher - Fixed at top right */}
             <div className="fixed top-4 right-4 z-50 flex items-center space-x-1 border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
                 <button 
                     onClick={() => switchLang('en')} 
@@ -681,5 +684,6 @@ export default function EmployeeOnboarding({
                 </div>
             </div>
         </div>
+        </>
     );
 }

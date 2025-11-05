@@ -33,13 +33,13 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        if (! User::where('email', 'worker@example.com')->exists()) {
+        if (! User::where('email', 'employee@example.com')->exists()) {
             User::create([
-                'name' => 'Worker User',
-                'email' => 'worker@example.com',
+                'name' => 'Employee User',
+                'email' => 'employee@example.com',
                 'email_verified_at' => now(),
                 'password' => 'password',
-                'role' => 'worker',
+                'role' => 'employee',
             ]);
         }
 

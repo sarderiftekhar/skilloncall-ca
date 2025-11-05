@@ -56,15 +56,15 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
     const cityInputRef = React.useRef<HTMLDivElement>(null);
 
     // Fetch cities from API only when user interacts with city field
-    const fetchCities = async () => {
-        if (!formData.province) {
-            return;
-        }
+    const fetchCities = async (search = '') => {
+        if (!formData.province) return;
 
-        setLoadingCities(true);
+        const searchParam = search ? `?search=${encodeURIComponent(search)}` : '';
+        const url = `/employee/api/provinces/code/${formData.province}/cities${searchParam}`;
+        console.log('Fetching cities from:', url);
+
         try {
-            const searchParam = citySearch ? `?search=${encodeURIComponent(citySearch)}` : '';
-            const response = await fetch(`/employee/api/provinces/code/${formData.province}/cities${searchParam}`, {
+            const response = await fetch(url, {
                 credentials: 'same-origin',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
@@ -74,6 +74,11 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
                 const data = await response.json();
                 setCities(data);
                 setCitiesLoaded(true);
+                console.log(`Loaded ${data.length} cities for province ${formData.province}`);
+            } else {
+                console.error(`Failed to fetch cities: ${response.status} ${response.statusText}`);
+                const errorText = await response.text();
+                console.error('Error response:', errorText);
             }
         } catch (error) {
             console.error('Failed to fetch cities:', error);
@@ -89,7 +94,7 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         }
 
         const timer = setTimeout(() => {
-            fetchCities();
+            fetchCities(citySearch);
         }, 300);
 
         return () => clearTimeout(timer);
@@ -106,15 +111,55 @@ export default function PersonalInfoStep({ formData, updateFormData, validationE
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Clear city when province changes (but not on initial mount)
+    // Clear city when province changes and fetch new cities
     React.useEffect(() => {
+        // Only process if we have a province
+        if (!formData.province) {
+            setPreviousProvince(null);
+            return;
+        }
+
+        // If province changed (not initial mount)
         if (previousProvince !== null && formData.province !== previousProvince) {
-            // Clear city, cities list, and reset loaded state when province actually changes
+            // Province was just changed, clear city and fetch new cities
             handleInputChange('city', '');
             setCitySearch('');
             setCities([]);
             setCitiesLoaded(false);
         }
+
+        // Fetch cities if we don't have them loaded yet or province changed
+        if (!citiesLoaded || (previousProvince !== null && formData.province !== previousProvince)) {
+            const fetchNewCities = async () => {
+                const url = `/employee/api/provinces/code/${formData.province}/cities`;
+                console.log('Fetching cities from:', url);
+                setLoadingCities(true);
+                try {
+                    const response = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        setCities(data);
+                        setCitiesLoaded(true);
+                        console.log(`Loaded ${data.length} cities for province ${formData.province}`);
+                    } else {
+                        console.error(`Failed to fetch cities: ${response.status} ${response.statusText}`);
+                        const errorText = await response.text();
+                        console.error('Error response:', errorText);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch cities:', error);
+                } finally {
+                    setLoadingCities(false);
+                }
+            };
+            fetchNewCities();
+        }
+
         setPreviousProvince(formData.province as string);
     }, [formData.province]);
 

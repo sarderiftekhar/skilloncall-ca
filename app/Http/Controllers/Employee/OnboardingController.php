@@ -374,7 +374,7 @@ class OnboardingController extends Controller
                 'province' => isset($data['province']),
                 'postal_code' => isset($data['postal_code']),
                 'work_authorization' => isset($data['work_authorization']),
-            ]
+            ],
         ]);
         
         // Check for common data issues that might cause unexpected errors
