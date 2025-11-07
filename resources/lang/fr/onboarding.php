@@ -155,6 +155,18 @@ return [
     'provinces.SK' => 'Saskatchewan',
     'provinces.YT' => 'Yukon',
 
+    // Relations de références professionnelles
+    'work_history.relationships.previous_employer' => 'Ancien employeur',
+    'work_history.relationships.previous_supervisor' => 'Ancien superviseur',
+    'work_history.relationships.satisfied_client' => 'Client satisfait',
+    'work_history.relationships.colleague' => 'Collègue',
+    'work_history.relationships.business_partner' => 'Partenaire d\'affaires',
+    'work_history.relationships.mentor' => 'Mentor',
+    'work_history.relationships.trainer' => 'Formateur ou formatrice',
+    'work_history.relationships.team_lead' => 'Chef d\'équipe',
+    'work_history.relationships.volunteer_coordinator' => 'Coordonnateur bénévole',
+    'work_history.relationships.community_leader' => 'Leader communautaire',
+
     // Employer Onboarding
     'employer.title' => 'Configuration de l\'employeur',
     'employer.step_of' => 'Étape :step de :total',

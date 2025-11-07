@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { logout } from '@/routes';
 import { 
     Users, 
@@ -24,7 +25,6 @@ import {
     MessageSquare,
     Heart,
     Search,
-    Bell,
     Plus,
     Triangle,
     ShoppingCart,
@@ -35,6 +35,7 @@ import { useTranslations } from '@/hooks/useTranslations';
 export default function Welcome() {
     const { auth, isProfileComplete } = usePage<SharedData>().props as any;
     const { t, locale } = useTranslations();
+    const isFrench = locale === 'fr';
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [showPrivacyModal, setShowPrivacyModal] = useState(false);
@@ -42,21 +43,73 @@ export default function Welcome() {
     const [showContactModal, setShowContactModal] = useState(false);
     const [email, setEmail] = useState('');
     const [isSubscribing, setIsSubscribing] = useState(false);
+    const queryLang = `?lang=${locale}`;
 
-    const handleCategoryClick = (categoryName: string) => {
+    const subscriptionContent = {
+        title: isFrench ? 'Prêt à propulser votre carrière vers le niveau supérieur ?' : 'Ready to Take Your Career to the Next Level?',
+        subtitle: isFrench
+            ? 'Rejoignez des milliers de professionnels qui ont rehaussé leur expérience SkillOnCall grâce à nos forfaits premium.'
+            : "Join thousands of professionals who've upgraded their SkillOnCall experience with our premium plans.",
+        note: isFrench
+            ? 'Commencez avec notre forfait gratuit • Mettez à niveau à tout moment • Annulez quand vous le souhaitez'
+            : 'Start with our free plan • Upgrade anytime • Cancel anytime',
+    };
+
+    const newsletterCopy = {
+        emailRequired: isFrench ? 'Veuillez entrer votre adresse courriel.' : 'Please enter your email address.',
+        success: isFrench
+            ? 'Merci de vous être abonné(e) à notre infolettre !\n\nVous recevrez des nouvelles sur les offres d’emploi et les fonctionnalités de la plateforme.'
+            : 'Thank you for subscribing to our newsletter!\n\nYou\'ll receive updates about new job opportunities and platform features.',
+        failure: isFrench ? 'Échec de l’abonnement. Veuillez réessayer.' : 'Failed to subscribe. Please try again.',
+        payload: {
+            name: isFrench ? 'Abonné(e) à l’infolettre' : 'Newsletter Subscriber',
+            message: isFrench
+                ? 'Demande d’abonnement à l’infolettre — Merci de m’ajouter à l’infolettre de SkillOnCall.ca afin de recevoir des mises à jour sur les nouvelles offres d’emploi, les fonctionnalités de la plateforme et l’actualité du secteur.'
+                : 'Newsletter Subscription Request - Please add me to the SkillOnCall.ca newsletter to receive updates about new job opportunities, platform features, and industry news.',
+        },
+    };
+
+    const postedByLabel = isFrench ? 'Publié par' : 'Posted by';
+    const responsesLabel = isFrench ? 'réponses' : 'responses';
+    const likesLabel = isFrench ? 'mentions J\'aime' : 'likes';
+
+    const defaultCategoryLabel = isFrench ? 'ce secteur' : 'this sector';
+
+    const modalCopy = {
+        title: isFrench ? 'Rejoignez SkillOnCall.ca' : 'Join SkillOnCall.ca',
+        description: (category: string) =>
+            isFrench
+                ? `Inscrivez-vous ou connectez-vous pour découvrir des opportunités en ${category} et entrer en contact avec des employeurs de votre région.`
+                : `Sign up or log in to explore ${category} opportunities and connect with employers in your area.`,
+        primaryCta: isFrench ? 'Créer un compte gratuit' : 'Create Free Account',
+        later: isFrench ? 'Peut-être plus tard' : 'Maybe later',
+    };
+
+    const platformDescription = isFrench
+        ? 'La principale plateforme canadienne pour relier des talents qualifiés à des entreprises locales. Créée par des Canadiens, pour des Canadiens.'
+        : "Canada's premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.";
+
+    const testimonialCopy = {
+        quote: isFrench
+            ? 'SkillOnCall.ca a révolutionné notre façon de connecter les entreprises canadiennes avec des travailleurs qualifiés. L’accent mis sur les communautés locales et la connectivité instantanée est inestimable pour soutenir l’écosystème de main-d’œuvre du Canada.'
+            : "SkillOnCall.ca has revolutionized how we connect Canadian businesses with skilled employees. The platform's focus on local communities and instant connectivity makes it invaluable for supporting Canada's workforce ecosystem.",
+        authorRole: isFrench ? 'PDG, SkillOnCall.ca' : 'CEO, SkillOnCall.ca',
+    };
+
+    const handleCategoryClick = (categorySlug: string, categoryLabel: string) => {
         if (auth.user) {
             // User is logged in, redirect to category page
-            window.location.href = `/categories/${categoryName.toLowerCase().replace(' ', '-')}`;
+            window.location.href = `/categories/${categorySlug}`;
         } else {
             // User not logged in, show auth modal
-            setSelectedCategory(categoryName);
+            setSelectedCategory(categoryLabel);
             setShowAuthModal(true);
         }
     };
 
     const handleNewsletterSubscribe = async () => {
         if (!email.trim()) {
-            alert('Please enter your email address');
+            alert(newsletterCopy.emailRequired);
             return;
         }
 
@@ -73,35 +126,83 @@ export default function Welcome() {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify({
-                    name: 'Newsletter Subscriber',
+                    name: newsletterCopy.payload.name,
                     email: email,
                     phone: '',
-                    message: 'Newsletter Subscription Request - Please add me to the SkillOnCall.ca newsletter to receive updates about new job opportunities, platform features, and industry news.'
+                    message: newsletterCopy.payload.message,
                 }),
             });
 
             const result = await response.json();
             
             if (result.success) {
-                alert('Thank you for subscribing to our newsletter!\n\nYou\'ll receive updates about new job opportunities and platform features.');
+                alert(newsletterCopy.success);
                 setEmail('');
             } else {
-                alert('Failed to subscribe. Please try again.');
+                alert(newsletterCopy.failure);
             }
         } catch (error) {
-            alert('Failed to subscribe. Please try again.');
+            alert(newsletterCopy.failure);
         } finally {
             setIsSubscribing(false);
         }
     };
 
     const skillCategories = [
-        { name: 'Food Service', icon: Coffee, count: '453 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
-        { name: 'Retail', icon: ShoppingCart, count: '324 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
-        { name: 'Grocery', icon: ShoppingCart, count: '267 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_3.png' },
-        { name: 'Hospitality', icon: Coffee, count: '189 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_sm.png' },
-        { name: 'Maintenance', icon: Tool, count: '145 Employees', color: 'text-white', bgColor: '#10B3D6', image: '/images/sprites/com_1.png' },
-        { name: 'Security', icon: Shield, count: '98 Employees', color: 'text-gray-800', bgColor: '#FCF2F0', image: '/images/sprites/com_2.png' },
+        {
+            slug: 'food-service',
+            name: isFrench ? 'Services alimentaires' : 'Food Service',
+            icon: Coffee,
+            count: isFrench ? '453 employés' : '453 Employees',
+            color: 'text-white',
+            bgColor: '#10B3D6',
+            image: '/images/sprites/com_1.png',
+        },
+        {
+            slug: 'retail',
+            name: isFrench ? 'Commerce de détail' : 'Retail',
+            icon: ShoppingCart,
+            count: isFrench ? '324 employés' : '324 Employees',
+            color: 'text-gray-800',
+            bgColor: '#FCF2F0',
+            image: '/images/sprites/com_2.png',
+        },
+        {
+            slug: 'grocery',
+            name: isFrench ? 'Épicerie' : 'Grocery',
+            icon: ShoppingCart,
+            count: isFrench ? '267 employés' : '267 Employees',
+            color: 'text-white',
+            bgColor: '#10B3D6',
+            image: '/images/sprites/com_3.png',
+        },
+        {
+            slug: 'hospitality',
+            name: isFrench ? 'Hôtellerie' : 'Hospitality',
+            icon: Coffee,
+            count: isFrench ? '189 employés' : '189 Employees',
+            color: 'text-gray-800',
+            bgColor: '#FCF2F0',
+            image: '/images/sprites/com_sm.png',
+        },
+        {
+            slug: 'maintenance',
+            name: isFrench ? 'Entretien' : 'Maintenance',
+            icon: Tool,
+            count: isFrench ? '145 employés' : '145 Employees',
+            color: 'text-white',
+            bgColor: '#10B3D6',
+            image: '/images/sprites/com_1.png',
+        },
+        {
+            slug: 'security',
+            name: isFrench ? 'Sécurité' : 'Security',
+            icon: Shield,
+            count: isFrench ? '98 employés' : '98 Employees',
+            color: 'text-gray-800',
+            bgColor: '#FCF2F0',
+            image: '/images/sprites/com_2.png',
+        },
     ];
 
     const statistics = [
@@ -111,45 +212,195 @@ export default function Welcome() {
         { label: t('stats.verified_employers', 'Verified Employers'), value: '340', change: '+5%', color: 'text-orange-600' },
     ];
 
-    const recentPosts = [
+    const recentPosts = isFrench
+        ? [
+              {
+                  title: 'Urgent : Caissier(ère) de soir recherché(e) pour une épicerie du centre-ville',
+                  author: 'Metro Foods',
+                  time: 'il y a 2 heures',
+                  responses: 12,
+                  likes: 8,
+                  type: { variant: 'urgent', label: 'Urgent' },
+              },
+              {
+                  title: 'Poste de barista pour la fin de semaine — horaires flexibles',
+                  author: 'Bean There Coffee',
+                  time: 'il y a 4 heures',
+                  responses: 6,
+                  likes: 15,
+                  type: { variant: 'flexible', label: 'Flexible' },
+              },
+              {
+                  title: 'Associé(e) de vente à temps partiel pour boutique de vêtements',
+                  author: 'Style Central',
+                  time: 'il y a 6 heures',
+                  responses: 9,
+                  likes: 11,
+                  type: { variant: 'part-time', label: 'Temps partiel' },
+              },
+          ]
+        : [
+              {
+                  title: 'Urgent: Evening shift cashier needed at downtown grocery store',
+                  author: 'Metro Foods',
+                  time: '2 hours ago',
+                  responses: 12,
+                  likes: 8,
+                  type: { variant: 'urgent', label: 'Urgent' },
+              },
+              {
+                  title: 'Weekend barista position available - flexible hours',
+                  author: 'Bean There Coffee',
+                  time: '4 hours ago',
+                  responses: 6,
+                  likes: 15,
+                  type: { variant: 'flexible', label: 'Flexible' },
+              },
+              {
+                  title: 'Part-time retail associate for clothing store',
+                  author: 'Style Central',
+                  time: '6 hours ago',
+                  responses: 9,
+                  likes: 11,
+                  type: { variant: 'part-time', label: 'Part-time' },
+              },
+          ];
+
+    const footerEmployerLinks = [
+        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: '#' },
+        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: '#' },
         {
-            title: 'Urgent: Evening shift cashier needed at downtown grocery store',
-            author: 'Metro Foods',
-            time: '2 hours ago',
-            responses: 12,
-            likes: 8,
-            type: 'Urgent'
+            label: isFrench ? 'Voir les forfaits' : 'Subscription Plans',
+            href: `/subscriptions${queryLang}`,
+            highlight: true,
+            prefix: '💎 ',
         },
+        { label: isFrench ? 'Histoires de réussite' : 'Success Stories', href: '#' },
+    ];
+
+    const footerEmployeeLinks = [
+        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: '#' },
+        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: '#' },
         {
-            title: 'Weekend barista position available - flexible hours',
-            author: 'Bean There Coffee',
-            time: '4 hours ago', 
-            responses: 6,
-            likes: 15,
-            type: 'Flexible'
+            label: isFrench ? 'Plans Pro' : 'Pro Plans',
+            href: `/subscriptions${queryLang}`,
+            highlight: true,
         },
-        {
-            title: 'Part-time retail associate for clothing store',
-            author: 'Style Central',
-            time: '6 hours ago',
-            responses: 9,
-            likes: 11,
-            type: 'Part-time'
-        }
+        { label: isFrench ? 'Centre d’aide' : 'Help Center', href: '#' },
     ];
 
     const floatingAvatars = [
         // Spread left → right following the wave arc (responsive positioning)
-        { id: 1, src: '/images/sprites/bn5.jpg', initials: 'KW', position: 'bottom-[20%] left-[3%] xl:bottom-[25%] xl:left-[2%]', size: 'h-16 w-16 xl:h-18 xl:w-18', decoration: 'bg-purple-300', decorationSize: 'w-7 h-7 xl:w-8 xl:h-8' },
-        { id: 2, src: '/images/sprites/bn4.jpg', initials: 'AL', position: 'bottom-[15%] left-[16%] xl:bottom-[18%] xl:left-[14%]', size: 'h-16 w-16 xl:h-18 xl:w-18', decoration: 'bg-green-300', decorationSize: 'w-7 h-7 xl:w-8 xl:h-8' },
-        { id: 3, src: '/images/sprites/bn1.jpg', initials: 'SA', position: 'bottom-[25%] left-[28%] xl:bottom-[30%] xl:left-[26%]', size: 'h-20 w-20 xl:h-24 xl:w-24', decoration: 'bg-pink-300', decorationSize: 'w-8 h-8 xl:w-10 xl:h-10' },
-        { id: 4, src: '/images/sprites/bn8.jpg', initials: 'CN', position: 'bottom-[12%] left-[42%] xl:bottom-[15%] xl:left-[40%]', size: 'h-15 w-15 xl:h-17 xl:w-17', decoration: 'bg-teal-300', decorationSize: 'w-6 h-6 xl:w-7 xl:h-7' },
-        { id: 5, src: '/images/sprites/bn3.jpg', initials: 'MR', position: 'bottom-[35%] left-1/2 -translate-x-1/2 xl:bottom-[40%]', size: 'h-28 w-28 xl:h-36 xl:w-36', decoration: 'bg-cyan-300', decorationSize: 'w-12 h-12 xl:w-16 xl:h-16' },
-        { id: 6, src: '/images/sprites/bn6.jpg', initials: 'TR', position: 'bottom-[12%] left-[58%] xl:bottom-[15%] xl:left-[60%]', size: 'h-15 w-15 xl:h-17 xl:w-17', decoration: 'bg-yellow-300', decorationSize: 'w-6 h-6 xl:w-7 xl:h-7' },
-        { id: 7, src: '/images/sprites/bn2.jpg', initials: 'JM', position: 'bottom-[25%] left-[68%] xl:bottom-[30%] xl:left-[70%]', size: 'h-20 w-20 xl:h-24 xl:w-24', decoration: 'bg-cyan-300', decorationSize: 'w-8 h-8 xl:w-10 xl:h-10' },
-        { id: 8, src: '/images/sprites/bn7.jpg', initials: 'BM', position: 'bottom-[15%] left-[84%] xl:bottom-[18%] xl:left-[86%]', size: 'h-16 w-16 xl:h-18 xl:w-18', decoration: 'bg-orange-300', decorationSize: 'w-7 h-7 xl:w-8 xl:h-8' },
-        { id: 9, src: '/images/sprites/bn9.jpg', initials: 'DL', position: 'bottom-[25%] left-[92%] xl:bottom-[30%] xl:left-[94%]', size: 'h-16 w-16 xl:h-18 xl:w-18', decoration: 'bg-indigo-300', decorationSize: 'w-7 h-7 xl:w-8 xl:h-8' },
-        { id: 10, src: '/images/sprites/bn10.jpg', initials: 'EM', position: 'bottom-[5%] right-[0.1%] xl:bottom-[8%] xl:right-[0.05%]', size: 'h-12 w-12 xl:h-14 xl:w-14', decoration: 'bg-rose-300', decorationSize: 'w-5 h-5 xl:w-6 xl:h-6' },
+        { 
+            id: 1, 
+            src: '/images/sprites/bn5.jpg', 
+            initials: 'KW', 
+            position: 'bottom-[20%] left-[3%] xl:bottom-[25%] xl:left-[2%]', 
+            size: 'h-16 w-16 xl:h-18 xl:w-18', 
+            decoration: 'bg-purple-300', 
+            decorationSize: 'w-7 h-7 xl:w-8 xl:h-8',
+            title: { en: 'Delivery Man', fr: 'Livreur' },
+            subtitle: { en: 'Ensures every parcel arrives right on time.', fr: 'Veille à ce que chaque colis arrive à l’heure.' }
+        },
+        { 
+            id: 2, 
+            src: '/images/sprites/bn4.jpg', 
+            initials: 'AL', 
+            position: 'bottom-[15%] left-[16%] xl:bottom-[18%] xl:left-[14%]', 
+            size: 'h-16 w-16 xl:h-18 xl:w-18', 
+            decoration: 'bg-green-300', 
+            decorationSize: 'w-7 h-7 xl:w-8 xl:h-8',
+            title: { en: 'Florist', fr: 'Fleuriste' },
+            subtitle: { en: 'Designs vibrant arrangements for every occasion.', fr: 'Crée des arrangements éclatants pour chaque occasion.' }
+        },
+        { 
+            id: 3, 
+            src: '/images/sprites/bn1.jpg', 
+            initials: 'SA', 
+            position: 'bottom-[25%] left-[28%] xl:bottom-[30%] xl:left-[26%]', 
+            size: 'h-20 w-20 xl:h-24 xl:w-24', 
+            decoration: 'bg-pink-300', 
+            decorationSize: 'w-8 h-8 xl:w-10 xl:h-10',
+            title: { en: 'Builder', fr: 'Constructeur' },
+            subtitle: { en: 'Brings blueprints to life with hands-on craftsmanship.', fr: 'Donne vie aux plans grâce à un savoir-faire pratique.' }
+        },
+        { 
+            id: 4, 
+            src: '/images/sprites/bn8.jpg', 
+            initials: 'CN', 
+            position: 'bottom-[12%] left-[42%] xl:bottom-[15%] xl:left-[40%]', 
+            size: 'h-15 w-15 xl:h-17 xl:w-17', 
+            decoration: 'bg-teal-300', 
+            decorationSize: 'w-6 h-6 xl:w-7 xl:h-7',
+            title: { en: 'Makeup Artist', fr: 'Artiste maquilleuse' },
+            subtitle: { en: 'Enhances every look with artistry and care.', fr: 'Sublime chaque look avec art et précision.' }
+        },
+        { 
+            id: 5, 
+            src: '/images/sprites/bn3.jpg', 
+            initials: 'MR', 
+            position: 'bottom-[35%] left-1/2 -translate-x-1/2 xl:bottom-[40%]', 
+            size: 'h-28 w-28 xl:h-36 xl:w-36', 
+            decoration: 'bg-cyan-300', 
+            decorationSize: 'w-12 h-12 xl:w-16 xl:h-16',
+            title: { en: 'Bridal Makeup Artist', fr: 'Maquilleuse de mariée' },
+            subtitle: { en: 'Creates timeless looks for unforgettable celebrations.', fr: 'Crée des looks intemporels pour des célébrations inoubliables.' }
+        },
+        { 
+            id: 6, 
+            src: '/images/sprites/bn6.jpg', 
+            initials: 'TR', 
+            position: 'bottom-[12%] left-[58%] xl:bottom-[15%] xl:left-[60%]', 
+            size: 'h-15 w-15 xl:h-17 xl:w-17', 
+            decoration: 'bg-yellow-300', 
+            decorationSize: 'w-6 h-6 xl:w-7 xl:h-7',
+            title: { en: 'Coffee Barista', fr: 'Barista café' },
+            subtitle: { en: 'Crafts perfect brews with a personal touch.', fr: 'Prépare des cafés parfaits avec une touche personnelle.' }
+        },
+        { 
+            id: 7, 
+            src: '/images/sprites/bn2.jpg', 
+            initials: 'JM', 
+            position: 'bottom-[25%] left-[68%] xl:bottom-[30%] xl:left-[70%]', 
+            size: 'h-20 w-20 xl:h-24 xl:w-24', 
+            decoration: 'bg-cyan-300', 
+            decorationSize: 'w-8 h-8 xl:w-10 xl:h-10',
+            title: { en: 'Baker', fr: 'Boulangère' },
+            subtitle: { en: 'Whips up fresh delights before sunrise.', fr: 'Prépare de délicieuses créations dès l’aube.' }
+        },
+        { 
+            id: 8, 
+            src: '/images/sprites/bn7.jpg', 
+            initials: 'BM', 
+            position: 'bottom-[15%] left-[84%] xl:bottom-[18%] xl:left-[86%]', 
+            size: 'h-16 w-16 xl:h-18 xl:w-18', 
+            decoration: 'bg-orange-300', 
+            decorationSize: 'w-7 h-7 xl:w-8 xl:h-8',
+            title: { en: 'Plumber', fr: 'Plombier' },
+            subtitle: { en: 'Fixes leaks and keeps water flowing smoothly.', fr: 'Répare les fuites et garantit un débit d’eau optimal.' }
+        },
+        { 
+            id: 9, 
+            src: '/images/sprites/bn9.jpg', 
+            initials: 'DL', 
+            position: 'bottom-[25%] left-[92%] xl:bottom-[30%] xl:left-[94%]', 
+            size: 'h-16 w-16 xl:h-18 xl:w-18', 
+            decoration: 'bg-indigo-300', 
+            decorationSize: 'w-7 h-7 xl:w-8 xl:h-8',
+            title: { en: 'Electrician', fr: 'Électricien' },
+            subtitle: { en: 'Installs safe wiring and brightens every space.', fr: 'Installe des câblages sécuritaires et illumine chaque espace.' }
+        },
+        { 
+            id: 10, 
+            src: '/images/sprites/bn10.jpg', 
+            initials: 'EM', 
+            position: 'bottom-[5%] right-[0.1%] xl:bottom-[8%] xl:right-[0.05%]', 
+            size: 'h-12 w-12 xl:h-14 xl:w-14', 
+            decoration: 'bg-rose-300', 
+            decorationSize: 'w-5 h-5 xl:w-6 xl:h-6',
+            title: { en: 'Supermarket Shelfer', fr: 'Employé de mise en rayon' },
+            subtitle: { en: 'Keeps aisles stocked, tidy, and inviting.', fr: 'Garde les rayons bien garnis, ordonnés et accueillants.' }
+        },
     ];
 
     const floatingShapes = [
@@ -173,11 +424,9 @@ export default function Welcome() {
         window.location.href = url.toString();
     };
 
-    const queryLang = `?lang=${locale}`;
-
     return (
         <>
-            <Head title="Welcome to SkillOnCall.ca">
+            <Head title={isFrench ? 'Bienvenue sur SkillOnCall.ca' : 'Welcome to SkillOnCall.ca'}>
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
                 <style>{`
@@ -257,7 +506,6 @@ export default function Welcome() {
                                 </div>
                         {auth.user ? (
                                     <div className="flex items-center space-x-3">
-                                        <Bell className="h-5 w-5 text-gray-300 hover:text-white cursor-pointer transition-colors" />
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <button className="cursor-pointer">
@@ -343,23 +591,52 @@ export default function Welcome() {
                             ))}
 
                             {/* Floating Avatars with Decorations */}
-                            {floatingAvatars.map((avatar, index) => (
-                                <div key={`avatar-${avatar.id ?? index}`} data-avatar-id={avatar.id ?? index} className={`absolute hidden lg:block ${avatar.position} z-20`} style={{
-                                    animation: `float 6s ease-in-out infinite`,
-                                    animationDelay: `${index * 0.5}s`
-                                }}>
-                                    <div className="relative group">
-                                        {/* Decorative colored circle behind avatar */}
-                                        <div className={`absolute -bottom-3 -right-2 ${avatar.decorationSize ?? 'w-8 h-8'} rounded-full ${avatar.decoration} opacity-70 group-hover:scale-110 transition-transform duration-300`}></div>
-                                        <Avatar className={`${avatar.size ?? 'h-20 w-20'} border-4 border-white shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300`}>
-                                            <AvatarImage src={avatar.src} alt="Employee" className="object-cover" />
-                                            <AvatarFallback className="text-white text-sm font-semibold" style={{backgroundColor: '#10B3D6'}}>
-                                                {avatar.initials}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    </div>
-                                </div>
-                            ))}
+                            <TooltipProvider delayDuration={100}>
+                                {floatingAvatars.map((avatar, index) => {
+                                    const title = avatar.title ? (locale === 'fr' ? avatar.title.fr : avatar.title.en) : '';
+                                    const subtitle = avatar.subtitle ? (locale === 'fr' ? avatar.subtitle.fr : avatar.subtitle.en) : '';
+
+                                    return (
+                                        <Tooltip key={`avatar-${avatar.id ?? index}`}>
+                                            <TooltipTrigger asChild>
+                                                <div
+                                                    data-avatar-id={avatar.id ?? index}
+                                                    className={`absolute hidden lg:block ${avatar.position} z-20 pointer-events-auto`}
+                                                    style={{
+                                                        animation: `float 6s ease-in-out infinite`,
+                                                        animationDelay: `${index * 0.5}s`
+                                                    }}
+                                                >
+                                                    <div className="relative group cursor-pointer">
+                                                        {/* Decorative colored circle behind avatar */}
+                                                        <div className={`absolute -bottom-3 -right-2 ${avatar.decorationSize ?? 'w-8 h-8'} rounded-full ${avatar.decoration} opacity-70 group-hover:scale-110 transition-transform duration-300`}></div>
+                                                        <Avatar className={`${avatar.size ?? 'h-20 w-20'} border-4 border-white shadow-2xl relative z-10 group-hover:scale-105 transition-transform duration-300`}>
+                                                            <AvatarImage src={avatar.src} alt={title || 'Employee'} className="object-cover" />
+                                                            <AvatarFallback className="text-white text-sm font-semibold" style={{backgroundColor: '#10B3D6'}}>
+                                                                {avatar.initials}
+                                                            </AvatarFallback>
+                                                        </Avatar>
+                                                    </div>
+                                                </div>
+                                            </TooltipTrigger>
+                                            {title && (
+                                                <TooltipContent side="top" className="rounded-xl border border-[#10B3D6]/30 bg-white px-4 py-3 shadow-xl text-left">
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="text-sm font-semibold" style={{color: '#192341'}}>
+                                                            {title}
+                                                        </span>
+                                                        {subtitle && (
+                                                            <span className="text-xs text-gray-600 leading-relaxed">
+                                                                {subtitle}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                    );
+                                })}
+                            </TooltipProvider>
                         </div>
                     </div>
                     
@@ -412,10 +689,10 @@ export default function Welcome() {
                         {/* Header */}
                         <div className="text-center mb-8">
                             <h2 className="text-2xl md:text-4xl font-bold text-white mb-3 leading-tight">
-                                Ready to Take Your Career to the Next Level?
+                                {subscriptionContent.title}
                             </h2>
                             <p className="text-sm md:text-base text-gray-300 max-w-3xl mx-auto">
-                                Join thousands of professionals who've upgraded their SkillOnCall experience with our premium plans.
+                                {subscriptionContent.subtitle}
                             </p>
                         </div>
                         
@@ -522,7 +799,7 @@ export default function Welcome() {
                         {/* Footer Note */}
                         <div className="text-center">
                             <p className="text-xs md:text-sm text-gray-400">
-                                Start with our free plan • Upgrade anytime • Cancel anytime
+                                {subscriptionContent.note}
                             </p>
                         </div>
                     </div>
@@ -541,7 +818,7 @@ export default function Welcome() {
                             {skillCategories.map((category, index) => (
                                 <div 
                                     key={index} 
-                                    onClick={() => handleCategoryClick(category.name)}
+                                    onClick={() => handleCategoryClick(category.slug, category.name)}
                                     className="group relative cursor-pointer rounded-2xl border-0 bg-white p-8 shadow-[0_12px_28px_rgba(16,179,214,0.10)] transition-all hover:-translate-y-1 hover:shadow-[0_22px_48px_rgba(16,179,214,0.18)]"
                                     style={{cursor: 'pointer'}}
                                 >
@@ -641,32 +918,46 @@ export default function Welcome() {
                                         <div className="flex items-start justify-between">
                                             <div className="flex-1">
                                                 <div className="flex items-center space-x-2 mb-2">
-                                                    <Badge 
-                                                        variant="secondary" 
+                                                    <Badge
+                                                        variant="secondary"
                                                         className="transition-all duration-300 group-hover:scale-105"
                                                         style={{
-                                                            backgroundColor: post.type === 'Urgent' ? '#FCF2F0' : 
-                                                                            post.type === 'Flexible' ? '#10B3D6' : '#FCF2F0',
-                                                            color: post.type === 'Urgent' ? '#10B3D6' :
-                                                                   post.type === 'Flexible' ? '#FFFFFF' : '#10B3D6'
+                                                            backgroundColor:
+                                                                post.type.variant === 'urgent'
+                                                                    ? '#FCF2F0'
+                                                                    : post.type.variant === 'flexible'
+                                                                    ? '#10B3D6'
+                                                                    : '#FCF2F0',
+                                                            color:
+                                                                post.type.variant === 'flexible'
+                                                                    ? '#FFFFFF'
+                                                                    : '#10B3D6',
                                                         }}
                                                     >
-                                                        {post.type}
+                                                        {post.type.label}
                                                     </Badge>
-                                                    <span className="text-sm text-gray-500 transition-colors duration-300 group-hover:text-gray-700">{post.time}</span>
+                                                    <span className="text-sm text-gray-500 transition-colors duration-300 group-hover:text-gray-700">
+                                                        {post.time}
+                                                    </span>
                                                 </div>
                                                 <h3 className="text-lg font-semibold mb-2 transition-colors duration-300 group-hover:opacity-90" style={{color: '#192341'}}>
                                                     {post.title}
                                                 </h3>
-                                                <p className="text-sm text-gray-600 mb-3 transition-colors duration-300 group-hover:text-gray-800">Posted by {post.author}</p>
+                                                <p className="text-sm text-gray-600 mb-3 transition-colors duration-300 group-hover:text-gray-800">
+                                                    {postedByLabel} {post.author}
+                                                </p>
                                                 <div className="flex items-center space-x-4 text-sm text-gray-500">
                                                     <div className="flex items-center transition-all duration-300 group-hover:scale-105">
                                                         <MessageSquare className="h-4 w-4 mr-1 transition-transform duration-300 group-hover:scale-110" style={{color: '#192341'}} />
-                                                        <span className="transition-colors duration-300 group-hover:text-gray-700">{post.responses} responses</span>
+                                                        <span className="transition-colors duration-300 group-hover:text-gray-700">
+                                                            {post.responses} {responsesLabel}
+                                                        </span>
                                                     </div>
                                                     <div className="flex items-center transition-all duration-300 group-hover:scale-105">
                                                         <Heart className="h-4 w-4 mr-1 transition-transform duration-300 group-hover:scale-110" style={{color: '#ef4444'}} />
-                                                        <span className="transition-colors duration-300 group-hover:text-gray-700">{post.likes} likes</span>
+                                                        <span className="transition-colors duration-300 group-hover:text-gray-700">
+                                                            {post.likes} {likesLabel}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -695,13 +986,11 @@ export default function Welcome() {
                                 </Avatar>
                             </div>
                             <blockquote className="text-xl font-bold mb-6" style={{color: '#10B3D6'}}>
-                                "SkillOnCall.ca has revolutionized how we connect Canadian businesses with skilled employees. 
-                                The platform's focus on local communities and instant connectivity makes it invaluable for 
-                                supporting Canada's workforce ecosystem."
+                                « {testimonialCopy.quote} »
                             </blockquote>
                             <div className="text-gray-600">
                                 <p className="font-semibold" style={{color: '#192341'}}>Catherine Moreau</p>
-                                <p>CEO, SkillOnCall.ca</p>
+                                <p>{testimonialCopy.authorRole}</p>
                             </div>
                         </div>
                     </div>
@@ -724,8 +1013,7 @@ export default function Welcome() {
                                     </div>
                                 </div>
                                 <p className="text-gray-100 mb-6 max-w-md">
-                                    Canada's premier platform for connecting skilled employees with local businesses. 
-                                    Built for Canadians, by Canadians.
+                                    {platformDescription}
                                 </p>
                                 <div>
                                     <h3 className="text-lg font-semibold mb-4">📧 {t('footer.newsletter', 'Newsletter Signup')}</h3>
@@ -762,20 +1050,47 @@ export default function Welcome() {
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">{t('footer.for_employers', 'For Employers')}</h3>
                                 <ul className="space-y-2 text-gray-100">
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Post Jobs</a></li>
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Find Employees</a></li>
-                                    <li><Link href={`/subscriptions${queryLang}`} className="hover:text-white cursor-pointer font-semibold text-yellow-300">💎 {t('cta.view_plans', 'Subscription Plans')}</Link></li>
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Success Stories</a></li>
-                            </ul>
+                                    {footerEmployerLinks.map((item, index) => {
+                                        const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
+                                        const label = `${item.prefix ?? ''}${item.label}`;
+
+                                        return (
+                                            <li key={index}>
+                                                {item.href.startsWith('/') ? (
+                                                    <Link href={item.href} className={commonClasses}>
+                                                        {label}
+                                                    </Link>
+                                                ) : (
+                                                    <a href={item.href} className={commonClasses}>
+                                                        {label}
+                                                    </a>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
                             </div>
 
                             <div>
                                 <h3 className="text-lg font-semibold mb-4">{t('footer.for_employees', 'For Employees')}</h3>
                                 <ul className="space-y-2 text-gray-100">
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Create Profile</a></li>
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Browse Jobs</a></li>
-                                    <li><Link href="/subscriptions" className="hover:text-white cursor-pointer font-semibold text-yellow-300">Pro Plans</Link></li>
-                                    <li><a href="#" className="hover:text-white cursor-pointer">Help Center</a></li>
+                                    {footerEmployeeLinks.map((item, index) => {
+                                        const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
+
+                                        return (
+                                            <li key={index}>
+                                                {item.href.startsWith('/') ? (
+                                                    <Link href={item.href} className={commonClasses}>
+                                                        {item.label}
+                                                    </Link>
+                                                ) : (
+                                                    <a href={item.href} className={commonClasses}>
+                                                        {item.label}
+                                                    </a>
+                                                )}
+                                            </li>
+                                        );
+                                    })}
                             </ul>
                         </div>
                         </div>
@@ -818,15 +1133,15 @@ export default function Welcome() {
                                 <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{backgroundColor: '#10B3D6'}}>
                                     <span className="text-white text-2xl font-bold">S</span>
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">Join SkillOnCall.ca</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-2">{modalCopy.title}</h2>
                                 <p className="text-gray-600 mb-6">
-                                    Sign up or log in to explore <strong>{selectedCategory}</strong> opportunities and connect with employers in your area.
+                                    {modalCopy.description(selectedCategory && selectedCategory.length > 0 ? selectedCategory : defaultCategoryLabel)}
                                 </p>
                                 
                                 <div className="space-y-3">
                                     <Link href={`/register${queryLang}`} className="block">
                                         <Button className="w-full text-white hover:opacity-90" style={{backgroundColor: '#10B3D6'}}>
-                                            Create Free Account
+                                            {modalCopy.primaryCta}
                                         </Button>
                                     </Link>
                                     <Link href={`/login${queryLang}`} className="block">
@@ -836,11 +1151,11 @@ export default function Welcome() {
                                     </Link>
                                 </div>
                                 
-                                <button 
+                                <button
                                     onClick={() => setShowAuthModal(false)}
                                     className="mt-4 text-sm text-gray-500 hover:text-gray-700"
                                 >
-                                    Maybe later
+                                    {modalCopy.later}
                                 </button>
                             </div>
                         </div>

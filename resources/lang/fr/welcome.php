@@ -17,29 +17,29 @@ return [
 
     'hero' => [
         'title' => 'SkillOnCall — Là où les compétences rencontrent les opportunités',
-        'subtitle' => 'Trouvez des réponses, posez des questions et connectez-vous avec notre communauté d'employés qualifiés partout au Canada.',
+        'subtitle' => 'Trouvez des mandats flexibles partout au Canada et mettez vos compétences en relation avec des employeurs à la recherche de soutien autonome ou contractuel.',
     ],
 
     'cta' => [
         'view_plans' => 'Voir les forfaits',
         'learn_more' => 'En savoir plus',
         'view_all_categories' => 'Voir toutes les catégories',
-        'view_all_jobs' => 'Voir toutes les offres d'emploi',
+        'view_all_jobs' => 'Voir toutes les offres d\'emploi',
     ],
 
     'sections' => [
-        'find_sector' => 'Trouvez votre secteur d'emploi',
+        'find_sector' => 'Trouvez votre secteur d\'emploi',
         'platform_performance' => 'Performance de la plateforme',
         'trusted' => 'Fiable pour les entreprises et employés à travers le Canada',
-        'latest_jobs' => 'Dernières offres d'emploi',
+        'latest_jobs' => 'Dernières offres d\'emploi',
         'recent_postings' => 'Annonces récentes des employeurs au Canada',
     ],
 
     'footer' => [
-        'newsletter' => 'Inscription à l'infolettre',
-        'newsletter_hint' => 'Recevez des nouvelles sur les emplois, les fonctionnalités et l'industrie',
+        'newsletter' => 'Inscription à l\'infolettre',
+        'newsletter_hint' => 'Recevez des nouvelles sur les emplois, les fonctionnalités et l\'industrie',
         'enter_email' => 'Entrez votre courriel',
-        'subscribe' => 'S'abonner',
+        'subscribe' => 'S\'abonner',
         'subscribing' => 'Abonnement...',
         'for_employers' => 'Pour les employeurs',
         'for_employees' => 'Pour les employés',
@@ -51,7 +51,7 @@ return [
 
     'employers' => [
         'title' => 'Pour les employeurs',
-        'unlimited_posts' => 'Offres d'emploi illimitées',
+        'unlimited_posts' => 'Offres d\'emploi illimitées',
         'featured' => 'Annonces en vedette et priorité',
         'analytics' => 'Analytique et rapports avancés',
     ],

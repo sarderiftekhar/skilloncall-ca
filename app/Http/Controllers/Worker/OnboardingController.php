@@ -564,7 +564,7 @@ class OnboardingController extends Controller
             'references.*.reference_name' => 'required_with:references|string|max:255',
             'references.*.reference_phone' => 'required_with:references|string|max:20',
             'references.*.reference_email' => 'nullable|email|max:255',
-            'references.*.relationship' => 'required_with:references|in:previous_employer,previous_supervisor,satisfied_client,colleague,business_partner',
+            'references.*.relationship' => 'required_with:references|in:previous_employer,previous_supervisor,satisfied_client,colleague,business_partner,mentor,trainer,team_lead,volunteer_coordinator,community_leader',
             'references.*.company_name' => 'nullable|string|max:255',
             'references.*.notes' => 'nullable|string|max:500',
         ], [

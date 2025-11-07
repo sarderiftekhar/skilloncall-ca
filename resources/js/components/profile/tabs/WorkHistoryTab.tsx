@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Briefcase, Plus, X, Edit, Save, User, Phone, Home, Calendar, CheckCircle } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface WorkHistoryTabProps {
     profile: any;
@@ -19,15 +20,21 @@ const EMPLOYMENT_STATUS_OPTIONS = [
     { value: 'self_employed', label: 'Self-Employed', description: 'I run my own business or freelance' }
 ];
 
-const RELATIONSHIP_OPTIONS = [
-    { value: 'previous_employer', label: 'Previous Employer' },
-    { value: 'previous_supervisor', label: 'Previous Supervisor' },
-    { value: 'satisfied_client', label: 'Satisfied Client' },
-    { value: 'colleague', label: 'Colleague' },
-    { value: 'business_partner', label: 'Business Partner' },
+const RELATIONSHIP_OPTION_DEFS = [
+    { value: 'previous_employer', defaultLabel: 'Previous Employer' },
+    { value: 'previous_supervisor', defaultLabel: 'Previous Supervisor' },
+    { value: 'satisfied_client', defaultLabel: 'Satisfied Client' },
+    { value: 'colleague', defaultLabel: 'Colleague' },
+    { value: 'business_partner', defaultLabel: 'Business Partner' },
+    { value: 'mentor', defaultLabel: 'Mentor' },
+    { value: 'trainer', defaultLabel: 'Trainer' },
+    { value: 'team_lead', defaultLabel: 'Team Lead' },
+    { value: 'volunteer_coordinator', defaultLabel: 'Volunteer Coordinator' },
+    { value: 'community_leader', defaultLabel: 'Community Leader' },
 ];
 
 export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProps) {
+    const { t } = useTranslations();
     const [isEditingStatus, setIsEditingStatus] = useState(false);
     const [isEditingExperiences, setIsEditingExperiences] = useState(false);
     const [isEditingReferences, setIsEditingReferences] = useState(false);
@@ -35,6 +42,11 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
     const [employmentStatus, setEmploymentStatus] = useState(profile?.employment_status || '');
     const [workExperiences, setWorkExperiences] = useState(profile?.work_experiences || []);
     const [references, setReferences] = useState(profile?.references || []);
+
+    const relationshipOptions = RELATIONSHIP_OPTION_DEFS.map((option) => ({
+        value: option.value,
+        label: t(`work_history.relationships.${option.value}`, option.defaultLabel),
+    }));
 
     const formatPhoneNumber = (value: string) => {
         const cleaned = value.replace(/\D/g, '');
@@ -584,8 +596,8 @@ export default function WorkHistoryTab({ profile, onUpdate }: WorkHistoryTabProp
                                                         <SelectTrigger className="mt-1">
                                                             <SelectValue placeholder="Select relationship" />
                                                         </SelectTrigger>
-                                                        <SelectContent>
-                                                            {RELATIONSHIP_OPTIONS.map((option) => (
+                                                    <SelectContent>
+                                                        {relationshipOptions.map((option) => (
                                                                 <SelectItem key={option.value} value={option.value}>
                                                                     {option.label}
                                                                 </SelectItem>

@@ -17,7 +17,7 @@ return [
 
     'hero' => [
         'title' => 'SkillOnCall — Where Skills Meet Opportunity',
-        'subtitle' => 'Find answers, ask questions, and connect with our community of skilled employees from around Canada.',
+        'subtitle' => 'Discover flexible gigs across Canada and match your skills with employers seeking freelance and contract support.',
     ],
 
     'cta' => [

@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Briefcase, Plus, X, Calendar, CheckCircle, User, Phone, AlertCircle } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface WorkHistoryStepProps {
     formData: any;
@@ -42,12 +43,17 @@ interface Reference {
     notes?: string;
 }
 
-const RELATIONSHIP_OPTIONS = [
-    { value: 'previous_employer', label: 'Previous Employer' },
-    { value: 'previous_supervisor', label: 'Previous Supervisor' },
-    { value: 'satisfied_client', label: 'Satisfied Client' },
-    { value: 'colleague', label: 'Colleague' },
-    { value: 'business_partner', label: 'Business Partner' },
+const RELATIONSHIP_OPTION_DEFS = [
+    { value: 'previous_employer', defaultLabel: 'Previous Employer' },
+    { value: 'previous_supervisor', defaultLabel: 'Previous Supervisor' },
+    { value: 'satisfied_client', defaultLabel: 'Satisfied Client' },
+    { value: 'colleague', defaultLabel: 'Colleague' },
+    { value: 'business_partner', defaultLabel: 'Business Partner' },
+    { value: 'mentor', defaultLabel: 'Mentor' },
+    { value: 'trainer', defaultLabel: 'Trainer' },
+    { value: 'team_lead', defaultLabel: 'Team Lead' },
+    { value: 'volunteer_coordinator', defaultLabel: 'Volunteer Coordinator' },
+    { value: 'community_leader', defaultLabel: 'Community Leader' },
 ];
 
 export default function WorkHistoryStep({
@@ -57,6 +63,7 @@ export default function WorkHistoryStep({
     globalSkills = [],
     globalIndustries = []
 }: WorkHistoryStepProps) {
+    const { t } = useTranslations();
     const [workExperiences, setWorkExperiences] = useState<WorkExperience[]>(
         formData.work_experiences || []
     );
@@ -67,6 +74,11 @@ export default function WorkHistoryStep({
     const [industrySearches, setIndustrySearches] = useState<{[key: string]: string}>({});
     const [showSkillSuggestions, setShowSkillSuggestions] = useState<{[key: string]: boolean}>({});
     const [showIndustrySuggestions, setShowIndustrySuggestions] = useState<{[key: string]: boolean}>({});
+
+    const relationshipOptions = RELATIONSHIP_OPTION_DEFS.map((option) => ({
+        value: option.value,
+        label: t(`work_history.relationships.${option.value}`, option.defaultLabel),
+    }));
 
     // Sync local state with parent formData only on initial mount
     useEffect(() => {
@@ -642,7 +654,7 @@ export default function WorkHistoryStep({
                                                     <SelectValue placeholder="Select relationship" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {RELATIONSHIP_OPTIONS.map((option) => (
+                                                    {relationshipOptions.map((option) => (
                                                         <SelectItem key={option.value} value={option.value}>
                                                             {option.label}
                                                         </SelectItem>
