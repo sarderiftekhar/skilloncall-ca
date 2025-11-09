@@ -165,16 +165,27 @@ class HandleInertiaRequests extends Middleware
                 $translations = __('welcome');
             }
             
-            // Always include welcome translations for modals (privacy, terms, contact)
-            // These modals can be opened from any page
-            $welcomeTranslations = __('welcome');
-            if (is_array($translations) && is_array($welcomeTranslations)) {
-                // Merge: page-specific translations override welcome, but welcome provides base (including modals)
-                // Use array_merge_recursive then flatten to ensure all keys are present
-                $translations = array_merge($welcomeTranslations, $translations);
-            } elseif (!is_array($translations) || empty($translations)) {
-                // If no translations loaded yet, use welcome translations
-                $translations = $welcomeTranslations;
+            // Always ensure welcome translations are available for modals
+            // Only merge if we're not already using welcome translations
+            if (!str_contains($routeName ?? '', 'welcome') && 
+                !str_contains($routeName ?? '', 'categories') &&
+                !str_contains($currentPath, 'categories')) {
+                $welcomeTranslations = __('welcome');
+                if (is_array($translations) && is_array($welcomeTranslations)) {
+                    // Only add modal translations if they don't exist
+                    if (!isset($translations['contact_modal'])) {
+                        $translations['contact_modal'] = $welcomeTranslations['contact_modal'] ?? [];
+                    }
+                    if (!isset($translations['privacy_modal'])) {
+                        $translations['privacy_modal'] = $welcomeTranslations['privacy_modal'] ?? [];
+                    }
+                    if (!isset($translations['terms_modal'])) {
+                        $translations['terms_modal'] = $welcomeTranslations['terms_modal'] ?? [];
+                    }
+                } elseif (!is_array($translations) || empty($translations)) {
+                    // If no translations loaded yet, use welcome translations
+                    $translations = $welcomeTranslations;
+                }
             }
             
             // Always include common translations
