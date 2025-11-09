@@ -35,6 +35,11 @@ return [
         'recent_postings' => 'Recent postings from employers across Canada',
     ],
 
+    'categories' => [
+        'title' => 'All Employment Categories',
+        'subtitle' => 'Explore all available employment sectors on SkillOnCall.ca',
+    ],
+
     'footer' => [
         'newsletter' => 'Newsletter Signup',
         'newsletter_hint' => 'Get updates on new jobs, platform features, and industry news',

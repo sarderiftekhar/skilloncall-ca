@@ -24,6 +24,9 @@ Route::get('/how-it-works', [App\Http\Controllers\HowItWorksController::class, '
 // Pricing page
 Route::get('/pricing', [App\Http\Controllers\PricingController::class, 'index'])->name('pricing');
 
+// Categories page
+Route::get('/categories', [App\Http\Controllers\CategoriesController::class, 'index'])->name('categories');
+
 // Contact form route
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 

@@ -152,6 +152,9 @@ class HandleInertiaRequests extends Middleware
                         'footer' => $welcomeTranslations['footer'] ?? [],
                     ]
                 );
+            } elseif (str_contains($routeName ?? '', 'categories') || str_contains($currentPath, 'categories')) {
+                // Categories page uses welcome translations
+                $translations = __('welcome');
             }
             
             // Always include common translations

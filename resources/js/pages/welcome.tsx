@@ -870,9 +870,11 @@ export default function Welcome() {
                         </div>
 
                         <div className="text-center mt-8">
-                            <Button size="lg" className="text-white hover:opacity-90 cursor-pointer" style={{backgroundColor: '#10B3D6'}}>
-                                {t('cta.view_all_categories', 'View All Categories')}
-                            </Button>
+                            <Link href={`/categories${queryLang}`}>
+                                <Button size="lg" className="text-white hover:opacity-90 cursor-pointer" style={{backgroundColor: '#10B3D6'}}>
+                                    {t('cta.view_all_categories', 'View All Categories')}
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </section>
