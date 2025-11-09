@@ -21,9 +21,10 @@ class UserObserver
         ]);
 
         // Fire role-specific events
-        if ($user->role === 'employee') {
-            event(new EmployeeRegistered($user));
-        }
+        // Temporarily disabled during seeding to avoid rate limits
+        // if ($user->role === 'employee') {
+        //     event(new EmployeeRegistered($user));
+        // }
 
         // Send welcome email based on role
         $this->sendWelcomeEmail($user);
