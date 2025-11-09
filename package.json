@@ -11,12 +11,9 @@
         "lint:check": "eslint .",
         "types": "tsc --noEmit",
         "quality": "npm run types && npm run lint:check && npm run format:check && composer format-check && php artisan test",
-        "test:js": "npm run types && npm run lint:check",
-        "prepare": "husky install"
+        "test:js": "npm run types && npm run lint:check"
     },
     "devDependencies": {
-        "@commitlint/cli": "^20.1.0",
-        "@commitlint/config-conventional": "^20.0.0",
         "@eslint/js": "^9.19.0",
         "@laravel/vite-plugin-wayfinder": "^0.1.3",
         "@types/node": "^22.13.5",
@@ -24,8 +21,6 @@
         "eslint-config-prettier": "^10.0.1",
         "eslint-plugin-react": "^7.37.3",
         "eslint-plugin-react-hooks": "^5.1.0",
-        "husky": "^9.1.7",
-        "lint-staged": "^16.2.6",
         "prettier": "^3.4.2",
         "prettier-plugin-organize-imports": "^4.1.0",
         "prettier-plugin-tailwindcss": "^0.6.11",
