@@ -129,63 +129,35 @@ class HandleInertiaRequests extends Middleware
             } elseif (str_contains($routeName ?? '', 'welcome')) {
                 $translations = __('welcome');
             } elseif (str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
-                $howItWorksTranslations = __('how-it-works');
+                // Load how-it-works translations first
+                $translations = __('how-it-works') ?? [];
+                
+                // Load welcome translations ONCE and extract needed parts
                 $welcomeTranslations = __('welcome');
-                // Merge: keep welcome nav/auth at top level, merge how-it-works content
-                // Extract nav and auth from welcome, merge rest of how-it-works at top level
-                // IMPORTANT: Include modal translations from welcome
-                $translations = array_merge(
-                    $howItWorksTranslations ?? [],
-                    [
-                        'nav' => $welcomeTranslations['nav'] ?? [],
-                        'auth' => $welcomeTranslations['auth'] ?? [],
-                        'contact_modal' => $welcomeTranslations['contact_modal'] ?? [],
-                        'privacy_modal' => $welcomeTranslations['privacy_modal'] ?? [],
-                        'terms_modal' => $welcomeTranslations['terms_modal'] ?? [],
-                    ]
-                );
+                if (is_array($translations) && is_array($welcomeTranslations)) {
+                    $translations['nav'] = $welcomeTranslations['nav'] ?? [];
+                    $translations['auth'] = $welcomeTranslations['auth'] ?? [];
+                    $translations['contact_modal'] = $welcomeTranslations['contact_modal'] ?? [];
+                    $translations['privacy_modal'] = $welcomeTranslations['privacy_modal'] ?? [];
+                    $translations['terms_modal'] = $welcomeTranslations['terms_modal'] ?? [];
+                }
             } elseif (str_contains($routeName ?? '', 'pricing') || str_contains($currentPath, 'pricing')) {
-                $pricingTranslations = __('pricing');
+                // Load pricing translations first
+                $translations = __('pricing') ?? [];
+                
+                // Load welcome translations ONCE and extract needed parts
                 $welcomeTranslations = __('welcome');
-                // Merge: keep welcome nav/auth at top level, merge pricing content
-                // IMPORTANT: Include modal translations from welcome
-                $translations = array_merge(
-                    $pricingTranslations ?? [],
-                    [
-                        'nav' => $welcomeTranslations['nav'] ?? [],
-                        'auth' => $welcomeTranslations['auth'] ?? [],
-                        'footer' => $welcomeTranslations['footer'] ?? [],
-                        'contact_modal' => $welcomeTranslations['contact_modal'] ?? [],
-                        'privacy_modal' => $welcomeTranslations['privacy_modal'] ?? [],
-                        'terms_modal' => $welcomeTranslations['terms_modal'] ?? [],
-                    ]
-                );
+                if (is_array($translations) && is_array($welcomeTranslations)) {
+                    $translations['nav'] = $welcomeTranslations['nav'] ?? [];
+                    $translations['auth'] = $welcomeTranslations['auth'] ?? [];
+                    $translations['footer'] = $welcomeTranslations['footer'] ?? [];
+                    $translations['contact_modal'] = $welcomeTranslations['contact_modal'] ?? [];
+                    $translations['privacy_modal'] = $welcomeTranslations['privacy_modal'] ?? [];
+                    $translations['terms_modal'] = $welcomeTranslations['terms_modal'] ?? [];
+                }
             } elseif (str_contains($routeName ?? '', 'categories') || str_contains($currentPath, 'categories')) {
                 // Categories page uses welcome translations
                 $translations = __('welcome');
-            }
-            
-            // Always ensure welcome translations are available for modals
-            // Only merge if we're not already using welcome translations
-            if (!str_contains($routeName ?? '', 'welcome') && 
-                !str_contains($routeName ?? '', 'categories') &&
-                !str_contains($currentPath, 'categories')) {
-                $welcomeTranslations = __('welcome');
-                if (is_array($translations) && is_array($welcomeTranslations)) {
-                    // Only add modal translations if they don't exist
-                    if (!isset($translations['contact_modal'])) {
-                        $translations['contact_modal'] = $welcomeTranslations['contact_modal'] ?? [];
-                    }
-                    if (!isset($translations['privacy_modal'])) {
-                        $translations['privacy_modal'] = $welcomeTranslations['privacy_modal'] ?? [];
-                    }
-                    if (!isset($translations['terms_modal'])) {
-                        $translations['terms_modal'] = $welcomeTranslations['terms_modal'] ?? [];
-                    }
-                } elseif (!is_array($translations) || empty($translations)) {
-                    // If no translations loaded yet, use welcome translations
-                    $translations = $welcomeTranslations;
-                }
             }
             
             // Always include common translations

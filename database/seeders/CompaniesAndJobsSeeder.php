@@ -6,6 +6,7 @@ use App\Models\Job;
 use App\Models\User;
 use App\Models\EmployerProfile;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Event;
 
 class CompaniesAndJobsSeeder extends Seeder
 {
@@ -14,6 +15,9 @@ class CompaniesAndJobsSeeder extends Seeder
      */
     public function run(): void
     {
+        // Disable all events during seeding to prevent emails from being sent
+        Event::fake();
+        
         // Canadian cities for job locations
         $cities = [
             'Toronto, ON', 'Vancouver, BC', 'Calgary, AB', 'Ottawa, ON', 'Montreal, QC',

@@ -18,12 +18,16 @@ use App\Models\WorkExperience;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 
 class EmployeeSeeder extends Seeder
 {
     public function run(): void
     {
+        // Disable all events during seeding to prevent emails from being sent
+        Event::fake();
+        
         DB::transaction(function () {
             $now = Carbon::now();
             $effectiveMonth = $now->format('Y-m');
