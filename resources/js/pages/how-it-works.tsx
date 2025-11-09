@@ -61,8 +61,8 @@ export default function HowItWorks() {
     };
 
     const footerEmployerLinks = [
-        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: '#' },
-        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: '#' },
+        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: `/register${queryLang}` },
+        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Voir les forfaits' : 'Subscription Plans',
             href: `/subscriptions${queryLang}`,
@@ -73,14 +73,14 @@ export default function HowItWorks() {
     ];
 
     const footerEmployeeLinks = [
-        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: '#' },
-        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: '#' },
+        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: `/register${queryLang}` },
+        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Plans Pro' : 'Pro Plans',
             href: `/subscriptions${queryLang}`,
             highlight: true,
         },
-        { label: isFrench ? 'Centre d\'aide' : 'Help Center', href: '#' },
+        { label: isFrench ? 'Centre d\'aide' : 'Help Center', href: `/how-it-works${queryLang}` },
     ];
 
     const handleNewsletterSubscribe = async () => {
@@ -402,9 +402,9 @@ export default function HowItWorks() {
                                 <Link href={`/how-it-works${queryLang}`} className="text-white font-semibold cursor-pointer transition-colors">
                                     {t('nav.how_it_works', 'How it Works')}
                                 </Link>
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">
+                                <Link href={`/pricing${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">
                                     {t('nav.pricing', 'Pricing')}
-                                </a>
+                                </Link>
                             </nav>
 
                             {/* User Menu */}

@@ -151,8 +151,8 @@ export default function Pricing() {
         : "Canada's premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.";
 
     const footerEmployerLinks = [
-        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: '#' },
-        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: '#' },
+        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: `/register${queryLang}` },
+        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Voir les forfaits' : 'Subscription Plans',
             href: `/subscriptions${queryLang}`,
@@ -163,14 +163,14 @@ export default function Pricing() {
     ];
 
     const footerEmployeeLinks = [
-        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: '#' },
-        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: '#' },
+        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: `/register${queryLang}` },
+        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Plans Pro' : 'Pro Plans',
             href: `/subscriptions${queryLang}`,
             highlight: true,
         },
-        { label: isFrench ? 'Centre d\'aide' : 'Help Center', href: '#' },
+        { label: isFrench ? 'Centre d\'aide' : 'Help Center', href: `/how-it-works${queryLang}` },
     ];
 
     const getPlanIcon = (planName: string) => {
