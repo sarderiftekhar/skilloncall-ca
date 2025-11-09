@@ -11,7 +11,6 @@ import { SubscriptionBadge } from '@/components/subscription-badge';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
@@ -58,10 +57,10 @@ function addLangParam(href: string, locale: string): string {
 }
 
 // Get role-based navigation items
-function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
+function getRoleBasedNavItems(userRole: string, t: (key: string, fallback?: string) => string, locale: string): NavItem[] {
     const baseItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: t('nav.dashboard', 'Dashboard'),
             href: addLangParam('/dashboard', locale),
             icon: Grid,
         },
@@ -107,37 +106,37 @@ function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Post Jobs',
+                title: t('nav.post_jobs', 'Post Jobs'),
                 href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
-                title: 'Manage Jobs',
+                title: t('nav.manage_jobs', 'Manage Jobs'),
                 href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
-                title: 'Applications',
+                title: t('nav.applications', 'Applications'),
                 href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
-                title: 'Find Employee',
-                href: addLangParam('/employer/workers', locale),
+                title: t('nav.find_employee', 'Find Employee'),
+                href: addLangParam('/employer/employees', locale),
                 icon: Search,
             },
             {
-                title: 'Messages',
+                title: t('nav.messages', 'Messages'),
                 href: addLangParam('/employer/messages', locale),
                 icon: MessageCircle,
             },
             {
-                title: 'Payments',
+                title: t('nav.payments', 'Payments'),
                 href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
-                title: 'Subscription',
+                title: t('nav.subscription', 'Subscription'),
                 href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
@@ -148,32 +147,32 @@ function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
         return [
             ...baseItems,
             {
-                title: 'Find Jobs',
+                title: t('nav.find_jobs', 'Find Jobs'),
                 href: addLangParam('/employee/jobs', locale),
                 icon: Briefcase,
             },
             {
-                title: 'My Applications',
+                title: t('nav.my_applications', 'My Applications'),
                 href: addLangParam('/employee/applications', locale),
                 icon: Users,
             },
             {
-                title: 'Messages',
+                title: t('nav.messages', 'Messages'),
                 href: addLangParam('/employee/messages', locale),
                 icon: MessageCircle,
             },
             {
-                title: 'Availability',
+                title: t('nav.availability', 'Availability'),
                 href: addLangParam('/employee/availability', locale),
                 icon: Clock,
             },
             {
-                title: 'My Profile',
+                title: t('nav.my_profile', 'My Profile'),
                 href: addLangParam('/employee/profile', locale),
                 icon: Settings,
             },
             {
-                title: 'Subscription',
+                title: t('nav.subscription', 'Subscription'),
                 href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },
@@ -185,12 +184,12 @@ function getRoleBasedNavItems(userRole: string, locale: string): NavItem[] {
 
 export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
-    const { locale } = useTranslations();
+    const { t, locale } = useTranslations();
     const mainNavItems = getMainNavItems(locale);
     const { auth, subscription } = page.props;
     const getInitials = useInitials();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', locale);
+    const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t, locale);
 
     return (
         <>
@@ -264,7 +263,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {/* Logo */}
                     <Link href={addLangParam('/dashboard', locale)} prefetch className="items-center space-x-2 hidden lg:flex">
-                        <AppLogo />
+                        <AppLogo variant="light" />
                     </Link>
 
                     {/* Desktop Navigation */}

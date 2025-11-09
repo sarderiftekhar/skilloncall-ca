@@ -1,5 +1,4 @@
 import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
-import { login } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { Loader, Briefcase, User } from 'react-feather';
 import { useState } from 'react';
@@ -156,7 +155,7 @@ export default function Register() {
 
                         <div className="text-center text-sm text-muted-foreground">
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6} className="text-[#10B3D6] hover:opacity-90 cursor-pointer">
+                            <TextLink href="/login" tabIndex={6} className="text-[#10B3D6] hover:opacity-90 cursor-pointer">
                                 Log in
                             </TextLink>
                         </div>

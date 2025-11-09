@@ -1,6 +1,5 @@
 // Components
 import EmailVerificationNotificationController from '@/actions/App/Http/Controllers/Auth/EmailVerificationNotificationController';
-import { logout } from '@/routes';
 import { Form, Head } from '@inertiajs/react';
 import { Loader } from 'react-feather';
 
@@ -27,7 +26,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                             Resend verification email
                         </Button>
 
-                        <TextLink href={logout()} className="mx-auto block text-sm">
+                        <TextLink href="/logout" method="post" className="mx-auto block text-sm">
                             Log out
                         </TextLink>
                     </>

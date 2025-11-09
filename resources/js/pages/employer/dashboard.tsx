@@ -86,13 +86,21 @@ export default function EmployerDashboard({
     activeWorkers,
     chartData 
 }: EmployerDashboardProps) {
-    const { t } = useTranslations();
+    const { t, locale } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
     
     useEffect(() => {
         const timer = setTimeout(() => setIsLoaded(true), 100);
         return () => clearTimeout(timer);
     }, []);
+
+    const appendLangParam = (path: string) => {
+        if (!locale) {
+            return path;
+        }
+
+        return path.includes('?') ? `${path}&lang=${locale}` : `${path}?lang=${locale}`;
+    };
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -297,7 +305,7 @@ export default function EmployerDashboard({
                                     <Button 
                                         variant="outline" 
                                         className="border-orange-300 text-orange-700 hover:bg-orange-100 cursor-pointer hover:scale-105 transition-all duration-200"
-                                        onClick={() => window.location.href = '/employer/applications'}
+                                        onClick={() => window.location.href = appendLangParam('/employer/applications')}
                                         style={{height: '2.7em'}}
                                     >
                                         Review Applications
@@ -333,9 +341,10 @@ export default function EmployerDashboard({
                                                 }`} 
                                                 style={{
                                                     backgroundColor: '#FCF2F0',
-                                                    transitionDelay: `${800 + (index * 100)}ms`
+                                                    transitionDelay: `${800 + (index * 100)}ms`,
+                                                    cursor: 'pointer'
                                                 }}
-                                                onClick={() => window.location.href = `/employer/jobs/${job.id}`}
+                                                onClick={() => window.location.href = appendLangParam(`/employer/jobs/${job.id}`)}
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <h4 className="text-sm font-medium text-default">{job.title}</h4>
@@ -361,7 +370,7 @@ export default function EmployerDashboard({
                                             <Button 
                                                 variant="outline" 
                                                 className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
-                                                onClick={() => window.location.href = '/employer/jobs'}
+                                                onClick={() => window.location.href = appendLangParam('/employer/jobs')}
                                                 style={{height: '2.7em'}}
                                             >
                                                 View All Jobs
@@ -375,7 +384,7 @@ export default function EmployerDashboard({
                                         <Button 
                                             className="mt-4 cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                                            onClick={() => window.location.href = '/employer/jobs/create'}
+                                            onClick={() => window.location.href = appendLangParam('/employer/jobs/create')}
                                         >
                                             Post Your First Job
                                         </Button>
@@ -410,7 +419,7 @@ export default function EmployerDashboard({
                                                     backgroundColor: '#FCF2F0',
                                                     transitionDelay: `${900 + (index * 100)}ms`
                                                 }}
-                                                onClick={() => window.location.href = `/employer/applications/${application.id}`}
+                                                onClick={() => window.location.href = appendLangParam(`/employer/applications/${application.id}`)}
                                             >
                                                 <div className="flex items-start justify-between">
                                                     <div className="flex-1 min-w-0">
@@ -430,7 +439,7 @@ export default function EmployerDashboard({
                                             <Button 
                                                 variant="outline" 
                                                 className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
-                                                onClick={() => window.location.href = '/employer/applications'}
+                                                onClick={() => window.location.href = appendLangParam('/employer/applications')}
                                                 style={{height: '2.7em'}}
                                             >
                                                 View All Applications
@@ -476,7 +485,7 @@ export default function EmployerDashboard({
                                                 backgroundColor: '#FCF2F0',
                                                 transitionDelay: `${1000 + (index * 100)}ms`
                                             }}
-                                            onClick={() => window.location.href = `/employer/workers/${worker.id}`}
+                                            onClick={() => window.location.href = appendLangParam(`/employer/employees/${worker.id}`)}
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="flex-shrink-0 rounded-full flex items-center justify-center text-white font-semibold" style={{backgroundColor: '#10B3D6', width: '40px', height: '40px'}}>
@@ -498,7 +507,7 @@ export default function EmployerDashboard({
                                         <Button 
                                             variant="outline" 
                                             className="w-full hover:scale-105 transition-all duration-200 cursor-pointer"
-                                            onClick={() => window.location.href = '/employer/workers'}
+                                            onClick={() => window.location.href = appendLangParam('/employer/workers')}
                                             style={{height: '2.7em'}}
                                         >
                                             View All Workers
@@ -514,7 +523,7 @@ export default function EmployerDashboard({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <Card 
                         className="hover:shadow-md transition-shadow cursor-pointer bg-white rounded-xl shadow-sm card-with-border"
-                        onClick={() => window.location.href = '/employer/jobs/create'}
+                        onClick={() => window.location.href = appendLangParam('/employer/jobs/create')}
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-3">
@@ -531,7 +540,7 @@ export default function EmployerDashboard({
 
                     <Card 
                         className="hover:shadow-md transition-shadow cursor-pointer bg-white rounded-xl shadow-sm card-with-border"
-                        onClick={() => window.location.href = '/employer/applications'}
+                        onClick={() => window.location.href = appendLangParam('/employer/applications')}
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-3">
@@ -548,7 +557,8 @@ export default function EmployerDashboard({
 
                     <Card 
                         className="hover:shadow-md transition-shadow cursor-pointer bg-white rounded-xl shadow-sm card-with-border"
-                        onClick={() => window.location.href = '/employer/workers'}
+                        onClick={() => window.location.href = appendLangParam('/employer/employees')}
+                        onClick={() => window.location.href = appendLangParam('/employer/employees')}
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-3">
@@ -565,7 +575,7 @@ export default function EmployerDashboard({
 
                     <Card 
                         className="hover:shadow-md transition-shadow cursor-pointer bg-white rounded-xl shadow-sm card-with-border"
-                        onClick={() => window.location.href = '/employer/payments'}
+                        onClick={() => window.location.href = appendLangParam('/employer/payments')}
                     >
                         <CardContent className="p-4">
                             <div className="flex items-center space-x-3">

@@ -28,6 +28,7 @@ class EmployerJobController extends Controller
         return Inertia::render('employer/jobs/index', [
             'jobs' => $jobs,
             'filters' => $request->only(['search', 'status', 'category']),
+            'categories' => $this->jobService->getJobCategories(),
         ]);
     }
 

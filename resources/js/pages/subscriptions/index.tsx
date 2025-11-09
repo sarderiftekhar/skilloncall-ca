@@ -118,7 +118,9 @@ export default function SubscriptionsIndex({
     const [showContent, setShowContent] = useState(false);
     
     // Use hardcoded plans for employees, fallback to server data
-    const plansToShow = userRole === 'employee' ? HARDCODED_EMPLOYEE_PLANS : employeePlans;
+    const plansToShow: SubscriptionPlan[] = userRole === 'employee' 
+        ? HARDCODED_EMPLOYEE_PLANS 
+        : employerPlans;
 
     useEffect(() => {
         const loadingTimer = setTimeout(() => {
@@ -129,22 +131,32 @@ export default function SubscriptionsIndex({
         return () => clearTimeout(loadingTimer);
     }, []);
 
-    const formatPrice = (plan: any) => {
+    const formatPrice = (plan: SubscriptionPlan) => {
         if (plan.name === 'Free') {
             return 'Free';
         }
         
-        const price = billingInterval === 'monthly' ? plan.price_monthly : plan.price_yearly;
+        const rawPrice = billingInterval === 'monthly' ? plan.price_monthly : plan.price_yearly;
+        const price = Number(rawPrice);
+        if (!Number.isFinite(price)) {
+            return 'Coming Soon';
+        }
         const interval = billingInterval === 'monthly' ? '/month' : '/year';
         
         return `$${price.toFixed(2)}${interval}`;
     };
 
-    const getSavings = (plan: any) => {
+    const getSavings = (plan: SubscriptionPlan) => {
         if (plan.name === 'Free') return null;
         
-        const monthlyTotal = plan.price_monthly * 12;
-        const yearlyPrice = plan.price_yearly;
+        const monthly = Number(plan.price_monthly);
+        const yearly = Number(plan.price_yearly);
+        if (!Number.isFinite(monthly) || !Number.isFinite(yearly) || monthly === 0) {
+            return null;
+        }
+
+        const monthlyTotal = monthly * 12;
+        const yearlyPrice = yearly;
         const savings = ((monthlyTotal - yearlyPrice) / monthlyTotal * 100).toFixed(0);
         
         return billingInterval === 'yearly' ? `Save ${savings}%` : null;
@@ -170,7 +182,7 @@ export default function SubscriptionsIndex({
         alert(`Subscribing to ${plan.name} plan (${billingInterval}) - This feature will be implemented soon!`);
     };
 
-    const isCurrentPlan = (plan: any) => {
+    const isCurrentPlan = (plan: SubscriptionPlan) => {
         return currentSubscription?.plan?.name?.toLowerCase() === plan.name.toLowerCase();
     };
 

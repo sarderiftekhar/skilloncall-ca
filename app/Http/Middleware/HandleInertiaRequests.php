@@ -128,6 +128,30 @@ class HandleInertiaRequests extends Middleware
                 $translations = __('onboarding');
             } elseif (str_contains($routeName ?? '', 'welcome')) {
                 $translations = __('welcome');
+            } elseif (str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
+                $howItWorksTranslations = __('how-it-works');
+                $welcomeTranslations = __('welcome');
+                // Merge: keep welcome nav/auth at top level, merge how-it-works content
+                // Extract nav and auth from welcome, merge rest of how-it-works at top level
+                $translations = array_merge(
+                    $howItWorksTranslations ?? [],
+                    [
+                        'nav' => $welcomeTranslations['nav'] ?? [],
+                        'auth' => $welcomeTranslations['auth'] ?? [],
+                    ]
+                );
+            } elseif (str_contains($routeName ?? '', 'pricing') || str_contains($currentPath, 'pricing')) {
+                $pricingTranslations = __('pricing');
+                $welcomeTranslations = __('welcome');
+                // Merge: keep welcome nav/auth at top level, merge pricing content
+                $translations = array_merge(
+                    $pricingTranslations ?? [],
+                    [
+                        'nav' => $welcomeTranslations['nav'] ?? [],
+                        'auth' => $welcomeTranslations['auth'] ?? [],
+                        'footer' => $welcomeTranslations['footer'] ?? [],
+                    ]
+                );
             }
             
             // Always include common translations

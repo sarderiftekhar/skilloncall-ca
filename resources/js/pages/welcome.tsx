@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { PrivacyPolicyModal } from '@/components/privacy-policy-modal';
 import { TermsModal } from '@/components/terms-modal';
 import { ContactModal } from '@/components/contact-modal';
+import { FeedbackModal } from '@/components/feedback-modal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { logout } from '@/routes';
+import { router } from '@inertiajs/react';
 import { 
     Users, 
     MapPin, 
@@ -43,6 +44,8 @@ export default function Welcome() {
     const [showContactModal, setShowContactModal] = useState(false);
     const [email, setEmail] = useState('');
     const [isSubscribing, setIsSubscribing] = useState(false);
+    const [showNewsletterModal, setShowNewsletterModal] = useState(false);
+    const [newsletterModalData, setNewsletterModalData] = useState<{type: 'success' | 'error', title: string, message: string} | null>(null);
     const queryLang = `?lang=${locale}`;
 
     const subscriptionContent = {
@@ -108,16 +111,33 @@ export default function Welcome() {
     };
 
     const handleNewsletterSubscribe = async () => {
+        // Validate email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email.trim()) {
-            alert(newsletterCopy.emailRequired);
+            setNewsletterModalData({
+                type: 'error',
+                title: isFrench ? 'Erreur' : 'Error',
+                message: newsletterCopy.emailRequired
+            });
+            setShowNewsletterModal(true);
+            return;
+        }
+
+        if (!emailRegex.test(email.trim())) {
+            setNewsletterModalData({
+                type: 'error',
+                title: isFrench ? 'Erreur' : 'Error',
+                message: isFrench ? 'Veuillez entrer une adresse courriel valide.' : 'Please enter a valid email address.'
+            });
+            setShowNewsletterModal(true);
             return;
         }
 
         setIsSubscribing(true);
         
         try {
-            // Send newsletter subscription email
-            const response = await fetch('/contact', {
+            // Send newsletter subscription
+            const response = await fetch('/newsletter/subscribe', {
                 method: 'POST',
                 credentials: 'same-origin',
                 headers: {
@@ -126,23 +146,36 @@ export default function Welcome() {
                     'X-Requested-With': 'XMLHttpRequest',
                 },
                 body: JSON.stringify({
+                    email: email.trim(),
                     name: newsletterCopy.payload.name,
-                    email: email,
-                    phone: '',
-                    message: newsletterCopy.payload.message,
+                    source: 'welcome_page',
                 }),
             });
 
             const result = await response.json();
             
             if (result.success) {
-                alert(newsletterCopy.success);
+                setNewsletterModalData({
+                    type: 'success',
+                    title: isFrench ? 'Abonnement réussi!' : 'Subscription Successful!',
+                    message: result.message || newsletterCopy.success
+                });
                 setEmail('');
             } else {
-                alert(newsletterCopy.failure);
+                setNewsletterModalData({
+                    type: 'error',
+                    title: isFrench ? 'Erreur' : 'Error',
+                    message: result.message || newsletterCopy.failure
+                });
             }
+            setShowNewsletterModal(true);
         } catch (error) {
-            alert(newsletterCopy.failure);
+            setNewsletterModalData({
+                type: 'error',
+                title: isFrench ? 'Erreur' : 'Error',
+                message: newsletterCopy.failure
+            });
+            setShowNewsletterModal(true);
         } finally {
             setIsSubscribing(false);
         }
@@ -460,7 +493,7 @@ export default function Welcome() {
                         <div className="flex justify-between items-center h-16">
                             {/* Logo */}
                             <div className="flex items-center">
-                                <div className="flex-shrink-0 flex items-center">
+                                <Link href={`/${queryLang}`} className="flex-shrink-0 flex items-center cursor-pointer">
                                     <img 
                                         src="/logo-white.png" 
                                         alt="SkillOnCall Logo" 
@@ -468,15 +501,15 @@ export default function Welcome() {
                                     />
                                     <span className="text-xl font-bold text-white">SkillOnCall</span>
                                     <span className="ml-1" style={{color: '#10B3D6'}}>.ca</span>
-                                </div>
+                                </Link>
                             </div>
 
                             {/* Navigation */}
                             <nav className="hidden md:flex space-x-8">
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</a>
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</a>
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</a>
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
+                                <Link href={`/register${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</Link>
+                                <Link href={`/register${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</Link>
+                                <Link href={`/how-it-works${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</Link>
+                                <Link href={`/pricing${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</Link>
                             </nav>
 
                             {/* User Menu */}
@@ -519,7 +552,7 @@ export default function Welcome() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56">
                                                 <DropdownMenuItem asChild>
-                                                    <Link href={logout()} method="post" className="cursor-pointer">
+                                                    <Link href="/logout" method="post" className="cursor-pointer">
                                                         <LogOut className="mr-2 h-4 w-4" />
                                                         Log out
                                                     </Link>
@@ -1179,6 +1212,20 @@ export default function Welcome() {
                     isOpen={showContactModal}
                     onClose={() => setShowContactModal(false)}
                 />
+
+                {/* Newsletter Subscription Modal */}
+                {newsletterModalData && (
+                    <FeedbackModal
+                        isOpen={showNewsletterModal}
+                        onClose={() => {
+                            setShowNewsletterModal(false);
+                            setNewsletterModalData(null);
+                        }}
+                        title={newsletterModalData.title}
+                        message={newsletterModalData.message}
+                        type={newsletterModalData.type}
+                    />
+                )}
             </div>
         </>
     );

@@ -78,37 +78,37 @@ function getNavItems(userRole: string, t: (key: string) => string, locale: strin
         return [
             ...baseItems,
             {
-                title: 'Post Jobs',
+                title: t('nav.post_jobs', 'Post Jobs'),
                 href: addLangParam('/employer/jobs/create', locale),
                 icon: Briefcase,
             },
             {
-                title: 'Manage Jobs',
+                title: t('nav.manage_jobs', 'Manage Jobs'),
                 href: addLangParam('/employer/jobs', locale),
                 icon: Settings,
             },
             {
-                title: 'Applications',
+                title: t('nav.applications', 'Applications'),
                 href: addLangParam('/employer/applications', locale),
                 icon: Users,
             },
             {
-                title: 'Find Employee',
-                href: addLangParam('/employer/workers', locale),
+                title: t('nav.find_employee', 'Find Employee'),
+                href: addLangParam('/employer/employees', locale),
                 icon: Search,
             },
             {
-                title: 'Messages',
+                title: t('nav.messages', 'Messages'),
                 href: addLangParam('/employer/messages', locale),
                 icon: MessageCircle,
             },
             {
-                title: 'Payments',
+                title: t('nav.payments', 'Payments'),
                 href: addLangParam('/employer/payments', locale),
                 icon: CreditCard,
             },
             {
-                title: 'Subscription',
+                title: t('nav.subscription', 'Subscription'),
                 href: addLangParam('/subscriptions', locale),
                 icon: Shield,
             },

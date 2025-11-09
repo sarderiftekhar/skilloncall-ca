@@ -18,8 +18,17 @@ Route::get('/', function (Illuminate\Http\Request $request) {
     ]);
 })->name('home');
 
+// How It Works page
+Route::get('/how-it-works', [App\Http\Controllers\HowItWorksController::class, 'index'])->name('how-it-works');
+
+// Pricing page
+Route::get('/pricing', [App\Http\Controllers\PricingController::class, 'index'])->name('pricing');
+
 // Contact form route
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
+
+// Newsletter subscription route
+Route::post('/newsletter/subscribe', [App\Http\Controllers\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
 
 // Test route for Resend (remove this in production)
 Route::get('/test-email', function () {
