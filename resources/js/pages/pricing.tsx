@@ -155,7 +155,7 @@ export default function Pricing() {
         { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Voir les forfaits' : 'Subscription Plans',
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
             highlight: true,
             prefix: '💎 ',
         },
@@ -167,7 +167,7 @@ export default function Pricing() {
         { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: `/register${queryLang}` },
         {
             label: isFrench ? 'Plans Pro' : 'Pro Plans',
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
             highlight: true,
         },
         { label: isFrench ? 'Centre d\'aide' : 'Help Center', href: `/how-it-works${queryLang}` },

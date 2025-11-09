@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { X, FileText, Users, Briefcase, CreditCard, Shield, AlertTriangle, Globe, Phone, Settings } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface TermsModalProps {
     isOpen: boolean;
@@ -8,23 +9,25 @@ interface TermsModalProps {
 }
 
 export function TermsModal({ isOpen, onClose }: TermsModalProps) {
+    const { t, locale } = useTranslations();
+    const isFrench = locale === 'fr';
     const [activeSection, setActiveSection] = useState('overview');
 
     if (!isOpen) return null;
 
     const sections = [
-        { id: 'overview', title: 'Terms Overview', icon: FileText },
-        { id: 'acceptance', title: 'Acceptance of Terms', icon: Settings },
-        { id: 'platform', title: 'Platform Services', icon: Globe },
-        { id: 'accounts', title: 'User Accounts', icon: Users },
-        { id: 'employers', title: 'Employer Terms', icon: Briefcase },
-        { id: 'workers', title: 'Worker Terms', icon: Users },
-        { id: 'payments', title: 'Payments & Billing', icon: CreditCard },
-        { id: 'conduct', title: 'User Conduct', icon: Shield },
-        { id: 'liability', title: 'Liability & Disputes', icon: AlertTriangle },
-        { id: 'termination', title: 'Termination', icon: X },
-        { id: 'legal', title: 'Legal Information', icon: Settings },
-        { id: 'contact', title: 'Contact Information', icon: Phone },
+        { id: 'overview', title: t('terms_modal.sections.overview', 'Terms Overview'), icon: FileText },
+        { id: 'acceptance', title: t('terms_modal.sections.acceptance', 'Acceptance of Terms'), icon: Settings },
+        { id: 'platform', title: t('terms_modal.sections.platform', 'Platform Services'), icon: Globe },
+        { id: 'accounts', title: t('terms_modal.sections.accounts', 'User Accounts'), icon: Users },
+        { id: 'employers', title: t('terms_modal.sections.employers', 'Employer Terms'), icon: Briefcase },
+        { id: 'workers', title: t('terms_modal.sections.workers', 'Worker Terms'), icon: Users },
+        { id: 'payments', title: t('terms_modal.sections.payments', 'Payments & Billing'), icon: CreditCard },
+        { id: 'conduct', title: t('terms_modal.sections.conduct', 'User Conduct'), icon: Shield },
+        { id: 'liability', title: t('terms_modal.sections.liability', 'Liability & Disputes'), icon: AlertTriangle },
+        { id: 'termination', title: t('terms_modal.sections.termination', 'Termination'), icon: X },
+        { id: 'legal', title: t('terms_modal.sections.legal', 'Legal Information'), icon: Settings },
+        { id: 'contact', title: t('terms_modal.sections.contact', 'Contact Information'), icon: Phone },
     ];
 
     const renderContent = () => {
@@ -32,40 +35,36 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
             case 'overview':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Terms of Service Overview</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('terms_modal.content.overview.title', 'Terms of Service Overview')}</h3>
                         <p className="text-gray-600 leading-relaxed">
-                            Welcome to SkillOnCall.ca, Canada's premier platform for connecting skilled workers with local businesses. 
-                            These Terms of Service ("Terms") govern your use of our platform and services.
+                            {t('terms_modal.content.overview.intro', 'Welcome to SkillOnCall.ca, Canada\'s premier platform for connecting skilled workers with local businesses. These Terms of Service ("Terms") govern your use of our platform and services.')}
                         </p>
                         
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">🍁 Canadian Platform</h4>
+                            <h4 className="font-semibold text-blue-900 mb-2">{t('terms_modal.content.overview.canadian_title', '🍁 Canadian Platform')}</h4>
                             <p className="text-blue-800 text-sm">
-                                SkillOnCall.ca is a Canadian company operating under Canadian law. Our platform is designed 
-                                specifically for the Canadian market, connecting local businesses with skilled workers across Canada.
+                                {t('terms_modal.content.overview.canadian_text', 'SkillOnCall.ca is a Canadian company operating under Canadian law. Our platform is designed specifically for the Canadian market, connecting local businesses with skilled workers across Canada.')}
                             </p>
                         </div>
 
                         <div className="grid gap-4 md:grid-cols-2">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">👔 For Employers</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.overview.for_employers_title', '👔 For Employers')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Post jobs, find skilled workers, manage shifts, and build your team with trusted professionals 
-                                    in your area.
+                                    {t('terms_modal.content.overview.for_employers_text', 'Post jobs, find skilled workers, manage shifts, and build your team with trusted professionals in your area.')}
                                 </p>
                             </div>
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">👷 For Workers</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.overview.for_workers_title', '👷 For Workers')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Find flexible work opportunities, showcase your skills, build your reputation, and earn 
-                                    income on your schedule.
+                                    {t('terms_modal.content.overview.for_workers_text', 'Find flexible work opportunities, showcase your skills, build your reputation, and earn income on your schedule.')}
                                 </p>
                             </div>
                         </div>
 
                         <p className="text-gray-600 leading-relaxed">
-                            <strong>Last Updated:</strong> January 2025<br />
-                            <strong>Effective Date:</strong> January 1, 2025
+                            <strong>{t('terms_modal.content.overview.last_updated_label', 'Last Updated:')}</strong> {t('terms_modal.content.overview.last_updated_value', 'January 2025')}<br />
+                            <strong>{t('terms_modal.content.overview.effective_date_label', 'Effective Date:')}</strong> {t('terms_modal.content.overview.effective_date_value', 'January 1, 2025')}
                         </p>
                     </div>
                 );
@@ -73,44 +72,42 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
             case 'acceptance':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Acceptance of Terms</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('terms_modal.content.acceptance.title', 'Acceptance of Terms')}</h3>
                         
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-red-900 mb-2">⚖️ Legal Agreement</h4>
+                            <h4 className="font-semibold text-red-900 mb-2">{t('terms_modal.content.acceptance.legal_title', '⚖️ Legal Agreement')}</h4>
                             <p className="text-red-800 text-sm">
-                                By accessing or using SkillOnCall.ca, you agree to be bound by these Terms of Service. 
-                                If you do not agree to these terms, you may not use our platform.
+                                {t('terms_modal.content.acceptance.legal_text', 'By accessing or using SkillOnCall.ca, you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use our platform.')}
                             </p>
                         </div>
 
                         <div className="space-y-4">
                             <div className="border-l-4 border-blue-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📋 What You're Agreeing To</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.acceptance.agreeing_title', '📋 What You\'re Agreeing To')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• These Terms of Service and all policies referenced herein</li>
-                                    <li>• Our Privacy Policy and data handling practices</li>
-                                    <li>• Community Guidelines and acceptable use policies</li>
-                                    <li>• Payment Terms and billing policies</li>
-                                    <li>• Applicable Canadian federal and provincial laws</li>
+                                    <li>• {t('terms_modal.content.acceptance.agreeing_item1', 'These Terms of Service and all policies referenced herein')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.agreeing_item2', 'Our Privacy Policy and data handling practices')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.agreeing_item3', 'Community Guidelines and acceptable use policies')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.agreeing_item4', 'Payment Terms and billing policies')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.agreeing_item5', 'Applicable Canadian federal and provincial laws')}</li>
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-green-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">✅ Eligibility Requirements</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.acceptance.eligibility_title', '✅ Eligibility Requirements')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• You must be at least 18 years old</li>
-                                    <li>• You must be legally authorized to work in Canada</li>
-                                    <li>• You must provide accurate and truthful information</li>
-                                    <li>• You must have the legal capacity to enter into contracts</li>
-                                    <li>• Your use must comply with all applicable laws</li>
+                                    <li>• {t('terms_modal.content.acceptance.eligibility_item1', 'You must be at least 18 years old')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.eligibility_item2', 'You must be legally authorized to work in Canada')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.eligibility_item3', 'You must provide accurate and truthful information')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.eligibility_item4', 'You must have the legal capacity to enter into contracts')}</li>
+                                    <li>• {t('terms_modal.content.acceptance.eligibility_item5', 'Your use must comply with all applicable laws')}</li>
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-purple-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔄 Changes to Terms</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.acceptance.changes_title', '🔄 Changes to Terms')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    We may update these Terms from time to time. We'll notify you of material changes via email 
-                                    or through the platform. Continued use after changes constitutes acceptance of the new terms.
+                                    {t('terms_modal.content.acceptance.changes_text', 'We may update these Terms from time to time. We\'ll notify you of material changes via email or through the platform. Continued use after changes constitutes acceptance of the new terms.')}
                                 </p>
                             </div>
                         </div>
@@ -120,57 +117,55 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
             case 'platform':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Platform Services</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('terms_modal.content.platform.title', 'Platform Services')}</h3>
                         
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">🌐 What We Provide</h4>
+                            <h4 className="font-semibold text-blue-900 mb-2">{t('terms_modal.content.platform.provide_title', '🌐 What We Provide')}</h4>
                             <p className="text-blue-800 text-sm">
-                                SkillOnCall.ca is a technology platform that facilitates connections between employers and workers. 
-                                We are not an employment agency and do not employ workers directly.
+                                {t('terms_modal.content.platform.provide_text', 'SkillOnCall.ca is a technology platform that facilitates connections between employers and workers. We are not an employment agency and do not employ workers directly.')}
                             </p>
                         </div>
 
                         <div className="grid gap-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔧 Core Services</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.platform.core_title', '🔧 Core Services')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Job posting and worker search functionality</li>
-                                    <li>• Messaging and communication tools</li>
-                                    <li>• Profile creation and skill verification</li>
-                                    <li>• Rating and review systems</li>
-                                    <li>• Payment processing through Stripe</li>
-                                    <li>• GPS check-in and work verification</li>
-                                    <li>• Dispute resolution assistance</li>
+                                    <li>• {t('terms_modal.content.platform.core_item1', 'Job posting and worker search functionality')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item2', 'Messaging and communication tools')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item3', 'Profile creation and skill verification')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item4', 'Rating and review systems')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item5', 'Payment processing through Stripe')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item6', 'GPS check-in and work verification')}</li>
+                                    <li>• {t('terms_modal.content.platform.core_item7', 'Dispute resolution assistance')}</li>
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📱 Platform Availability</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.platform.availability_title', '📱 Platform Availability')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Web platform accessible 24/7 (subject to maintenance)</li>
-                                    <li>• Mobile apps for iOS and Android (coming soon)</li>
-                                    <li>• Email and SMS notifications</li>
-                                    <li>• Customer support during business hours</li>
+                                    <li>• {t('terms_modal.content.platform.availability_item1', 'Web platform accessible 24/7 (subject to maintenance)')}</li>
+                                    <li>• {t('terms_modal.content.platform.availability_item2', 'Mobile apps for iOS and Android (coming soon)')}</li>
+                                    <li>• {t('terms_modal.content.platform.availability_item3', 'Email and SMS notifications')}</li>
+                                    <li>• {t('terms_modal.content.platform.availability_item4', 'Customer support during business hours')}</li>
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🚫 What We Don't Provide</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.platform.dont_provide_title', '🚫 What We Don\'t Provide')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Employment relationships or job guarantees</li>
-                                    <li>• Background checks or employment verification</li>
-                                    <li>• Insurance coverage for work performed</li>
-                                    <li>• Legal advice or employment law guidance</li>
-                                    <li>• Tax preparation or payroll services</li>
+                                    <li>• {t('terms_modal.content.platform.dont_provide_item1', 'Employment relationships or job guarantees')}</li>
+                                    <li>• {t('terms_modal.content.platform.dont_provide_item2', 'Background checks or employment verification')}</li>
+                                    <li>• {t('terms_modal.content.platform.dont_provide_item3', 'Insurance coverage for work performed')}</li>
+                                    <li>• {t('terms_modal.content.platform.dont_provide_item4', 'Legal advice or employment law guidance')}</li>
+                                    <li>• {t('terms_modal.content.platform.dont_provide_item5', 'Tax preparation or payroll services')}</li>
                                 </ul>
                             </div>
                         </div>
 
                         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-yellow-900 mb-2">⚠️ Platform Limitations</h4>
+                            <h4 className="font-semibold text-yellow-900 mb-2">{t('terms_modal.content.platform.limitations_title', '⚠️ Platform Limitations')}</h4>
                             <p className="text-yellow-800 text-sm">
-                                While we strive for 100% uptime, we cannot guarantee uninterrupted service. We may temporarily 
-                                suspend services for maintenance, updates, or technical issues.
+                                {t('terms_modal.content.platform.limitations_text', 'While we strive for 100% uptime, we cannot guarantee uninterrupted service. We may temporarily suspend services for maintenance, updates, or technical issues.')}
                             </p>
                         </div>
                     </div>
@@ -179,62 +174,61 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
             case 'accounts':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">User Accounts</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('terms_modal.content.accounts.title', 'User Accounts')}</h3>
                         
                         <div className="space-y-4">
                             <div className="border-l-4 border-blue-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📝 Account Creation</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.accounts.creation_title', '📝 Account Creation')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Provide accurate, current, and complete information</li>
-                                    <li>• Choose a secure password and enable two-factor authentication</li>
-                                    <li>• Verify your email address and phone number</li>
-                                    <li>• Upload required identification documents</li>
-                                    <li>• Select appropriate account type (Employer or Worker)</li>
+                                    <li>• {t('terms_modal.content.accounts.creation_item1', 'Provide accurate, current, and complete information')}</li>
+                                    <li>• {t('terms_modal.content.accounts.creation_item2', 'Choose a secure password and enable two-factor authentication')}</li>
+                                    <li>• {t('terms_modal.content.accounts.creation_item3', 'Verify your email address and phone number')}</li>
+                                    <li>• {t('terms_modal.content.accounts.creation_item4', 'Upload required identification documents')}</li>
+                                    <li>• {t('terms_modal.content.accounts.creation_item5', 'Select appropriate account type (Employer or Worker)')}</li>
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-green-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔒 Account Security</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.accounts.security_title', '🔒 Account Security')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• You are responsible for maintaining account security</li>
-                                    <li>• Do not share login credentials with others</li>
-                                    <li>• Report suspicious activity immediately</li>
-                                    <li>• Use strong, unique passwords</li>
-                                    <li>• Log out from shared or public devices</li>
+                                    <li>• {t('terms_modal.content.accounts.security_item1', 'You are responsible for maintaining account security')}</li>
+                                    <li>• {t('terms_modal.content.accounts.security_item2', 'Do not share login credentials with others')}</li>
+                                    <li>• {t('terms_modal.content.accounts.security_item3', 'Report suspicious activity immediately')}</li>
+                                    <li>• {t('terms_modal.content.accounts.security_item4', 'Use strong, unique passwords')}</li>
+                                    <li>• {t('terms_modal.content.accounts.security_item5', 'Log out from shared or public devices')}</li>
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-orange-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🚫 Account Restrictions</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.accounts.restrictions_title', '🚫 Account Restrictions')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• One account per person (no multiple accounts)</li>
-                                    <li>• No account sharing or selling</li>
-                                    <li>• Limited to 3 devices per account</li>
-                                    <li>• Must be 18+ years old to create an account</li>
-                                    <li>• Must be legally authorized to work in Canada</li>
+                                    <li>• {t('terms_modal.content.accounts.restrictions_item1', 'One account per person (no multiple accounts)')}</li>
+                                    <li>• {t('terms_modal.content.accounts.restrictions_item2', 'No account sharing or selling')}</li>
+                                    <li>• {t('terms_modal.content.accounts.restrictions_item3', 'Limited to 3 devices per account')}</li>
+                                    <li>• {t('terms_modal.content.accounts.restrictions_item4', 'Must be 18+ years old to create an account')}</li>
+                                    <li>• {t('terms_modal.content.accounts.restrictions_item5', 'Must be legally authorized to work in Canada')}</li>
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-red-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">⚖️ Account Verification</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.accounts.verification_title', '⚖️ Account Verification')}</h4>
                                 <p className="text-gray-600 text-sm mb-2">
-                                    We may require identity verification including:
+                                    {t('terms_modal.content.accounts.verification_intro', 'We may require identity verification including:')}
                                 </p>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Government-issued photo ID</li>
-                                    <li>• Social Insurance Number (for tax purposes)</li>
-                                    <li>• Business registration documents (for employers)</li>
-                                    <li>• Banking information for payments</li>
-                                    <li>• Professional certifications or licenses</li>
+                                    <li>• {t('terms_modal.content.accounts.verification_item1', 'Government-issued photo ID')}</li>
+                                    <li>• {t('terms_modal.content.accounts.verification_item2', 'Social Insurance Number (for tax purposes)')}</li>
+                                    <li>• {t('terms_modal.content.accounts.verification_item3', 'Business registration documents (for employers)')}</li>
+                                    <li>• {t('terms_modal.content.accounts.verification_item4', 'Banking information for payments')}</li>
+                                    <li>• {t('terms_modal.content.accounts.verification_item5', 'Professional certifications or licenses')}</li>
                                 </ul>
                             </div>
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
-                            <h4 className="font-semibold text-gray-900 mb-2">📧 Account Communications</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('terms_modal.content.accounts.communications_title', '📧 Account Communications')}</h4>
                             <p className="text-gray-600 text-sm">
-                                By creating an account, you consent to receive communications from SkillOnCall.ca including 
-                                job alerts, platform updates, and important account notifications via email, SMS, and push notifications.
+                                {t('terms_modal.content.accounts.communications_text', 'By creating an account, you consent to receive communications from SkillOnCall.ca including job alerts, platform updates, and important account notifications via email, SMS, and push notifications.')}
                             </p>
                         </div>
                     </div>
@@ -874,8 +868,8 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
                                     <FileText className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-gray-900">Terms of Service</h2>
-                                    <p className="text-sm text-gray-500">SkillOnCall.ca</p>
+                                    <h2 className="text-lg font-bold text-gray-900">{t('terms_modal.title', 'Terms of Service')}</h2>
+                                    <p className="text-sm text-gray-500">{t('terms_modal.subtitle', 'SkillOnCall.ca')}</p>
                                 </div>
                             </div>
                             <button
@@ -909,8 +903,8 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
 
                     <div className="p-4 border-t border-gray-200">
                         <div className="text-xs text-gray-500 text-center">
-                            <p>🍁 Made in Canada</p>
-                            <p className="mt-1">Last updated: January 2025</p>
+                            <p>{t('terms_modal.made_in_canada', '🍁 Made in Canada')}</p>
+                            <p className="mt-1">{t('terms_modal.last_updated', 'Last updated: January 2025')}</p>
                         </div>
                     </div>
                 </div>
@@ -924,14 +918,14 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
                     <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">
-                                Questions? Contact us at <strong>legal@skilloncall.ca</strong>
+                                {t('terms_modal.questions', 'Questions? Contact us at')} <strong>legal@skilloncall.ca</strong>
                             </div>
                             <Button 
                                 onClick={onClose}
                                 className="text-white hover:opacity-90"
                                 style={{backgroundColor: '#10B3D6'}}
                             >
-                                Close
+                                {t('terms_modal.close', 'Close')}
                             </Button>
                         </div>
                     </div>
