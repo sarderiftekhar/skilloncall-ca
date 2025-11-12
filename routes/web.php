@@ -12,8 +12,8 @@ Route::get('/', function (Illuminate\Http\Request $request) {
         $isProfileComplete = $employeeProfile && $employeeProfile->is_profile_complete;
     }
     
+    // Translations are loaded by HandleInertiaRequests middleware
     return Inertia::render('welcome', [
-        'translations' => trans('welcome'),
         'isProfileComplete' => $isProfileComplete,
     ]);
 })->name('home');

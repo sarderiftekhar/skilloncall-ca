@@ -126,7 +126,7 @@ class HandleInertiaRequests extends Middleware
                 }
             } elseif (str_contains($routeName ?? '', 'onboarding')) {
                 $translations = __('onboarding');
-            } elseif (str_contains($routeName ?? '', 'welcome')) {
+            } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/') {
                 $translations = __('welcome');
             }
             
