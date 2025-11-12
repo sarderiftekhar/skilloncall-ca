@@ -361,7 +361,9 @@ return [
             'for_workers_title' => '👷 For Workers',
             'for_workers_description' => 'Find flexible work opportunities, showcase your skills, build your reputation, and earn income on your schedule.',
             'last_updated' => 'Last Updated:',
+            'last_updated_date' => 'January 2025',
             'effective_date' => 'Effective Date:',
+            'effective_date_value' => 'January 1, 2025',
         ],
         
         'acceptance' => [

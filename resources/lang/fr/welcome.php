@@ -361,7 +361,9 @@ return [
             'for_workers_title' => '👷 Pour les travailleurs',
             'for_workers_description' => 'Trouvez des opportunités de travail flexibles, mettez en valeur vos compétences, construisez votre réputation et gagnez un revenu selon votre horaire.',
             'last_updated' => 'Dernière mise à jour:',
+            'last_updated_date' => 'janvier 2025',
             'effective_date' => 'Date d\'entrée en vigueur:',
+            'effective_date_value' => '1er janvier 2025',
         ],
         
         'acceptance' => [

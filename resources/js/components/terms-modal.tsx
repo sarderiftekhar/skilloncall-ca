@@ -62,8 +62,8 @@ export function TermsModal({ isOpen, onClose }: TermsModalProps) {
                         </div>
 
                         <p className="text-gray-600 leading-relaxed">
-                            <strong>{t('terms_modal.overview.last_updated', 'Last Updated:')}</strong> January 2025<br />
-                            <strong>{t('terms_modal.overview.effective_date', 'Effective Date:')}</strong> January 1, 2025
+                            <strong>{t('terms_modal.overview.last_updated', 'Last Updated:')}</strong> {t('terms_modal.overview.last_updated_date', 'January 2025')}<br />
+                            <strong>{t('terms_modal.overview.effective_date', 'Effective Date:')}</strong> {t('terms_modal.overview.effective_date_value', 'January 1, 2025')}
                         </p>
                     </div>
                 );
