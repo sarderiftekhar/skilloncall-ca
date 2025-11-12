@@ -8,7 +8,7 @@ export function useTranslations() {
     const translations: Translations = (props as any).translations || {};
     const locale: string = (props as any).locale || 'en';
 
-    const t = (key: string, fallback?: string) => {
+    const t = (key: string, fallback?: string | any[]) => {
         // Handle nested keys like 'stats.total_applications'
         const keys = key.split('.');
         let value = translations;
@@ -21,7 +21,12 @@ export function useTranslations() {
             }
         }
         
-        return typeof value === 'string' ? value : (fallback ?? key);
+        // Return the value if it exists, otherwise return fallback
+        if (value !== undefined && value !== null) {
+            return value;
+        }
+        
+        return fallback ?? key;
     };
 
     return { t, locale };
