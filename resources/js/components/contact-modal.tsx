@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { X, Mail, Phone, User, MessageSquare, Send } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface ContactModalProps {
     isOpen: boolean;
@@ -7,6 +8,7 @@ interface ContactModalProps {
 }
 
 export function ContactModal({ isOpen, onClose }: ContactModalProps) {
+    const { t } = useTranslations();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -50,11 +52,11 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 // Keep the form data to show in success message
             } else {
                 // Handle validation errors or other issues
-                alert(result.message || 'There was an error sending your message. Please try again.');
+                alert(result.message || t('contact_modal.error_sending', 'There was an error sending your message. Please try again.'));
             }
         } catch (error) {
             console.error('Error submitting form:', error);
-            alert('There was an error sending your message. Please try again.');
+            alert(t('contact_modal.error_sending', 'There was an error sending your message. Please try again.'));
         } finally {
             setIsSubmitting(false);
         }
@@ -87,8 +89,8 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                             <Mail className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Contact Us</h2>
-                            <p className="text-sm text-gray-600">SkillOnCall.ca</p>
+                            <h2 className="text-xl font-semibold text-gray-900">{t('contact_modal.title', 'Contact Us')}</h2>
+                            <p className="text-sm text-gray-600">{t('contact_modal.subtitle', 'SkillOnCall.ca')}</p>
                         </div>
                     </div>
                     <button
@@ -104,9 +106,9 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     {!isSubmitted ? (
                         <div>
                             <div className="mb-6">
-                                <h3 className="text-lg font-medium text-gray-900 mb-2">Get in Touch</h3>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">{t('contact_modal.get_in_touch', 'Get in Touch')}</h3>
                                 <p className="text-gray-600">
-                                    Have a question or need assistance? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+                                    {t('contact_modal.description', 'Have a question or need assistance? We\'d love to hear from you. Send us a message and we\'ll respond as soon as possible.')}
                                 </p>
                             </div>
 
@@ -115,7 +117,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                 <div>
                                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                                         <User className="w-4 h-4 inline mr-2" />
-                                        Full Name *
+                                        {t('contact_modal.full_name', 'Full Name')} *
                                     </label>
                                     <input
                                         type="text"
@@ -125,7 +127,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                         onChange={handleInputChange}
                                         required
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Enter your full name"
+                                        placeholder={t('contact_modal.full_name_placeholder', 'Enter your full name')}
                                     />
                                 </div>
 
@@ -133,7 +135,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                 <div>
                                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                         <Mail className="w-4 h-4 inline mr-2" />
-                                        Email Address *
+                                        {t('contact_modal.email_address', 'Email Address')} *
                                     </label>
                                     <input
                                         type="email"
@@ -143,7 +145,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                         onChange={handleInputChange}
                                         required
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Enter your email address"
+                                        placeholder={t('contact_modal.email_address_placeholder', 'Enter your email address')}
                                     />
                                 </div>
 
@@ -151,7 +153,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                 <div>
                                     <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                                         <Phone className="w-4 h-4 inline mr-2" />
-                                        Phone Number
+                                        {t('contact_modal.phone_number', 'Phone Number')}
                                     </label>
                                     <input
                                         type="tel"
@@ -160,7 +162,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                         value={formData.phone}
                                         onChange={handleInputChange}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                        placeholder="Enter your phone number (optional)"
+                                        placeholder={t('contact_modal.phone_number_placeholder', 'Enter your phone number (optional)')}
                                     />
                                 </div>
 
@@ -168,7 +170,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                 <div>
                                     <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
                                         <MessageSquare className="w-4 h-4 inline mr-2" />
-                                        Message *
+                                        {t('contact_modal.message', 'Message')} *
                                     </label>
                                     <textarea
                                         id="message"
@@ -178,7 +180,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                         required
                                         rows={4}
                                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                                        placeholder="Tell us how we can help you..."
+                                        placeholder={t('contact_modal.message_placeholder', 'Tell us how we can help you...')}
                                     />
                                 </div>
 
@@ -196,12 +198,12 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                                         {isSubmitting ? (
                                             <>
                                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                Sending...
+                                                {t('contact_modal.sending', 'Sending...')}
                                             </>
                                         ) : (
                                             <>
                                                 <Send className="w-4 h-4" />
-                                                Send Message
+                                                {t('contact_modal.send_message', 'Send Message')}
                                             </>
                                         )}
                                     </button>
@@ -214,23 +216,24 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{backgroundColor: '#10F2C5'}}>
                                 <Mail className="w-8 h-8 text-white" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-900 mb-2">Message Sent Successfully!</h3>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">{t('contact_modal.message_sent_title', 'Message Sent Successfully!')}</h3>
                             <p className="text-gray-600 mb-6">
-                                Thank you for contacting us. We've received your message and will get back to you within 24 hours at <strong>{formData.email}</strong>.
+                                {t('contact_modal.message_sent_description', 'Thank you for contacting us. We\'ve received your message and will get back to you within 24 hours at')} <strong>{formData.email}</strong>.
                             </p>
                             <div className="space-y-3">
                                 <button
                                     onClick={resetForm}
                                     className="w-full px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                                    style={{ cursor: 'pointer' }}
                                 >
-                                    Send Another Message
+                                    {t('contact_modal.send_another_message', 'Send Another Message')}
                                 </button>
                                 <button
                                     onClick={onClose}
                                     className="w-full px-6 py-2 text-white rounded-md transition-colors"
-                                    style={{backgroundColor: '#10B3D6'}}
+                                    style={{backgroundColor: '#10B3D6', cursor: 'pointer'}}
                                 >
-                                    Close
+                                    {t('contact_modal.close', 'Close')}
                                 </button>
                             </div>
                         </div>
@@ -242,10 +245,10 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
                         <div className="flex items-center justify-center text-sm text-gray-600">
                             <Mail className="w-4 h-4 mr-2" style={{color: '#10B3D6'}} />
-                            Messages will be sent to: <strong className="ml-1">contact@skilloncall.ca</strong>
+                            {t('contact_modal.footer_text', 'Messages will be sent to:')} <strong className="ml-1">contact@skilloncall.ca</strong>
                         </div>
                         <p className="text-xs text-gray-500 text-center mt-2">
-                            We typically respond within 24 hours during business days.
+                            {t('contact_modal.response_time', 'We typically respond within 24 hours during business days.')}
                         </p>
                     </div>
                 )}

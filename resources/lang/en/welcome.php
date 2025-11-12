@@ -69,6 +69,30 @@ return [
         'successful_matches' => 'Successful Matches',
         'verified_employers' => 'Verified Employers',
     ],
+
+    'contact_modal' => [
+        'title' => 'Contact Us',
+        'subtitle' => 'SkillOnCall.ca',
+        'get_in_touch' => 'Get in Touch',
+        'description' => 'Have a question or need assistance? We\'d love to hear from you. Send us a message and we\'ll respond as soon as possible.',
+        'full_name' => 'Full Name',
+        'full_name_placeholder' => 'Enter your full name',
+        'email_address' => 'Email Address',
+        'email_address_placeholder' => 'Enter your email address',
+        'phone_number' => 'Phone Number',
+        'phone_number_placeholder' => 'Enter your phone number (optional)',
+        'message' => 'Message',
+        'message_placeholder' => 'Tell us how we can help you...',
+        'send_message' => 'Send Message',
+        'sending' => 'Sending...',
+        'message_sent_title' => 'Message Sent Successfully!',
+        'message_sent_description' => 'Thank you for contacting us. We\'ve received your message and will get back to you within 24 hours at',
+        'send_another_message' => 'Send Another Message',
+        'close' => 'Close',
+        'footer_text' => 'Messages will be sent to:',
+        'response_time' => 'We typically respond within 24 hours during business days.',
+        'error_sending' => 'There was an error sending your message. Please try again.',
+    ],
 ];
 
 
