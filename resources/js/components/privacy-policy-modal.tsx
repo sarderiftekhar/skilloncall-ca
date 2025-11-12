@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { X, Shield, Eye, Lock, Users, MapPin, CreditCard, Bell, FileText } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
 
 interface PrivacyPolicyModalProps {
     isOpen: boolean;
@@ -8,21 +9,22 @@ interface PrivacyPolicyModalProps {
 }
 
 export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps) {
+    const { t } = useTranslations();
     const [activeSection, setActiveSection] = useState('overview');
 
     if (!isOpen) return null;
 
     const sections = [
-        { id: 'overview', title: 'Overview', icon: Shield },
-        { id: 'collection', title: 'Information We Collect', icon: Eye },
-        { id: 'usage', title: 'How We Use Information', icon: Users },
-        { id: 'sharing', title: 'Information Sharing', icon: FileText },
-        { id: 'location', title: 'Location Data', icon: MapPin },
-        { id: 'payments', title: 'Payment Information', icon: CreditCard },
-        { id: 'security', title: 'Data Security', icon: Lock },
-        { id: 'communications', title: 'Communications', icon: Bell },
-        { id: 'rights', title: 'Your Rights', icon: Users },
-        { id: 'contact', title: 'Contact Us', icon: FileText },
+        { id: 'overview', title: t('privacy_modal.sections.overview', 'Overview'), icon: Shield },
+        { id: 'collection', title: t('privacy_modal.sections.collection', 'Information We Collect'), icon: Eye },
+        { id: 'usage', title: t('privacy_modal.sections.usage', 'How We Use Information'), icon: Users },
+        { id: 'sharing', title: t('privacy_modal.sections.sharing', 'Information Sharing'), icon: FileText },
+        { id: 'location', title: t('privacy_modal.sections.location', 'Location Data'), icon: MapPin },
+        { id: 'payments', title: t('privacy_modal.sections.payments', 'Payment Information'), icon: CreditCard },
+        { id: 'security', title: t('privacy_modal.sections.security', 'Data Security'), icon: Lock },
+        { id: 'communications', title: t('privacy_modal.sections.communications', 'Communications'), icon: Bell },
+        { id: 'rights', title: t('privacy_modal.sections.rights', 'Your Rights'), icon: Users },
+        { id: 'contact', title: t('privacy_modal.sections.contact', 'Contact Us'), icon: FileText },
     ];
 
     const renderContent = () => {
@@ -30,22 +32,19 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'overview':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Privacy Policy Overview</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.overview.title', 'Privacy Policy Overview')}</h3>
                         <p className="text-gray-600 leading-relaxed">
-                            At SkillOnCall.ca, we are committed to protecting your privacy and ensuring the security of your personal information. 
-                            This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform 
-                            to connect Canadian businesses with skilled workers.
+                            {t('privacy_modal.overview.description', 'At SkillOnCall.ca, we are committed to protecting your privacy and ensuring the security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform to connect Canadian businesses with skilled workers.')}
                         </p>
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">🍁 Canadian Privacy Commitment</h4>
+                            <h4 className="font-semibold text-blue-900 mb-2">{t('privacy_modal.overview.canadian_commitment_title', '🍁 Canadian Privacy Commitment')}</h4>
                             <p className="text-blue-800 text-sm">
-                                As a Canadian company, we comply with the Personal Information Protection and Electronic Documents Act (PIPEDA) 
-                                and applicable provincial privacy legislation to protect your personal information.
+                                {t('privacy_modal.overview.canadian_commitment', 'As a Canadian company, we comply with the Personal Information Protection and Electronic Documents Act (PIPEDA) and applicable provincial privacy legislation to protect your personal information.')}
                             </p>
                         </div>
                         <p className="text-gray-600 leading-relaxed">
-                            <strong>Last Updated:</strong> January 2025<br />
-                            <strong>Effective Date:</strong> January 1, 2025
+                            <strong>{t('privacy_modal.overview.last_updated', 'Last Updated:')}</strong> January 2025<br />
+                            <strong>{t('privacy_modal.overview.effective_date', 'Effective Date:')}</strong> January 1, 2025
                         </p>
                     </div>
                 );
@@ -53,44 +52,42 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'collection':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Information We Collect</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.collection.title', 'Information We Collect')}</h3>
                         
                         <div className="space-y-4">
                             <div className="border-l-4 border-blue-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Account Information</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.collection.account_title', 'Account Information')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Name, email address, phone number</li>
-                                    <li>• Profile photos and business logos</li>
-                                    <li>• Skills, certifications, and work experience (for workers)</li>
-                                    <li>• Business information and verification documents (for employers)</li>
+                                    {(Array.isArray(t('privacy_modal.collection.account_items', [])) ? t('privacy_modal.collection.account_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-green-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Location Information</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.collection.location_title', 'Location Information')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• GPS coordinates for job matching and check-in verification</li>
-                                    <li>• Preferred work locations and service areas</li>
-                                    <li>• Address information for job postings</li>
+                                    {(Array.isArray(t('privacy_modal.collection.location_items', [])) ? t('privacy_modal.collection.location_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-purple-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Usage Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.collection.usage_title', 'Usage Data')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Job applications, postings, and work history</li>
-                                    <li>• Messages and communications on the platform</li>
-                                    <li>• Ratings, reviews, and feedback</li>
-                                    <li>• Device information and IP addresses</li>
+                                    {(Array.isArray(t('privacy_modal.collection.usage_items', [])) ? t('privacy_modal.collection.usage_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border-l-4 border-orange-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Verification Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.collection.verification_title', 'Verification Data')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Government-issued ID for identity verification</li>
-                                    <li>• Selfies for check-in verification</li>
-                                    <li>• Banking information for payments (securely processed by Stripe)</li>
+                                    {(Array.isArray(t('privacy_modal.collection.verification_items', [])) ? t('privacy_modal.collection.verification_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -100,43 +97,42 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'usage':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">How We Use Your Information</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.usage.title', 'How We Use Your Information')}</h3>
                         
                         <div className="grid gap-4">
                             <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔍 Platform Services</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.usage.platform_title', '🔍 Platform Services')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Match workers with suitable job opportunities</li>
-                                    <li>• Enable communication between employers and workers</li>
-                                    <li>• Process payments and manage subscriptions</li>
-                                    <li>• Verify user identities and prevent fraud</li>
+                                    {(Array.isArray(t('privacy_modal.usage.platform_items', [])) ? t('privacy_modal.usage.platform_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📱 Notifications & Updates</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.usage.notifications_title', '📱 Notifications & Updates')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Send job alerts and application updates</li>
-                                    <li>• Notify about platform updates and new features</li>
-                                    <li>• Send security alerts and account notifications</li>
+                                    {(Array.isArray(t('privacy_modal.usage.notifications_items', [])) ? t('privacy_modal.usage.notifications_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🛡️ Safety & Security</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.usage.safety_title', '🛡️ Safety & Security')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Verify work attendance with GPS and selfie check-ins</li>
-                                    <li>• Detect and prevent fraudulent activities</li>
-                                    <li>• Maintain platform safety and user trust</li>
+                                    {(Array.isArray(t('privacy_modal.usage.safety_items', [])) ? t('privacy_modal.usage.safety_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="bg-gray-50 rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📊 Platform Improvement</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.usage.improvement_title', '📊 Platform Improvement')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Analyze usage patterns to improve our services</li>
-                                    <li>• Develop new features based on user needs</li>
-                                    <li>• Ensure platform performance and reliability</li>
+                                    {(Array.isArray(t('privacy_modal.usage.improvement_items', [])) ? t('privacy_modal.usage.improvement_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -146,32 +142,31 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'sharing':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Information Sharing</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.sharing.title', 'Information Sharing')}</h3>
                         
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                            <h4 className="font-semibold text-red-900 mb-2">🚫 We Never Sell Your Data</h4>
+                            <h4 className="font-semibold text-red-900 mb-2">{t('privacy_modal.sharing.never_sell_title', '🚫 We Never Sell Your Data')}</h4>
                             <p className="text-red-800 text-sm">
-                                SkillOnCall.ca does not sell, rent, or trade your personal information to third parties for marketing purposes.
+                                {t('privacy_modal.sharing.never_sell', 'SkillOnCall.ca does not sell, rent, or trade your personal information to third parties for marketing purposes.')}
                             </p>
                         </div>
 
                         <div className="space-y-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">✅ When We Share Information</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.sharing.when_share_title', '✅ When We Share Information')}</h4>
                                 <ul className="text-gray-600 space-y-2 text-sm">
-                                    <li><strong>With Other Users:</strong> Profile information visible to facilitate job matching</li>
-                                    <li><strong>Service Providers:</strong> Stripe for payments, Twilio for SMS, Firebase for notifications</li>
-                                    <li><strong>Legal Requirements:</strong> When required by Canadian law or to protect platform safety</li>
-                                    <li><strong>Business Transfers:</strong> In case of merger or acquisition (with notice to users)</li>
+                                    {(Array.isArray(t('privacy_modal.sharing.when_share_items', [])) ? t('privacy_modal.sharing.when_share_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx} dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔒 How We Protect Shared Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.sharing.protect_title', '🔒 How We Protect Shared Data')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• All service providers must meet our security standards</li>
-                                    <li>• Data sharing agreements limit use to specified purposes only</li>
-                                    <li>• Regular security audits of third-party integrations</li>
+                                    {(Array.isArray(t('privacy_modal.sharing.protect_items', [])) ? t('privacy_modal.sharing.protect_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -181,39 +176,36 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'location':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Location Data</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.location.title', 'Location Data')}</h3>
                         
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">📍 Why We Use Location Data</h4>
+                            <h4 className="font-semibold text-blue-900 mb-2">{t('privacy_modal.location.why_title', '📍 Why We Use Location Data')}</h4>
                             <p className="text-blue-800 text-sm">
-                                Location data is essential for matching workers with nearby jobs and verifying work attendance. 
-                                We only collect location data when you're actively using the app.
+                                {t('privacy_modal.location.why_description', 'Location data is essential for matching workers with nearby jobs and verifying work attendance. We only collect location data when you\'re actively using the app.')}
                             </p>
                         </div>
 
                         <div className="space-y-4">
                             <div className="border-l-4 border-green-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Job Matching</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.location.matching_title', 'Job Matching')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    We use your location to show relevant job opportunities within your preferred distance 
-                                    and help employers find workers in their area.
+                                    {t('privacy_modal.location.matching_description', 'We use your location to show relevant job opportunities within your preferred distance and help employers find workers in their area.')}
                                 </p>
                             </div>
 
                             <div className="border-l-4 border-orange-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Work Verification</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.location.verification_title', 'Work Verification')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    GPS check-in ensures workers are at the correct job location, protecting both 
-                                    employers and workers from fraud and disputes.
+                                    {t('privacy_modal.location.verification_description', 'GPS check-in ensures workers are at the correct job location, protecting both employers and workers from fraud and disputes.')}
                                 </p>
                             </div>
 
                             <div className="border-l-4 border-purple-500 pl-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">Your Control</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.location.control_title', 'Your Control')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• You can disable location services in your device settings</li>
-                                    <li>• Location data is only collected during active app use</li>
-                                    <li>• You can set your preferred work radius in your profile</li>
+                                    {(Array.isArray(t('privacy_modal.location.control_items', [])) ? t('privacy_modal.location.control_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -223,42 +215,38 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'payments':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Payment Information</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.payments.title', 'Payment Information')}</h3>
                         
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-green-900 mb-2">🔒 Secure Payment Processing</h4>
+                            <h4 className="font-semibold text-green-900 mb-2">{t('privacy_modal.payments.secure_title', '🔒 Secure Payment Processing')}</h4>
                             <p className="text-green-800 text-sm">
-                                All payment processing is handled by Stripe, a PCI DSS Level 1 certified payment processor. 
-                                SkillOnCall.ca does not store your complete credit card information.
+                                {t('privacy_modal.payments.secure_description', 'All payment processing is handled by Stripe, a PCI DSS Level 1 certified payment processor. SkillOnCall.ca does not store your complete credit card information.')}
                             </p>
                         </div>
 
                         <div className="space-y-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">💳 What We Collect</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.payments.collect_title', '💳 What We Collect')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Last 4 digits of credit cards (for account management)</li>
-                                    <li>• Payment method types (Visa, Mastercard, etc.)</li>
-                                    <li>• Transaction history and receipts</li>
-                                    <li>• Banking information for worker payouts (encrypted)</li>
+                                    {(Array.isArray(t('privacy_modal.payments.collect_items', [])) ? t('privacy_modal.payments.collect_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🛡️ Security Measures</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.payments.security_title', '🛡️ Security Measures')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• End-to-end encryption for all payment data</li>
-                                    <li>• Fraud detection and prevention systems</li>
-                                    <li>• Regular security audits and compliance checks</li>
-                                    <li>• Secure tokenization of payment methods</li>
+                                    {(Array.isArray(t('privacy_modal.payments.security_items', [])) ? t('privacy_modal.payments.security_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">💰 Payout Protection</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.payments.payout_title', '💰 Payout Protection')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Worker payouts are only sent to bank accounts verified to match the worker's legal name, 
-                                    preventing fraud and ensuring secure compensation.
+                                    {t('privacy_modal.payments.payout_description', 'Worker payouts are only sent to bank accounts verified to match the worker\'s legal name, preventing fraud and ensuring secure compensation.')}
                                 </p>
                             </div>
                         </div>
@@ -268,44 +256,40 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'security':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Data Security</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.security.title', 'Data Security')}</h3>
                         
                         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-red-900 mb-2">🛡️ Enterprise-Grade Security</h4>
+                            <h4 className="font-semibold text-red-900 mb-2">{t('privacy_modal.security.enterprise_title', '🛡️ Enterprise-Grade Security')}</h4>
                             <p className="text-red-800 text-sm">
-                                We implement multiple layers of security to protect your data, including encryption, 
-                                access controls, and continuous monitoring.
+                                {t('privacy_modal.security.enterprise_description', 'We implement multiple layers of security to protect your data, including encryption, access controls, and continuous monitoring.')}
                             </p>
                         </div>
 
                         <div className="grid gap-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔐 Authentication Security</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.security.auth_title', '🔐 Authentication Security')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• One-Time Password (OTP) login verification</li>
-                                    <li>• Passkey support for passwordless authentication</li>
-                                    <li>• Device limits to prevent account sharing</li>
-                                    <li>• Automatic session termination on new device login</li>
+                                    {(Array.isArray(t('privacy_modal.security.auth_items', [])) ? t('privacy_modal.security.auth_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🔒 Data Protection</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.security.protection_title', '🔒 Data Protection')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• AES-256 encryption for data at rest</li>
-                                    <li>• TLS 1.3 encryption for data in transit</li>
-                                    <li>• Regular security audits and penetration testing</li>
-                                    <li>• Secure cloud infrastructure with AWS/Google Cloud</li>
+                                    {(Array.isArray(t('privacy_modal.security.protection_items', [])) ? t('privacy_modal.security.protection_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🚨 Fraud Prevention</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.security.fraud_title', '🚨 Fraud Prevention')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• AI-powered risk detection engine</li>
-                                    <li>• Suspicious activity monitoring and alerts</li>
-                                    <li>• GPS and selfie verification for work check-ins</li>
-                                    <li>• Multi-factor authentication for sensitive actions</li>
+                                    {(Array.isArray(t('privacy_modal.security.fraud_items', [])) ? t('privacy_modal.security.fraud_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -315,36 +299,33 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'communications':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Communications</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.communications.title', 'Communications')}</h3>
                         
                         <div className="space-y-4">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                <h4 className="font-semibold text-blue-900 mb-2">📱 Types of Communications</h4>
+                                <h4 className="font-semibold text-blue-900 mb-2">{t('privacy_modal.communications.types_title', '📱 Types of Communications')}</h4>
                                 <ul className="text-blue-800 space-y-1 text-sm">
-                                    <li>• Job alerts and application notifications</li>
-                                    <li>• Platform updates and new feature announcements</li>
-                                    <li>• Security alerts and account notifications</li>
-                                    <li>• Marketing communications (with your consent)</li>
+                                    {(Array.isArray(t('privacy_modal.communications.types_items', [])) ? t('privacy_modal.communications.types_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">✉️ Communication Channels</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.communications.channels_title', '✉️ Communication Channels')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li><strong>Email:</strong> Account updates, job notifications, newsletters</li>
-                                    <li><strong>SMS:</strong> Urgent alerts, OTP codes, shift reminders</li>
-                                    <li><strong>Push Notifications:</strong> Real-time job alerts and messages</li>
-                                    <li><strong>In-App Messages:</strong> Direct communication between users</li>
+                                    {(Array.isArray(t('privacy_modal.communications.channels_items', [])) ? t('privacy_modal.communications.channels_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx} dangerouslySetInnerHTML={{ __html: item.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🎛️ Your Communication Preferences</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.communications.preferences_title', '🎛️ Your Communication Preferences')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Customize notification types in your account settings</li>
-                                    <li>• Unsubscribe from marketing emails at any time</li>
-                                    <li>• Control push notification permissions in your device settings</li>
-                                    <li>• Essential security and account notifications cannot be disabled</li>
+                                    {(Array.isArray(t('privacy_modal.communications.preferences_items', [])) ? t('privacy_modal.communications.preferences_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
@@ -354,68 +335,61 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'rights':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Your Privacy Rights</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.rights.title', 'Your Privacy Rights')}</h3>
                         
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-green-900 mb-2">🍁 Canadian Privacy Rights</h4>
+                            <h4 className="font-semibold text-green-900 mb-2">{t('privacy_modal.rights.canadian_title', '🍁 Canadian Privacy Rights')}</h4>
                             <p className="text-green-800 text-sm">
-                                Under Canadian privacy law (PIPEDA), you have specific rights regarding your personal information. 
-                                We're committed to honoring these rights and making them easy to exercise.
+                                {t('privacy_modal.rights.canadian_description', 'Under Canadian privacy law (PIPEDA), you have specific rights regarding your personal information. We\'re committed to honoring these rights and making them easy to exercise.')}
                             </p>
                         </div>
 
                         <div className="grid gap-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">👁️ Access Your Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.access_title', '👁️ Access Your Data')}</h4>
                                 <p className="text-gray-600 text-sm mb-2">
-                                    Request a copy of all personal information we have about you, including:
+                                    {t('privacy_modal.rights.access_description', 'Request a copy of all personal information we have about you, including:')}
                                 </p>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Profile information and work history</li>
-                                    <li>• Messages and communications</li>
-                                    <li>• Payment and transaction records</li>
-                                    <li>• Location and usage data</li>
+                                    {(Array.isArray(t('privacy_modal.rights.access_items', [])) ? t('privacy_modal.rights.access_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">✏️ Correct Your Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.correct_title', '✏️ Correct Your Data')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Update or correct any inaccurate personal information in your account. 
-                                    Most information can be updated directly in your profile settings.
+                                    {t('privacy_modal.rights.correct_description', 'Update or correct any inaccurate personal information in your account. Most information can be updated directly in your profile settings.')}
                                 </p>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🗑️ Delete Your Data</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.delete_title', '🗑️ Delete Your Data')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Request deletion of your account and associated data. Note that some information 
-                                    may be retained for legal compliance, fraud prevention, or dispute resolution.
+                                    {t('privacy_modal.rights.delete_description', 'Request deletion of your account and associated data. Note that some information may be retained for legal compliance, fraud prevention, or dispute resolution.')}
                                 </p>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">📤 Data Portability</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.portability_title', '📤 Data Portability')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Export your data in a machine-readable format to transfer to another service, 
-                                    where technically feasible.
+                                    {t('privacy_modal.rights.portability_description', 'Export your data in a machine-readable format to transfer to another service, where technically feasible.')}
                                 </p>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🚫 Object to Processing</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.object_title', '🚫 Object to Processing')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    Object to certain types of data processing, such as marketing communications 
-                                    or automated decision-making.
+                                    {t('privacy_modal.rights.object_description', 'Object to certain types of data processing, such as marketing communications or automated decision-making.')}
                                 </p>
                             </div>
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
-                            <h4 className="font-semibold text-gray-900 mb-2">📧 Exercise Your Rights</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.rights.exercise_title', '📧 Exercise Your Rights')}</h4>
                             <p className="text-gray-600 text-sm">
-                                To exercise any of these rights, contact us at <strong>privacy@skilloncall.ca</strong> 
-                                or use the contact form in your account settings. We'll respond within 30 days.
+                                {t('privacy_modal.rights.exercise_description', 'To exercise any of these rights, contact us at privacy@skilloncall.ca or use the contact form in your account settings. We\'ll respond within 30 days.')}
                             </p>
                         </div>
                     </div>
@@ -424,58 +398,47 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
             case 'contact':
                 return (
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold text-gray-900">Contact Us</h3>
+                        <h3 className="text-xl font-semibold text-gray-900">{t('privacy_modal.contact.title', 'Contact Us')}</h3>
                         
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">📞 Get in Touch</h4>
+                            <h4 className="font-semibold text-blue-900 mb-2">{t('privacy_modal.contact.get_touch_title', '📞 Get in Touch')}</h4>
                             <p className="text-blue-800 text-sm">
-                                Have questions about this Privacy Policy or how we handle your data? 
-                                We're here to help and committed to transparency.
+                                {t('privacy_modal.contact.get_touch_description', 'Have questions about this Privacy Policy or how we handle your data? We\'re here to help and committed to transparency.')}
                             </p>
                         </div>
 
                         <div className="grid gap-4">
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🏢 SkillOnCall.ca Inc.</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.contact.company_title', '🏢 SkillOnCall.ca Inc.')}</h4>
                                 <div className="text-gray-600 text-sm space-y-1">
-                                    <p><strong>Privacy Officer:</strong> privacy@skilloncall.ca</p>
-                                    <p><strong>General Support:</strong> support@skilloncall.ca</p>
-                                    <p><strong>Mailing Address:</strong></p>
-                                    <p className="ml-4">
-                                        SkillOnCall.ca Inc.<br />
-                                        Privacy Department<br />
-                                        123 Main Street, Suite 456<br />
-                                        Toronto, ON M5V 3A8<br />
-                                        Canada
-                                    </p>
+                                    <p><strong>{t('privacy_modal.contact.privacy_officer', 'Privacy Officer:')}</strong> privacy@skilloncall.ca</p>
+                                    <p><strong>{t('privacy_modal.contact.general_support', 'General Support:')}</strong> support@skilloncall.ca</p>
+                                    <p><strong>{t('privacy_modal.contact.mailing_address', 'Mailing Address:')}</strong></p>
+                                    <p className="ml-4" dangerouslySetInnerHTML={{ __html: t('privacy_modal.contact.company_address', 'SkillOnCall.ca Inc.<br />Privacy Department<br />123 Main Street, Suite 456<br />Toronto, ON M5V 3A8<br />Canada') }} />
                                 </div>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">⏰ Response Times</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.contact.response_times_title', '⏰ Response Times')}</h4>
                                 <ul className="text-gray-600 space-y-1 text-sm">
-                                    <li>• Privacy requests: Within 30 days</li>
-                                    <li>• General inquiries: Within 2 business days</li>
-                                    <li>• Security concerns: Within 24 hours</li>
-                                    <li>• Urgent issues: Same day response</li>
+                                    {(Array.isArray(t('privacy_modal.contact.response_items', [])) ? t('privacy_modal.contact.response_items', []) : []).map((item: string, idx: number) => (
+                                        <li key={idx}>• {item}</li>
+                                    ))}
                                 </ul>
                             </div>
 
                             <div className="border rounded-lg p-4">
-                                <h4 className="font-semibold text-gray-900 mb-2">🏛️ Regulatory Complaints</h4>
+                                <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.contact.regulatory_title', '🏛️ Regulatory Complaints')}</h4>
                                 <p className="text-gray-600 text-sm">
-                                    If you're not satisfied with our response to your privacy concerns, you can file a complaint 
-                                    with the Office of the Privacy Commissioner of Canada at <strong>priv.gc.ca</strong> or 
-                                    your provincial privacy commissioner.
+                                    {t('privacy_modal.contact.regulatory_description', 'If you\'re not satisfied with our response to your privacy concerns, you can file a complaint with the Office of the Privacy Commissioner of Canada at priv.gc.ca or your provincial privacy commissioner.')}
                                 </p>
                             </div>
                         </div>
 
                         <div className="bg-gray-50 rounded-lg p-4">
-                            <h4 className="font-semibold text-gray-900 mb-2">🔄 Policy Updates</h4>
+                            <h4 className="font-semibold text-gray-900 mb-2">{t('privacy_modal.contact.updates_title', '🔄 Policy Updates')}</h4>
                             <p className="text-gray-600 text-sm">
-                                We may update this Privacy Policy from time to time. We'll notify you of significant changes 
-                                via email or through the platform. The "Last Updated" date at the top indicates when changes were made.
+                                {t('privacy_modal.contact.updates_description', 'We may update this Privacy Policy from time to time. We\'ll notify you of significant changes via email or through the platform. The "Last Updated" date at the top indicates when changes were made.')}
                             </p>
                         </div>
                     </div>
@@ -509,8 +472,8 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
                                     <Shield className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-gray-900">Privacy Policy</h2>
-                                    <p className="text-sm text-gray-500">SkillOnCall.ca</p>
+                                    <h2 className="text-lg font-bold text-gray-900">{t('privacy_modal.title', 'Privacy Policy')}</h2>
+                                    <p className="text-sm text-gray-500">{t('privacy_modal.subtitle', 'SkillOnCall.ca')}</p>
                                 </div>
                             </div>
                             <button
@@ -544,8 +507,8 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
 
                     <div className="p-4 border-t border-gray-200">
                         <div className="text-xs text-gray-500 text-center">
-                            <p>🍁 Made in Canada</p>
-                            <p className="mt-1">Last updated: January 2025</p>
+                            <p>{t('privacy_modal.made_in_canada', '🍁 Made in Canada')}</p>
+                            <p className="mt-1">{t('privacy_modal.last_updated', 'Last updated: January 2025')}</p>
                         </div>
                     </div>
                 </div>
@@ -559,14 +522,14 @@ export function PrivacyPolicyModal({ isOpen, onClose }: PrivacyPolicyModalProps)
                     <div className="border-t border-gray-200 p-6 bg-gray-50 rounded-br-2xl">
                         <div className="flex items-center justify-between">
                             <div className="text-sm text-gray-600">
-                                Questions? Contact us at <strong>privacy@skilloncall.ca</strong>
+                                {t('privacy_modal.questions_contact', 'Questions? Contact us at')} <strong>privacy@skilloncall.ca</strong>
                             </div>
                             <Button 
                                 onClick={onClose}
                                 className="text-white hover:opacity-90"
-                                style={{backgroundColor: '#10B3D6'}}
+                                style={{backgroundColor: '#10B3D6', cursor: 'pointer'}}
                             >
-                                Close
+                                {t('privacy_modal.close', 'Close')}
                             </Button>
                         </div>
                     </div>
