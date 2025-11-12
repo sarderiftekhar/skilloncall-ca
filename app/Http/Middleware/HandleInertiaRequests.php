@@ -126,7 +126,7 @@ class HandleInertiaRequests extends Middleware
                 }
             } elseif (str_contains($routeName ?? '', 'onboarding')) {
                 $translations = __('onboarding');
-            } elseif (str_contains($routeName ?? '', 'welcome')) {
+            } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/') {
                 $translations = __('welcome');
             } elseif (str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
                 // Load how-it-works translations first
@@ -175,9 +175,28 @@ class HandleInertiaRequests extends Middleware
                     ]
                 ]);
             }
-        } catch (\Exception $e) {
-            Log::warning('Failed to load translations: ' . $e->getMessage());
-            $translations = [];
+        } catch (\Throwable $e) {
+            Log::error('Failed to load translations', [
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'route' => $routeName ?? null,
+                'path' => $currentPath ?? null,
+                'locale' => $locale ?? 'unknown',
+            ]);
+            
+            // Fallback to English if French fails
+            if ($locale === 'fr') {
+                try {
+                    app()->setLocale('en');
+                    $translations = __('welcome');
+                    Log::info('Fell back to English translations');
+                } catch (\Throwable $fallbackError) {
+                    Log::error('Fallback also failed: ' . $fallbackError->getMessage());
+                    $translations = [];
+                }
+            } else {
+                $translations = [];
+            }
         }
 
         return [
