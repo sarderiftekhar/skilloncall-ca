@@ -47,6 +47,19 @@ return [
         'privacy' => 'Confidentialité',
         'terms' => 'Conditions',
         'copyright' => 'Tous droits réservés. Fait avec 🍁 au Canada.',
+        'platform_description' => 'La principale plateforme canadienne pour relier des talents qualifiés à des entreprises locales. Créée par des Canadiens, pour des Canadiens.',
+        'employer_links' => [
+            'post_jobs' => 'Publier des offres',
+            'find_employees' => 'Trouver des employés',
+            'subscription_plans' => 'Voir les forfaits',
+            'success_stories' => 'Histoires de réussite',
+        ],
+        'employee_links' => [
+            'create_profile' => 'Créer un profil',
+            'browse_jobs' => 'Explorer les offres',
+            'pro_plans' => 'Plans Pro',
+            'help_center' => 'Centre d\'aide',
+        ],
     ],
 
     'employers' => [

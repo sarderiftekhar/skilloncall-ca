@@ -47,6 +47,19 @@ return [
         'privacy' => 'Privacy',
         'terms' => 'Terms',
         'copyright' => 'All rights reserved. Made with 🍁 in Canada.',
+        'platform_description' => 'Canada\'s premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.',
+        'employer_links' => [
+            'post_jobs' => 'Post Jobs',
+            'find_employees' => 'Find Employees',
+            'subscription_plans' => 'Subscription Plans',
+            'success_stories' => 'Success Stories',
+        ],
+        'employee_links' => [
+            'create_profile' => 'Create Profile',
+            'browse_jobs' => 'Browse Jobs',
+            'pro_plans' => 'Pro Plans',
+            'help_center' => 'Help Center',
+        ],
     ],
 
     'employers' => [

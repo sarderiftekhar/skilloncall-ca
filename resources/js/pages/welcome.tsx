@@ -85,9 +85,7 @@ export default function Welcome() {
         later: isFrench ? 'Peut-être plus tard' : 'Maybe later',
     };
 
-    const platformDescription = isFrench
-        ? 'La principale plateforme canadienne pour relier des talents qualifiés à des entreprises locales. Créée par des Canadiens, pour des Canadiens.'
-        : "Canada's premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.";
+    const platformDescription = t('footer.platform_description', "Canada's premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.");
 
     const testimonialCopy = {
         quote: isFrench
@@ -267,22 +265,22 @@ export default function Welcome() {
           ];
 
     const footerEmployerLinks = [
-        { label: isFrench ? 'Publier des offres' : 'Post Jobs', href: '#' },
-        { label: isFrench ? 'Trouver des employés' : 'Find Employees', href: '#' },
+        { label: t('footer.employer_links.post_jobs', 'Post Jobs'), href: '#' },
+        { label: t('footer.employer_links.find_employees', 'Find Employees'), href: '#' },
         {
-            label: isFrench ? 'Voir les forfaits' : 'Subscription Plans',
+            label: t('footer.employer_links.subscription_plans', 'Subscription Plans'),
             href: `/subscriptions${queryLang}`,
             highlight: true,
             prefix: '💎 ',
         },
-        { label: isFrench ? 'Histoires de réussite' : 'Success Stories', href: '#' },
+        { label: t('footer.employer_links.success_stories', 'Success Stories'), href: '#' },
     ];
 
     const footerEmployeeLinks = [
-        { label: isFrench ? 'Créer un profil' : 'Create Profile', href: '#' },
-        { label: isFrench ? 'Explorer les offres' : 'Browse Jobs', href: '#' },
+        { label: t('footer.employee_links.create_profile', 'Create Profile'), href: '#' },
+        { label: t('footer.employee_links.browse_jobs', 'Browse Jobs'), href: '#' },
         {
-            label: isFrench ? 'Plans Pro' : 'Pro Plans',
+            label: t('footer.employee_links.pro_plans', 'Pro Plans'),
             href: `/subscriptions${queryLang}`,
             highlight: true,
         },
