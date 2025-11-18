@@ -19,10 +19,11 @@ import {
 import { useState, useEffect } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const breadcrumbs: BreadcrumbItem[] = [
+// Breadcrumbs will be set dynamically based on locale
+const getBreadcrumbs = (t: (key: string, fallback?: string) => string, locale: string): BreadcrumbItem[] => [
     {
-        title: 'Employer Dashboard',
-        href: '/employer/dashboard',
+        title: t('employer.title', 'Employer Dashboard'),
+        href: `/employer/dashboard?lang=${locale}`,
     },
 ];
 
@@ -86,7 +87,7 @@ export default function EmployerDashboard({
     activeWorkers,
     chartData 
 }: EmployerDashboardProps) {
-    const { t } = useTranslations();
+    const { t, locale } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
     
     useEffect(() => {
@@ -126,9 +127,11 @@ export default function EmployerDashboard({
         });
     };
 
+    const breadcrumbs = getBreadcrumbs(t, locale);
+    
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Employer Dashboard">
+            <Head title={t('employer.title', 'Employer Dashboard')}>
                 <style>{`
                     * { cursor: default; }
                     a, button, [role="button"], .cursor-pointer, 
@@ -209,13 +212,13 @@ export default function EmployerDashboard({
                 {/* Header */}
                 <div className={`flex items-center justify-between transition-all duration-700 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold leading-tight employer-title">Employer Dashboard</h1>
-                        <p className="text-lg leading-relaxed text-gray-600 mt-1">Manage your job postings and applications</p>
+                        <h1 className="text-2xl md:text-3xl font-bold leading-tight employer-title">{t('employer.title', 'Employer Dashboard')}</h1>
+                        <p className="text-lg leading-relaxed text-gray-600 mt-1">{t('employer.subtitle', 'Manage your job postings and applications')}</p>
                     </div>
                     <div className="flex items-center space-x-3">
                         <Badge variant="outline" className="text-green-700 border-green-200 bg-green-50">
                             <CheckCircle className="h-3 w-3 mr-1" />
-                            Verified Employer
+                            {t('employer.verified_employer', 'Verified Employer')}
                         </Badge>
                         <Button 
                             className="text-white hover:opacity-90 hover:scale-105 transition-all duration-200 cursor-pointer" 
@@ -223,7 +226,7 @@ export default function EmployerDashboard({
                             onClick={() => window.location.href = '/employer/jobs/create'}
                         >
                             <PlusCircle className="h-4 w-4 mr-2" />
-                            Post New Job
+                            {t('employer.post_new_job', 'Post New Job')}
                         </Button>
                     </div>
                 </div>
@@ -232,28 +235,28 @@ export default function EmployerDashboard({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
                         {
-                            title: 'Total Jobs',
+                            title: t('employer.stats.total_jobs', 'Total Jobs'),
                             value: stats.totalJobs,
                             icon: Briefcase,
-                            description: 'All job postings'
+                            description: t('employer.stats.all_job_postings', 'All job postings')
                         },
                         {
-                            title: 'Active Jobs',
+                            title: t('employer.stats.active_jobs', 'Active Jobs'),
                             value: stats.activeJobs,
                             icon: CheckCircle,
-                            description: 'Currently active'
+                            description: t('employer.stats.currently_active', 'Currently active')
                         },
                         {
-                            title: 'Applications',
+                            title: t('employer.stats.applications', 'Applications'),
                             value: stats.totalApplications,
                             icon: FileText,
-                            description: 'Total received'
+                            description: t('employer.stats.total_received', 'Total received')
                         },
                         {
-                            title: 'Total Employees',
+                            title: t('employer.stats.total_employees', 'Total Employees'),
                             value: stats.activeWorkers,
                             icon: Users,
-                            description: 'Total employees'
+                            description: t('employer.stats.total_employees_desc', 'Total employees')
                         }
                     ].map((stat, index) => (
                         <Card 
@@ -288,10 +291,10 @@ export default function EmployerDashboard({
                                     <AlertCircle className="h-8 w-8 text-orange-600" />
                                     <div className="flex-1">
                                         <h3 className="font-semibold text-orange-900">
-                                            You have {stats.pendingApplications} pending application{stats.pendingApplications !== 1 ? 's' : ''}
+                                            {t('employer.pending_applications', `You have ${stats.pendingApplications} pending application${stats.pendingApplications !== 1 ? 's' : ''}`).replace(':count', String(stats.pendingApplications))}
                                         </h3>
                                         <p className="text-orange-700 mt-1">
-                                            Review and respond to applications to find the best workers for your jobs.
+                                            {t('employer.pending_applications_message', 'Review and respond to applications to find the best workers for your jobs.')}
                                         </p>
                                     </div>
                                     <Button 
@@ -300,7 +303,7 @@ export default function EmployerDashboard({
                                         onClick={() => window.location.href = '/employer/applications'}
                                         style={{height: '2.7em'}}
                                     >
-                                        Review Applications
+                                        {t('employer.review_applications', 'Review Applications')}
                                     </Button>
                                 </div>
                             </CardContent>
@@ -316,10 +319,10 @@ export default function EmployerDashboard({
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold flex items-center">
                                     <Briefcase className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                                    Recent Job Postings
+                                    {t('employer.recent_job_postings', 'Recent Job Postings')}
                                 </CardTitle>
                                 <CardDescription className="text-sm text-gray-600">
-                                    Your latest job postings
+                                    {t('employer.recent_job_postings_subtitle', 'Your latest job postings')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -341,18 +344,18 @@ export default function EmployerDashboard({
                                                     <h4 className="text-sm font-medium text-default">{job.title}</h4>
                                                     <div className="flex items-center gap-2 mt-1">
                                                         <Badge className={getStatusColor(job.status)} style={{fontSize: '10px'}}>
-                                                            {job.status}
+                                                            {t(`employer.status.${job.status.toLowerCase()}`, job.status)}
                                                         </Badge>
                                                         <span className="text-xs text-gray-600">
                                                             {formatCurrency(job.budget)}
                                                         </span>
                                                         <span className="text-xs text-gray-500">•</span>
                                                         <span className="text-xs text-gray-600">
-                                                            {job.applications_count} application{job.applications_count !== 1 ? 's' : ''}
+                                                            {job.applications_count} {job.applications_count !== 1 ? t('employer.applications_plural', 'applications') : t('employer.application', 'application')}
                                                         </span>
                                                     </div>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        Posted {formatDate(job.created_at)}
+                                                        {t('employer.posted', 'Posted')} {formatDate(job.created_at)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -364,20 +367,20 @@ export default function EmployerDashboard({
                                                 onClick={() => window.location.href = '/employer/jobs'}
                                                 style={{height: '2.7em'}}
                                             >
-                                                View All Jobs
+                                                {t('employer.view_all_jobs', 'View All Jobs')}
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
                                         <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-600">No jobs posted yet</p>
+                                        <p className="text-gray-600">{t('employer.no_jobs_posted', 'No jobs posted yet')}</p>
                                         <Button 
                                             className="mt-4 cursor-pointer text-white hover:scale-105 transition-all duration-200"
                                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                                             onClick={() => window.location.href = '/employer/jobs/create'}
                                         >
-                                            Post Your First Job
+                                            {t('employer.post_first_job', 'Post Your First Job')}
                                         </Button>
                                     </div>
                                 )}
@@ -391,10 +394,10 @@ export default function EmployerDashboard({
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold flex items-center">
                                     <FileText className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                                    Recent Applications
+                                    {t('employer.recent_applications_title', 'Recent Applications')}
                                 </CardTitle>
                                 <CardDescription className="text-sm text-gray-600">
-                                    Latest applications received
+                                    {t('employer.recent_applications_subtitle', 'Latest applications received')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -417,11 +420,11 @@ export default function EmployerDashboard({
                                                         <h4 className="text-sm font-medium text-default">{application.worker_name}</h4>
                                                         <p className="text-xs text-gray-600 mt-1">{application.job_title}</p>
                                                         <p className="text-xs text-gray-500 mt-1">
-                                                            Applied {formatDate(application.created_at)}
+                                                            {t('employer.applied', 'Applied')} {formatDate(application.created_at)}
                                                         </p>
                                                     </div>
                                                     <Badge className={getStatusColor(application.status)} style={{fontSize: '10px'}}>
-                                                        {application.status}
+                                                        {t(`employer.status.${application.status.toLowerCase()}`, application.status)}
                                                     </Badge>
                                                 </div>
                                             </div>
@@ -433,16 +436,16 @@ export default function EmployerDashboard({
                                                 onClick={() => window.location.href = '/employer/applications'}
                                                 style={{height: '2.7em'}}
                                             >
-                                                View All Applications
+                                                {t('employer.view_all_applications', 'View All Applications')}
                                             </Button>
                                         </div>
                                     </div>
                                 ) : (
                                     <div className="text-center py-8">
                                         <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                                        <p className="text-gray-600">No applications yet</p>
+                                        <p className="text-gray-600">{t('employer.no_applications_yet', 'No applications yet')}</p>
                                         <p className="text-sm text-gray-500 mt-2">
-                                            Post jobs to receive applications from workers
+                                            {t('employer.no_applications_message', 'Post jobs to receive applications from workers')}
                                         </p>
                                     </div>
                                 )}
@@ -458,10 +461,10 @@ export default function EmployerDashboard({
                             <CardHeader>
                                 <CardTitle className="text-lg font-semibold flex items-center">
                                     <Users className="h-5 w-5 mr-2" style={{color: '#10B3D6'}} />
-                                    Total Employees
+                                    {t('employer.total_employees_title', 'Total Employees')}
                                 </CardTitle>
                                 <CardDescription className="text-sm text-gray-600">
-                                    Employees currently engaged on your jobs
+                                    {t('employer.total_employees_subtitle', 'Employees currently engaged on your jobs')}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -486,7 +489,7 @@ export default function EmployerDashboard({
                                                     <h4 className="text-sm font-medium text-default">{worker.name}</h4>
                                                     <p className="text-xs text-gray-600 truncate">{worker.current_job}</p>
                                                     <p className="text-xs text-gray-500 mt-1">
-                                                        Hired {formatDate(worker.hired_at)}
+                                                        {t('employer.hired', 'Hired')} {formatDate(worker.hired_at)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -501,7 +504,7 @@ export default function EmployerDashboard({
                                             onClick={() => window.location.href = '/employer/workers'}
                                             style={{height: '2.7em'}}
                                         >
-                                            View All Workers
+                                            {t('employer.view_all_workers', 'View All Workers')}
                                         </Button>
                                     </div>
                                 )}
@@ -522,8 +525,8 @@ export default function EmployerDashboard({
                                     <PlusCircle className="h-5 w-5" style={{color: '#10B3D6'}} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-default">Post New Job</p>
-                                    <p className="text-xs text-gray-500">Create a job listing</p>
+                                    <p className="text-sm font-semibold text-default">{t('employer.quick_actions.post_new_job', 'Post New Job')}</p>
+                                    <p className="text-xs text-gray-500">{t('employer.quick_actions.post_new_job_desc', 'Create a job listing')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -539,8 +542,8 @@ export default function EmployerDashboard({
                                     <FileText className="h-5 w-5" style={{color: '#10B3D6'}} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-default">View Applications</p>
-                                    <p className="text-xs text-gray-500">Review submissions</p>
+                                    <p className="text-sm font-semibold text-default">{t('employer.quick_actions.view_applications', 'View Applications')}</p>
+                                    <p className="text-xs text-gray-500">{t('employer.quick_actions.view_applications_desc', 'Review submissions')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -556,8 +559,8 @@ export default function EmployerDashboard({
                                     <Users className="h-5 w-5" style={{color: '#10B3D6'}} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-default">Find Workers</p>
-                                    <p className="text-xs text-gray-500">Browse worker profiles</p>
+                                    <p className="text-sm font-semibold text-default">{t('employer.quick_actions.find_workers', 'Find Workers')}</p>
+                                    <p className="text-xs text-gray-500">{t('employer.quick_actions.find_workers_desc', 'Browse worker profiles')}</p>
                                 </div>
                             </div>
                         </CardContent>
@@ -573,8 +576,8 @@ export default function EmployerDashboard({
                                     <DollarSign className="h-5 w-5" style={{color: '#10B3D6'}} />
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-default">Payments</p>
-                                    <p className="text-xs text-gray-500">Manage transactions</p>
+                                    <p className="text-sm font-semibold text-default">{t('employer.quick_actions.payments', 'Payments')}</p>
+                                    <p className="text-xs text-gray-500">{t('employer.quick_actions.payments_desc', 'Manage transactions')}</p>
                                 </div>
                             </div>
                         </CardContent>

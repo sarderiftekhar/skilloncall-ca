@@ -60,3 +60,13 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface PaginationLinks {
+    url: string | null;
+    label: string;
+    active: boolean;
+}
+
+declare global {
+    function route(name: string, params?: any, absolute?: boolean): string;
+}

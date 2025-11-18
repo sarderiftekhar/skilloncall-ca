@@ -169,6 +169,28 @@
 .sidebar-nav-link {
     color: #FFFFFF !important;
     text-decoration: none !important;
+    cursor: pointer !important;
+}
+
+/* Ensure sidebar menu items show pointer cursor */
+.sidebar-nav-link,
+.sidebar-nav-link *,
+[data-sidebar="menu-button"],
+[data-sidebar="menu-button"] *,
+.sidebar-nav-link:hover,
+[data-sidebar="menu-button"]:hover,
+[data-sidebar="menu-item"],
+[data-sidebar="menu-item"] *,
+[data-sidebar="menu-item"]:hover {
+    cursor: pointer !important;
+}
+
+/* Force pointer cursor on all sidebar menu interactive elements */
+[data-sidebar="menu"] [data-sidebar="menu-item"],
+[data-sidebar="menu"] [data-sidebar="menu-item"] *,
+[data-sidebar="menu"] [data-sidebar="menu-item"]:hover,
+[data-sidebar="menu"] [data-sidebar="menu-item"]:hover * {
+    cursor: pointer !important;
 }
 
 .sidebar-nav-link:hover {

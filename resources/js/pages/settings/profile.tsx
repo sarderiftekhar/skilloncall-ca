@@ -14,18 +14,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 
-const breadcrumbs: BreadcrumbItem[] = [
+// Breadcrumbs will be set dynamically based on locale
+const getBreadcrumbs = (t: (key: string, fallback?: string) => string, locale: string): BreadcrumbItem[] => [
     {
-        title: 'Account Settings',
-        href: '/settings/profile',
+        title: t('settings_page.title', 'Account Settings'),
+        href: `/settings/profile?lang=${locale}`,
     },
 ];
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
-    const { t } = useTranslations();
+    const { t, locale } = useTranslations();
     const { auth } = usePage<SharedData>().props;
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
+    const breadcrumbs = getBreadcrumbs(t, locale);
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -53,17 +55,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     alert(result.message);
                 }
             } else {
-                alert('Password updated successfully!');
+                alert(t('settings_page.password_updated', 'Password updated successfully!'));
             }
         } catch (error) {
             console.error('Password update failed:', error);
-            alert('Failed to update password. Please try again.');
+            alert(t('settings_page.password_update_failed', 'Failed to update password. Please try again.'));
         }
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Account Settings" />
+            <Head title={t('settings_page.title', 'Account Settings')} />
             
             <div className="flex justify-center items-center min-h-[calc(100vh-200px)] py-8">
                 <Card className="border w-full max-w-2xl" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
@@ -71,17 +73,17 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         <Tabs defaultValue="password" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-6">
                                 <TabsTrigger value="password" className="cursor-pointer">
-                                    Password
+                                    {t('settings_page.password_tab', 'Password')}
                                 </TabsTrigger>
                                 <TabsTrigger value="deactivate" className="cursor-pointer">
-                                    Deactivate Account
+                                    {t('settings_page.deactivate_tab', 'Deactivate Account')}
                                 </TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="password" className="space-y-4">
                                 <form onSubmit={handlePasswordSubmit} className="space-y-6">
                                     <div className="grid gap-2">
-                                        <Label htmlFor="current_password">Current password</Label>
+                                        <Label htmlFor="current_password">{t('settings_page.current_password', 'Current password')}</Label>
                                         <Input
                                             id="current_password"
                                             ref={currentPasswordInput}
@@ -89,13 +91,13 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             type="password"
                                             className="mt-1 block w-full"
                                             autoComplete="current-password"
-                                            placeholder="Current password"
+                                            placeholder={t('settings_page.current_password', 'Current password')}
                                             required
                                         />
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="password">New password</Label>
+                                        <Label htmlFor="password">{t('settings_page.new_password', 'New password')}</Label>
                                         <Input
                                             id="password"
                                             ref={passwordInput}
@@ -103,20 +105,20 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             type="password"
                                             className="mt-1 block w-full"
                                             autoComplete="new-password"
-                                            placeholder="New password"
+                                            placeholder={t('settings_page.new_password', 'New password')}
                                             required
                                         />
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="password_confirmation">Confirm password</Label>
+                                        <Label htmlFor="password_confirmation">{t('settings_page.confirm_password', 'Confirm password')}</Label>
                                         <Input
                                             id="password_confirmation"
                                             name="password_confirmation"
                                             type="password"
                                             className="mt-1 block w-full"
                                             autoComplete="new-password"
-                                            placeholder="Confirm password"
+                                            placeholder={t('settings_page.confirm_password', 'Confirm password')}
                                             required
                                         />
                                     </div>
@@ -127,7 +129,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                             className="text-white cursor-pointer"
                                             style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
                                         >
-                                            Save password
+                                            {t('settings_page.save_password', 'Save password')}
                                         </Button>
                                     </div>
                                 </form>

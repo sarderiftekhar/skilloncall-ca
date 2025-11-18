@@ -8,28 +8,30 @@ export function useTranslations() {
     const translations: Translations = (props as any).translations || {};
     const locale: string = (props as any).locale || 'en';
 
-    const t = (key: string, fallback?: string | any[]) => {
+    const t = (key: string, fallback?: string, replacements?: Record<string, string | number>): string => {
         // Handle nested keys like 'stats.total_applications'
         const keys = key.split('.');
-        let value = translations;
-        
+        let value: any = translations;
+
         for (const k of keys) {
             if (value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, k)) {
                 value = value[k];
             } else {
-                return fallback ?? key;
+                value = undefined;
+                break;
             }
         }
-        
-        // Return the value if it exists, otherwise return fallback
-        if (value !== undefined && value !== null) {
-            return value;
+
+        let result = (value !== undefined && value !== null) ? String(value) : (fallback ?? key);
+
+        if (replacements) {
+            for (const [placeholder, replacement] of Object.entries(replacements)) {
+                result = result.replace(`:${placeholder}`, String(replacement));
+            }
         }
-        
-        return fallback ?? key;
+
+        return result;
     };
 
     return { t, locale };
 }
-
-

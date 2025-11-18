@@ -119,6 +119,16 @@ class EmployeeProfile extends Model
         return $this->hasMany(EmployeeAvailability::class);
     }
 
+    public function portfolios(): HasMany
+    {
+        return $this->hasMany(Portfolio::class, 'user_id', 'user_id');
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewee_id', 'user_id');
+    }
+
     // Scopes
     public function scopeComplete($query)
     {

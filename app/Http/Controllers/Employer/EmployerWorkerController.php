@@ -27,15 +27,27 @@ class EmployerWorkerController extends Controller
 
         return Inertia::render('employer/workers/index', [
             'workers' => $workers,
-            'filters' => $request->only(['search', 'skills', 'rating', 'availability']),
+            'filters' => $request->only(['search', 'skills', 'rating', 'availability', 'location', 'min_rate', 'max_rate']),
+            'skills' => \App\Models\GlobalSkill::active()->ordered()->get(['id', 'name']),
+            'provinces' => \App\Models\GlobalProvince::all(['code', 'name']),
         ]);
     }
 
     /**
      * Display the specified worker.
      */
-    public function show(User $worker): Response
+    public function show($employee): Response
     {
+        // Find the user by ID - ensure they have employee role
+        $worker = User::where('id', $employee)
+            ->where('role', 'employee')
+            ->firstOrFail();
+
+        // Check if worker has an employee profile
+        if (!$worker->employeeProfile) {
+            abort(404, 'Employee profile not found');
+        }
+
         $workerDetails = $this->workerService->getWorkerDetails($worker);
 
         return Inertia::render('employer/workers/show', [

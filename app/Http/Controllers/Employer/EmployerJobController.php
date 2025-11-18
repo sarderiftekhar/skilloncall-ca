@@ -7,6 +7,7 @@ use App\Http\Requests\Employer\StoreJobRequest;
 use App\Http\Requests\Employer\UpdateJobRequest;
 use App\Models\Job;
 use App\Services\Employer\EmployerJobService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,6 +15,7 @@ use Inertia\Response;
 
 class EmployerJobController extends Controller
 {
+    use AuthorizesRequests;
     public function __construct(
         protected EmployerJobService $jobService
     ) {}
@@ -73,9 +75,7 @@ class EmployerJobController extends Controller
         
         $jobDetails = $this->jobService->getJobDetails($job);
 
-        return Inertia::render('employer/jobs/show', [
-            'job' => $jobDetails,
-        ]);
+        return Inertia::render('employer/jobs/show', $jobDetails);
     }
 
     /**
