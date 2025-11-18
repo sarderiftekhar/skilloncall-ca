@@ -34,6 +34,9 @@ import {
 } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 import { type BreadcrumbItem } from '@/types';
+import { usePage } from '@inertiajs/react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Lock } from 'react-feather';
 
 interface Skill {
     id: number;
@@ -219,6 +222,8 @@ const getColorFromName = (name: string | null | undefined) => {
 
 export default function WorkerShow({ worker }: Props) {
     const { t, locale } = useTranslations();
+    const { isFreeTier } = usePage().props as { isFreeTier?: boolean };
+    const isFree = isFreeTier ?? true; // Default to free tier if not provided
 
     // Safety checks
     if (!worker) {
@@ -449,46 +454,98 @@ export default function WorkerShow({ worker }: Props) {
                                                     <span>{employeeProfile.city || ''}, {employeeProfile.province || ''}</span>
                                                 </div>
                                                 {worker.email && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Mail className="h-4 w-4" />
-                                                        <span>{worker.email}</span>
-                                                    </div>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="flex items-center gap-1 cursor-help">
+                                                                <Mail className="h-4 w-4" />
+                                                                <span className={isFree ? 'blur-sm select-none' : ''}>
+                                                                    {isFree ? '••••••@•••••' : worker.email}
+                                                                </span>
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        {isFree && (
+                                                            <TooltipContent>
+                                                                <p>{t('employer.subscribe_to_view', 'Subscribe to view contact information')}</p>
+                                                            </TooltipContent>
+                                                        )}
+                                                    </Tooltip>
                                                 )}
                                                 {employeeProfile.phone && (
-                                                    <div className="flex items-center gap-1">
-                                                        <Phone className="h-4 w-4" />
-                                                        <span>{employeeProfile.phone}</span>
-                                                    </div>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="flex items-center gap-1 cursor-help">
+                                                                <Phone className="h-4 w-4" />
+                                                                <span className={isFree ? 'blur-sm select-none' : ''}>
+                                                                    {isFree ? '•••-•••-••••' : employeeProfile.phone}
+                                                                </span>
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        {isFree && (
+                                                            <TooltipContent>
+                                                                <p>{t('employer.subscribe_to_view', 'Subscribe to view contact information')}</p>
+                                                            </TooltipContent>
+                                                        )}
+                                                    </Tooltip>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Stats */}
-                                        <div className="flex flex-wrap gap-6">
-                                            <div className="text-center">
-                                                <div className="text-2xl font-bold page-title">
-                                                    {formatCurrency(employeeProfile.hourly_rate_min || 0)}
-                                                    {employeeProfile.hourly_rate_max && employeeProfile.hourly_rate_max !== employeeProfile.hourly_rate_min && (
-                                                        <span className="text-lg text-gray-500"> - {formatCurrency(employeeProfile.hourly_rate_max)}</span>
-                                                    )}
-                                                </div>
-                                                <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">{t('common.hourly_rate', 'Hourly Rate')}</div>
+                                        {/* Action Buttons */}
+                                        <div className="flex items-center gap-3 mt-4">
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <span>
+                                                        <Button
+                                                            disabled={isFree}
+                                                            className={isFree ? 'opacity-50 cursor-not-allowed' : ''}
+                                                            style={{ backgroundColor: isFree ? '#9CA3AF' : '#10B3D6', color: '#FFFFFF' }}
+                                                            onClick={() => {
+                                                                if (!isFree) {
+                                                                    // Navigate to messages or open message modal
+                                                                    router.get(`/employer/messages?employee=${worker.id}&lang=${locale}`);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <MessageCircle className="h-4 w-4 mr-2" />
+                                                            {t('employer.message_employee', 'Message Employee')}
+                                                            {isFree && <Lock className="h-4 w-4 ml-2" />}
+                                                        </Button>
+                                                    </span>
+                                                </TooltipTrigger>
+                                                {isFree && (
+                                                    <TooltipContent>
+                                                        <p>{t('employer.subscribe_to_message', 'Subscribe to message employees')}</p>
+                                                    </TooltipContent>
+                                                )}
+                                            </Tooltip>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats */}
+                                    <div className="flex flex-wrap gap-6 mt-4">
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold page-title">
+                                                {formatCurrency(employeeProfile.hourly_rate_min || 0)}
+                                                {employeeProfile.hourly_rate_max && employeeProfile.hourly_rate_max !== employeeProfile.hourly_rate_min && (
+                                                    <span className="text-lg text-gray-500"> - {formatCurrency(employeeProfile.hourly_rate_max)}</span>
+                                                )}
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-2xl font-bold page-title flex items-center justify-center gap-1">
-                                                    <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                                                    {avgRating}
-                                                </div>
-                                                <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">
-                                                    {employeeProfile.reviews?.length || 0} {t('common.reviews', 'Reviews')}
-                                                </div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">{t('common.hourly_rate', 'Hourly Rate')}</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold page-title flex items-center justify-center gap-1">
+                                                <Star className="h-5 w-5 text-yellow-400 fill-current" />
+                                                {avgRating}
                                             </div>
-                                            <div className="text-center">
-                                                <div className="text-2xl font-bold page-title">
-                                                    {employeeProfile.overall_experience || '0'}
-                                                </div>
-                                                <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">{t('common.years_exp', 'Years Exp')}</div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">
+                                                {employeeProfile.reviews?.length || 0} {t('common.reviews', 'Reviews')}
                                             </div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-2xl font-bold page-title">
+                                                {employeeProfile.overall_experience || '0'}
+                                            </div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide mt-1">{t('common.years_exp', 'Years Exp')}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -747,22 +804,39 @@ export default function WorkerShow({ worker }: Props) {
                                             )}
                                         </div>
                                         
-                                        {/* Full Address */}
-                                        {(employeeProfile.address_line_1 || employeeProfile.postal_code || employeeProfile.country) && (
-                                            <div className="pt-4 border-t">
-                                                <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block">{t('employer.address', 'Address')}</Label>
-                                                <div className="text-default space-y-1">
-                                                    {employeeProfile.address_line_1 && <p>{employeeProfile.address_line_1}</p>}
-                                                    {employeeProfile.address_line_2 && <p>{employeeProfile.address_line_2}</p>}
-                                                    <p>
-                                                        {employeeProfile.city && `${employeeProfile.city}, `}
-                                                        {employeeProfile.province && `${employeeProfile.province} `}
-                                                        {employeeProfile.postal_code && employeeProfile.postal_code}
-                                                    </p>
-                                                    {employeeProfile.country && <p>{employeeProfile.country}</p>}
-                                                </div>
-                                            </div>
-                                        )}
+                                    {/* Full Address */}
+                                    {(employeeProfile.address_line_1 || employeeProfile.postal_code || employeeProfile.country) && (
+                                        <div className="pt-4 border-t">
+                                            <Label className="text-xs text-gray-500 uppercase tracking-wide mb-2 block">{t('employer.address', 'Address')}</Label>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="text-default space-y-1 cursor-help">
+                                                        {employeeProfile.address_line_1 && (
+                                                            <p className={isFree ? 'blur-sm select-none' : ''}>
+                                                                {isFree ? '•••• •••• •••• ••••' : employeeProfile.address_line_1}
+                                                            </p>
+                                                        )}
+                                                        {employeeProfile.address_line_2 && (
+                                                            <p className={isFree ? 'blur-sm select-none' : ''}>
+                                                                {isFree ? '•••• •••• •••• ••••' : employeeProfile.address_line_2}
+                                                            </p>
+                                                        )}
+                                                        <p>
+                                                            {employeeProfile.city && `${employeeProfile.city}, `}
+                                                            {employeeProfile.province && `${employeeProfile.province} `}
+                                                            {employeeProfile.postal_code && employeeProfile.postal_code}
+                                                        </p>
+                                                        {employeeProfile.country && <p>{employeeProfile.country}</p>}
+                                                    </div>
+                                                </TooltipTrigger>
+                                                {isFree && (
+                                                    <TooltipContent>
+                                                        <p>{t('employer.subscribe_to_view', 'Subscribe to view contact information')}</p>
+                                                    </TooltipContent>
+                                                )}
+                                            </Tooltip>
+                                        </div>
+                                    )}
                                     </CardContent>
                                 </Card>
                             )}
@@ -1119,28 +1193,41 @@ export default function WorkerShow({ worker }: Props) {
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="space-y-2">
-                                            {employeeProfile.emergency_contact_name && (
-                                                <div>
-                                                    <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.name', 'Name')}</Label>
-                                                    <p className="text-default font-medium mt-1">{employeeProfile.emergency_contact_name}</p>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <div className="space-y-2 cursor-help">
+                                                    {employeeProfile.emergency_contact_name && (
+                                                        <div>
+                                                            <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.name', 'Name')}</Label>
+                                                            <p className={`text-default font-medium mt-1 ${isFree ? 'blur-sm select-none' : ''}`}>
+                                                                {isFree ? '•••• ••••' : employeeProfile.emergency_contact_name}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {employeeProfile.emergency_contact_phone && (
+                                                        <div>
+                                                            <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.phone', 'Phone')}</Label>
+                                                            <p className={`text-default font-medium mt-1 ${isFree ? 'blur-sm select-none' : ''}`}>
+                                                                {isFree ? '•••-•••-••••' : employeeProfile.emergency_contact_phone}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                    {employeeProfile.emergency_contact_relationship && (
+                                                        <div>
+                                                            <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.relationship', 'Relationship')}</Label>
+                                                            <p className="text-default font-medium mt-1 capitalize">
+                                                                {employeeProfile.emergency_contact_relationship.replace(/_/g, ' ')}
+                                                            </p>
+                                                        </div>
+                                                    )}
                                                 </div>
+                                            </TooltipTrigger>
+                                            {isFree && (
+                                                <TooltipContent>
+                                                    <p>{t('employer.subscribe_to_view', 'Subscribe to view contact information')}</p>
+                                                </TooltipContent>
                                             )}
-                                            {employeeProfile.emergency_contact_phone && (
-                                                <div>
-                                                    <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.phone', 'Phone')}</Label>
-                                                    <p className="text-default font-medium mt-1">{employeeProfile.emergency_contact_phone}</p>
-                                                </div>
-                                            )}
-                                            {employeeProfile.emergency_contact_relationship && (
-                                                <div>
-                                                    <Label className="text-xs text-gray-500 uppercase tracking-wide">{t('employer.relationship', 'Relationship')}</Label>
-                                                    <p className="text-default font-medium mt-1 capitalize">
-                                                        {employeeProfile.emergency_contact_relationship.replace(/_/g, ' ')}
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </div>
+                                        </Tooltip>
                                     </CardContent>
                                 </Card>
                             )}

@@ -69,17 +69,22 @@ class HandleInertiaRequests extends Middleware
 
         // Get current subscription info
         $subscription = null;
+        $isFreeTier = true; // Default to free tier
         if ($user) {
             try {
                 $activeSubscription = $user->activeSubscription();
                 if ($activeSubscription) {
+                    $plan = $activeSubscription->plan;
+                    $isFreeTier = $plan->slug === 'free' || $plan->price == 0;
                     $subscription = [
-                        'plan_name' => $activeSubscription->plan->name,
-                        'plan_type' => $activeSubscription->plan->type,
+                        'plan_name' => $plan->name,
+                        'plan_slug' => $plan->slug,
+                        'plan_type' => $plan->type,
                         'status' => $activeSubscription->status,
                         'ends_at' => $activeSubscription->ends_at?->format('M j, Y'),
                         'days_until_expiration' => $activeSubscription->daysUntilExpiration(),
                         'is_cancelled' => $activeSubscription->isCancelled(),
+                        'is_free_tier' => $isFreeTier,
                     ];
                 }
             } catch (\Exception $e) {
@@ -158,6 +163,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'subscription' => $subscription,
+            'isFreeTier' => $isFreeTier,
             'locale' => $locale,
             'translations' => $translations,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

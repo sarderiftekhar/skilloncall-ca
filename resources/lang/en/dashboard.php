@@ -255,6 +255,10 @@ return [
             'portfolio_photos' => 'Portfolio Photos',
             'payments' => 'Payments',
             'payments_desc' => 'Manage transactions',
+            'subscribe_to_view' => 'Subscribe to view contact information',
+            'subscribe_to_message' => 'Subscribe to message employees',
+            'message_employee' => 'Message Employee',
+            'locked' => 'Locked',
         ],
         
         // Status translations

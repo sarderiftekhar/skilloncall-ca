@@ -255,6 +255,10 @@ return [
             'portfolio_photos' => 'Photos de portfolio',
             'payments' => 'Paiements',
             'payments_desc' => 'Gérer les transactions',
+            'subscribe_to_view' => 'Abonnez-vous pour voir les informations de contact',
+            'subscribe_to_message' => 'Abonnez-vous pour envoyer des messages aux employés',
+            'message_employee' => 'Envoyer un message à l\'employé',
+            'locked' => 'Verrouillé',
         ],
         
         // Status translations
