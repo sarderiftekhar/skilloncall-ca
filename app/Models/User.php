@@ -204,4 +204,45 @@ class User extends Authenticatable
         $subscription = $this->activeSubscription();
         return $subscription ? $subscription->getRemainingUsage($feature) : null;
     }
+
+    /**
+     * Get the average rating for this user.
+     */
+    public function getAverageRating(): float
+    {
+        $reviews = $this->receivedReviews;
+        if ($reviews->isEmpty()) {
+            return 0.0;
+        }
+        
+        return round($reviews->avg('rating'), 2);
+    }
+
+    /**
+     * Get review statistics for this user.
+     */
+    public function getReviewStats(): array
+    {
+        $reviews = $this->receivedReviews;
+        $total = $reviews->count();
+        
+        if ($total === 0) {
+            return [
+                'total' => 0,
+                'average' => 0.0,
+                'distribution' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
+            ];
+        }
+        
+        $distribution = [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0];
+        foreach ($reviews as $review) {
+            $distribution[$review->rating]++;
+        }
+        
+        return [
+            'total' => $total,
+            'average' => $this->getAverageRating(),
+            'distribution' => $distribution,
+        ];
+    }
 }

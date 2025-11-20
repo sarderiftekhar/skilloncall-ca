@@ -29,7 +29,14 @@ class EmployeeProfileController extends Controller
             'references',
             'availability',
             'certifications',
+            'reviews.reviewer',
+            'reviews.job',
         ])->where('user_id', $user->id)->first();
+
+        // Add review stats to profile
+        if ($profile) {
+            $profile->review_stats = $profile->getReviewStats();
+        }
 
         $globalData = [
             'globalSkills' => GlobalSkill::active()->ordered()->get(),

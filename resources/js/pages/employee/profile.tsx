@@ -13,6 +13,9 @@ import SkillsExperienceTab from '@/components/profile/tabs/SkillsExperienceTab';
 import WorkHistoryTab from '@/components/profile/tabs/WorkHistoryTab';
 import LanguagesTab from '@/components/profile/tabs/LanguagesTab';
 import PortfolioCertificationsTab from '@/components/profile/tabs/PortfolioCertificationsTab';
+import ReviewList from '@/components/reviews/ReviewList';
+import ReviewStats from '@/components/reviews/ReviewStats';
+import { Link } from '@inertiajs/react';
 
 // Loading Skeleton Components
 const ProfileHeaderSkeleton = () => (
@@ -290,6 +293,25 @@ export default function EmployeeProfilePage(props: PageProps) {
             profile={profile} 
             onUpdate={handleUpdate}
           />
+        );
+      case 'reviews':
+        const reviews = profile?.reviews || [];
+        const stats = profile?.review_stats || {
+          total: 0,
+          average: 0,
+          distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+        };
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <ReviewStats stats={stats} />
+              </div>
+              <div className="lg:col-span-2">
+                <ReviewList reviews={reviews} showJob={true} />
+              </div>
+            </div>
+          </div>
         );
       default:
         return null;

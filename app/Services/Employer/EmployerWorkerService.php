@@ -157,9 +157,15 @@ class EmployerWorkerService
             'employeeProfile.references',
             'employeeProfile.portfolios',
             'employeeProfile.reviews.reviewer',
+            'employeeProfile.reviews.job',
             'employeeProfile.availability',
             'employeeProfile.serviceAreas'
         ]);
+
+        // Add review stats to employee profile
+        if ($worker->employeeProfile) {
+            $worker->employeeProfile->review_stats = $worker->employeeProfile->getReviewStats();
+        }
 
         // Normalize image URLs to prevent double /storage/ prefix
         if ($worker->employeeProfile && $worker->employeeProfile->profile_photo) {
@@ -260,7 +266,8 @@ class EmployerWorkerService
      */
     public function rateWorker(User $employer, User $worker, array $data): void
     {
-        // Logic to create a review
-        // For now, this is a placeholder
+        // This method is deprecated - use ReviewService instead
+        // Keeping for backward compatibility but should use ReviewService directly
+        // Logic moved to ReviewService::createReview()
     }
 }

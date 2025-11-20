@@ -17,6 +17,7 @@ class Review extends Model
      */
     protected $fillable = [
         'job_id',
+        'application_id',
         'reviewer_id',
         'reviewee_id',
         'rating',
@@ -55,5 +56,46 @@ class Review extends Model
     public function reviewee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewee_id');
+    }
+
+    /**
+     * Get the application that the review is for.
+     */
+    public function application(): BelongsTo
+    {
+        return $this->belongsTo(Application::class);
+    }
+
+    /**
+     * Scope a query to only include reviews for employees.
+     */
+    public function scopeForEmployee($query)
+    {
+        return $query->where('type', 'employer_to_employee');
+    }
+
+    /**
+     * Scope a query to only include reviews for employers.
+     */
+    public function scopeForEmployer($query)
+    {
+        return $query->where('type', 'employee_to_employer');
+    }
+
+    /**
+     * Check if the review can be edited.
+     */
+    public function canBeEdited(): bool
+    {
+        // Reviews can be edited within 7 days of creation
+        return $this->created_at->addDays(7)->isFuture();
+    }
+
+    /**
+     * Check if the review is editable.
+     */
+    public function isEditable(): bool
+    {
+        return $this->canBeEdited();
     }
 }

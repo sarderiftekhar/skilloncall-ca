@@ -20,7 +20,6 @@ import {
     Mail
 } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
-import { show as showApplication } from '@/routes/employer/applications';
 
 interface Application {
     id: number;
@@ -339,7 +338,7 @@ export default function IndexApplicationsPage({ applications, filters }: IndexAp
                                                         variant="outline"
                                                         size="sm"
                                                         className="cursor-pointer"
-                                                        onClick={() => router.visit(showApplication({ application: application.id }).url({ lang: locale }))}
+                                                        onClick={() => router.visit(`/employer/applications/${application.id}?lang=${locale}`)}
                                                         style={{height: '2.5em'}}
                                                     >
                                                         <Eye className="h-4 w-4 mr-2" />

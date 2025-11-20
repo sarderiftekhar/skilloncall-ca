@@ -79,6 +79,8 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                     className="sidebar-nav-link flex w-full items-center gap-3 rounded-md px-3 py-2 cursor-pointer"
                                     style={{ cursor: 'pointer' }}
                                     title={item.title}
+                                    preserveState={false}
+                                    preserveScroll={false}
                                 >
                                     {item.icon && <item.icon size={18} color="#FFFFFF" />}
                                     <span className="force-white-text flex-1 text-left cursor-pointer" style={{ fontWeight: '500', fontSize: '14px' }}>

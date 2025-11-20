@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Briefcase, Clock, Globe, Image } from 'react-feather';
+import { User, Briefcase, Clock, Globe, Image, Star } from 'react-feather';
 
 interface Tab {
     id: string;
@@ -129,6 +129,12 @@ export const profileTabs: Tab[] = [
         id: 'portfolio',
         title: 'Portfolio & Certifications',
         icon: Image,
+        completionStatus: 'empty'
+    },
+    {
+        id: 'reviews',
+        title: 'Reviews',
+        icon: Star,
         completionStatus: 'empty'
     }
 ];

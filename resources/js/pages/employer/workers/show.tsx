@@ -1133,7 +1133,7 @@ export default function WorkerShow({ worker }: Props) {
                             )}
 
                             {/* Reviews */}
-                            {employeeProfile.reviews && employeeProfile.reviews.length > 0 && (
+                            {(employeeProfile.reviews && employeeProfile.reviews.length > 0) && (
                                 <Card className="bg-white rounded-xl shadow-sm" style={{ borderTop: '0.5px solid #192341' }}>
                                     <CardHeader>
                                         <CardTitle className="text-lg font-semibold page-title flex items-center">
@@ -1143,7 +1143,7 @@ export default function WorkerShow({ worker }: Props) {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="space-y-4">
-                                            {employeeProfile.reviews.map((review) => (
+                                            {employeeProfile.reviews.slice(0, 5).map((review: Review) => (
                                                 <div key={review.id} className="p-4 rounded-lg border" style={{borderColor: '#E5E7EB'}}>
                                                     <div className="flex items-start justify-between mb-2">
                                                         <div className="flex items-center gap-3">
@@ -1179,6 +1179,16 @@ export default function WorkerShow({ worker }: Props) {
                                                 </div>
                                             ))}
                                         </div>
+                                        {employeeProfile.reviews.length > 5 && (
+                                            <div className="mt-4 text-center">
+                                                <Link 
+                                                    href={`/reviews/${worker.id}`}
+                                                    className="text-sm text-[#10B3D6] hover:underline cursor-pointer"
+                                                >
+                                                    {t('reviews.view_all', 'View all reviews')} ({employeeProfile.reviews.length})
+                                                </Link>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             )}

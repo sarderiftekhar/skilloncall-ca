@@ -104,5 +104,33 @@ class EmployerProfile extends Model
         
         return true;
     }
+
+    /**
+     * Get the reviews received by this employer.
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class, 'reviewee_id', 'user_id');
+    }
+
+    /**
+     * Get the average rating for this employer.
+     */
+    public function getAverageRating(): float
+    {
+        return $this->user ? $this->user->getAverageRating() : 0.0;
+    }
+
+    /**
+     * Get review statistics for this employer.
+     */
+    public function getReviewStats(): array
+    {
+        return $this->user ? $this->user->getReviewStats() : [
+            'total' => 0,
+            'average' => 0.0,
+            'distribution' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
+        ];
+    }
 }
 

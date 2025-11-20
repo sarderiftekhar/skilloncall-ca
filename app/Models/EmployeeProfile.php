@@ -129,6 +129,26 @@ class EmployeeProfile extends Model
         return $this->hasMany(Review::class, 'reviewee_id', 'user_id');
     }
 
+    /**
+     * Get the average rating for this employee.
+     */
+    public function getAverageRating(): float
+    {
+        return $this->user ? $this->user->getAverageRating() : 0.0;
+    }
+
+    /**
+     * Get review statistics for this employee.
+     */
+    public function getReviewStats(): array
+    {
+        return $this->user ? $this->user->getReviewStats() : [
+            'total' => 0,
+            'average' => 0.0,
+            'distribution' => [1 => 0, 2 => 0, 3 => 0, 4 => 0, 5 => 0],
+        ];
+    }
+
     // Scopes
     public function scopeComplete($query)
     {

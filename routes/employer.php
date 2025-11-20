@@ -7,6 +7,7 @@ use App\Http\Controllers\Employer\EmployerApplicationController;
 use App\Http\Controllers\Employer\EmployerPaymentController;
 use App\Http\Controllers\Employer\EmployerMessageController;
 use App\Http\Controllers\Employer\EmployerProfileController;
+use App\Http\Controllers\Employer\EmployerReviewController;
 use App\Http\Controllers\Employer\OnboardingController;
 use App\Http\Controllers\LocationController;
 use Illuminate\Support\Facades\Route;
@@ -81,4 +82,13 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('profile', [EmployerProfileController::class, 'show'])->name('profile.show');
     Route::get('profile/edit', [EmployerProfileController::class, 'edit'])->name('profile.edit');
     Route::put('profile', [EmployerProfileController::class, 'update'])->name('profile.update');
+
+    // Review Management
+    Route::get('reviews', [EmployerReviewController::class, 'index'])->name('reviews.index');
+    Route::get('applications/{application}/reviews/create', [EmployerReviewController::class, 'create'])->name('reviews.create');
+    Route::post('reviews', [EmployerReviewController::class, 'store'])->name('reviews.store');
+    Route::get('reviews/{review}/edit', [EmployerReviewController::class, 'edit'])->name('reviews.edit');
+    Route::put('reviews/{review}', [EmployerReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('reviews/{review}', [EmployerReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::get('applications/{application}/can-review', [EmployerReviewController::class, 'canReview'])->name('reviews.can-review');
 });
