@@ -5,6 +5,7 @@ use App\Http\Controllers\Employer\EmployerJobController;
 use App\Http\Controllers\Employer\EmployerWorkerController;
 use App\Http\Controllers\Employer\EmployerApplicationController;
 use App\Http\Controllers\Employer\EmployerPaymentController;
+use App\Http\Controllers\Employer\EmployerMessageController;
 use App\Http\Controllers\Employer\EmployerProfileController;
 use App\Http\Controllers\Employer\OnboardingController;
 use App\Http\Controllers\LocationController;
@@ -69,6 +70,12 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     Route::get('payments', [EmployerPaymentController::class, 'index'])->name('payments.index');
     Route::get('payments/{payment}', [EmployerPaymentController::class, 'show'])->name('payments.show');
     Route::post('payments', [EmployerPaymentController::class, 'store'])->name('payments.store');
+    
+    // Message Management
+    Route::get('messages', [EmployerMessageController::class, 'index'])->name('messages.index');
+    Route::get('messages/{employee}', [EmployerMessageController::class, 'show'])->name('messages.show');
+    Route::post('messages', [EmployerMessageController::class, 'store'])->name('messages.store');
+    Route::put('messages/{employee}/read', [EmployerMessageController::class, 'markAsRead'])->name('messages.markAsRead');
     
     // Profile Management
     Route::get('profile', [EmployerProfileController::class, 'show'])->name('profile.show');

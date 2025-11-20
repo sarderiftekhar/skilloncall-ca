@@ -36,12 +36,25 @@ class SubscriptionController extends Controller
             $employeePlans = $this->subscriptionService->getEmployeePlans();
             $currentSubscription = $user->activeSubscription();
 
+            // Transform plans to match frontend expectations
+            $transformPlan = function($plan) {
+                return [
+                    'id' => $plan->id,
+                    'name' => $plan->name,
+                    'type' => $plan->type,
+                    'price_monthly' => (float) $plan->price,
+                    'price_yearly' => (float) ($plan->yearly_price ?? $plan->price * 12),
+                    'features' => $plan->features ?? [],
+                    'is_popular' => $plan->is_popular ?? false,
+                ];
+            };
+
             return Inertia::render('subscriptions/index', [
-                'employerPlans' => $employerPlans,
-                'employeePlans' => $employeePlans,
+                'employerPlans' => $employerPlans->map($transformPlan)->toArray(),
+                'employeePlans' => $employeePlans->map($transformPlan)->toArray(),
                 'currentSubscription' => $currentSubscription ? [
                     'id' => $currentSubscription->id,
-                    'plan' => $currentSubscription->plan,
+                    'plan' => $transformPlan($currentSubscription->plan),
                     'status' => $currentSubscription->status,
                     'amount' => $currentSubscription->getFormattedAmount(),
                     'billing_interval' => $currentSubscription->billing_interval,
@@ -64,7 +77,7 @@ class SubscriptionController extends Controller
                 'employerPlans' => [],
                 'employeePlans' => [],
                 'currentSubscription' => null,
-                'userRole' => Auth::user()->role ?? 'employee',
+                'userRole' => Auth::user()?->role ?? 'employee',
                 'error' => 'Unable to load subscription data. Please try again.',
             ]);
         }
