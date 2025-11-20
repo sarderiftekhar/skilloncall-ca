@@ -1,4 +1,3 @@
-import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
+import loginRoutes from '@/routes/login';
 import { Head, useForm } from '@inertiajs/react';
 import { Loader } from 'react-feather';
 
@@ -26,7 +26,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(AuthenticatedSessionController.store.post(), {
+        post(loginRoutes.store.url(), {
             onSuccess: () => {
                 reset('password');
             },

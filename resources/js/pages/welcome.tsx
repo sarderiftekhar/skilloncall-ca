@@ -12,7 +12,8 @@ import { TermsModal } from '@/components/terms-modal';
 
 import { ContactModal } from '@/components/contact-modal';
 
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -1069,18 +1070,21 @@ export default function Welcome() {
 
                                         {isProfileComplete ? (
 
-                                            <Link href={`/dashboard${queryLang}`}>
-
-                                                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:text-white hover:border-gray-400">{t('auth.dashboard', 'Dashboard')}</Button>
-
+                                            <Link 
+                                                href={`/dashboard${queryLang}`}
+                                                className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'border-gray-600 text-gray-300 hover:text-white hover:border-gray-400')}
+                                            >
+                                                {t('auth.dashboard', 'Dashboard')}
                                             </Link>
 
                                         ) : (
 
-                                            <Link href={auth.user?.role === 'employer' ? `/employer/onboarding${queryLang}` : `/employee/onboarding${queryLang}`}>
-
-                                                <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.complete_profile', 'Complete Profile')}</Button>
-
+                                            <Link 
+                                                href={auth.user?.role === 'employer' ? `/employer/onboarding${queryLang}` : `/employee/onboarding${queryLang}`}
+                                                className={cn(buttonVariants({ size: 'sm' }), 'hover:opacity-90 text-white')}
+                                                style={{backgroundColor: '#10B3D6'}}
+                                            >
+                                                {t('auth.complete_profile', 'Complete Profile')}
                                             </Link>
 
                                         )}
@@ -1091,17 +1095,20 @@ export default function Welcome() {
 
                                     <div className="flex items-center space-x-3">
 
-                                        <Link href={`/login${queryLang}`}>
+                                        <Link 
+                                            href={`/login${queryLang}`}
+                                            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'text-gray-300 hover:text-white cursor-pointer')}
+                                        >
+                                            {t('auth.sign_in', 'Sign In')}
+                                        </Link>
 
-                                            <Button variant="ghost" size="sm" className="text-gray-300 hover:text-white">{t('auth.sign_in', 'Sign In')}</Button>
-
-                                </Link>
-
-                                        <Link href={`/register${queryLang}`}>
-
-                                            <Button size="sm" style={{backgroundColor: '#10B3D6'}} className="hover:opacity-90 text-white">{t('auth.get_started', 'Get Started')}</Button>
-
-                                </Link>
+                                        <Link 
+                                            href={`/register${queryLang}`}
+                                            className={cn(buttonVariants({ size: 'sm' }), 'hover:opacity-90 text-white cursor-pointer')}
+                                            style={{backgroundColor: '#10B3D6'}}
+                                        >
+                                            {t('auth.get_started', 'Get Started')}
+                                        </Link>
 
                                     </div>
 

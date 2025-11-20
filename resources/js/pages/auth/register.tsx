@@ -1,5 +1,5 @@
-import RegisteredUserController from '@/actions/App/Http/Controllers/Auth/RegisteredUserController';
 import { login } from '@/routes';
+import registerRoutes from '@/routes/register';
 import { Form, Head } from '@inertiajs/react';
 import { Loader, Briefcase, User } from 'react-feather';
 import { useState } from 'react';
@@ -23,7 +23,8 @@ export default function Register() {
                 <div className="pointer-events-none absolute top-0 left-0 right-0 h-1.5 rounded-t-xl bg-[#10B3D6]" />
                 <CardContent className="pt-6">
                     <Form
-                        {...RegisteredUserController.store.form()}
+                        action={registerRoutes.store.url()}
+                        method="post"
                         resetOnSuccess={['password', 'password_confirmation']}
                         disableWhileProcessing
                         className="flex flex-col gap-6"
