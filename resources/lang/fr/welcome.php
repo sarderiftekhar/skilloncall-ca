@@ -795,4 +795,90 @@ return [
             'updates_description' => 'Nous pouvons mettre à jour ces conditions d\'utilisation de temps à autre. Les changements importants seront communiqués par courriel et via la plateforme. L\'utilisation continue constitue une acceptation des conditions mises à jour.',
         ],
     ],
+
+    'how_it_works' => [
+        'title' => 'Comment ça marche',
+        'subtitle' => 'La principale plateforme canadienne pour trouver et recruter des employés qualifiés',
+        'intro' => 'SkillOnCall.ca est spécialement conçu pour connecter les entreprises canadiennes avec des employés qualifiés. Que vous soyez un employeur cherchant à recruter des professionnels talentueux ou un employé qualifié recherchant des quarts supplémentaires et des opportunités dans votre domaine, nous facilitons la connexion de manière simple et efficace.',
+        'for_employers' => 'Pour les employeurs',
+        'for_employees' => 'Pour les employés qualifiés',
+        'employer_focus' => 'Trouvez et recrutez des employés qualifiés',
+        'employee_focus' => 'Trouvez des quarts supplémentaires et du travail dans votre domaine',
+        
+        'employers' => [
+            'title' => 'Trouvez et recrutez des employés qualifiés en 5 étapes simples',
+            'description' => 'Publiez vos offres d\'emploi et connectez-vous avec des employés qualifiés qui correspondent à vos exigences. Recrutez les talents dont vous avez besoin rapidement et efficacement.',
+            'step1' => [
+                'title' => 'Créez votre compte',
+                'description' => 'Inscrivez-vous en tant qu\'employeur et complétez votre profil d\'entreprise. Vérifiez votre entreprise pour établir la confiance avec les employés qualifiés.',
+            ],
+            'step2' => [
+                'title' => 'Publiez votre offre',
+                'description' => 'Créez une offre d\'emploi détaillée pour des employés qualifiés avec les exigences, l\'emplacement, le budget et l\'horaire. Votre première offre est gratuite!',
+            ],
+            'step3' => [
+                'title' => 'Examinez les candidatures',
+                'description' => 'Recevez des candidatures d\'employés qualifiés. Examinez leurs profils, compétences, certifications, évaluations et disponibilités pour trouver la correspondance parfaite.',
+            ],
+            'step4' => [
+                'title' => 'Connectez-vous et interviewez',
+                'description' => 'Envoyez des messages directement aux employés qualifiés via notre plateforme pour discuter des détails, négocier les conditions et planifier des entrevues. Recrutez les meilleurs talents pour votre équipe.',
+            ],
+            'step5' => [
+                'title' => 'Embauchez et commencez',
+                'description' => 'Sélectionnez le meilleur employé qualifié et marquez-le comme embauché. Commencez à travailler ensemble et construisez votre équipe avec des professionnels qualifiés!',
+            ],
+        ],
+        
+        'employees' => [
+            'title' => 'Trouvez des quarts supplémentaires et du travail dans votre domaine en 5 étapes simples',
+            'description' => 'Découvrez des opportunités dans votre domaine de travail. Trouvez des quarts supplémentaires, du travail à temps partiel et des opportunités contractuelles qui correspondent à vos compétences et à votre expertise.',
+            'step1' => [
+                'title' => 'Créez votre profil',
+                'description' => 'Inscrivez-vous en tant qu\'employé qualifié et créez votre profil professionnel. Mettez en valeur vos compétences, expérience, certifications et disponibilité pour attirer les employeurs.',
+            ],
+            'step2' => [
+                'title' => 'Parcourez les offres dans votre domaine',
+                'description' => 'Recherchez et filtrez les opportunités d\'emploi par emplacement, catégorie et vos compétences spécifiques. Trouvez des quarts supplémentaires et des opportunités de travail qui correspondent à votre expertise et à votre domaine de travail.',
+            ],
+            'step3' => [
+                'title' => 'Postulez aux offres',
+                'description' => 'Exprimez votre intérêt pour les emplois qui correspondent à vos compétences et à votre domaine. Les employeurs recherchant des employés qualifiés verront votre profil et pourront vous contacter directement.',
+            ],
+            'step4' => [
+                'title' => 'Recevez des messages',
+                'description' => 'Recevez des messages d\'employeurs recherchant des employés qualifiés. Discutez des détails de l\'emploi, des tarifs et des horaires via notre système de messagerie sécurisé.',
+            ],
+            'step5' => [
+                'title' => 'Obtenez l\'emploi et travaillez',
+                'description' => 'Une fois embauché, complétez le travail et développez votre réputation. Trouvez des quarts supplémentaires et faites progresser votre carrière dans votre domaine. Recevez des paiements directement des employeurs!',
+            ],
+        ],
+        
+        'features' => [
+            'title' => 'Pourquoi choisir SkillOnCall.ca?',
+            'secure' => [
+                'title' => 'Sécurisé et vérifié',
+                'description' => 'Tous les employés qualifiés et les employeurs sont vérifiés avec des vérifications d\'identité. La messagerie sécurisée garde vos informations privées.',
+            ],
+            'fast' => [
+                'title' => 'Appariement rapide',
+                'description' => 'Connectez-vous avec des employés qualifiés ou trouvez des opportunités de travail rapidement. Notre plateforme se spécialise dans l\'appariement de professionnels qualifiés avec les bonnes opportunités.',
+            ],
+            'flexible' => [
+                'title' => 'Travail flexible et quarts supplémentaires',
+                'description' => 'Trouvez des quarts supplémentaires et des opportunités de travail dans votre domaine. Parfait pour les employés qualifiés recherchant un revenu supplémentaire et des horaires flexibles.',
+            ],
+            'support' => [
+                'title' => 'Support 24/7',
+                'description' => 'Notre équipe de support canadienne est là pour vous aider à réussir. Obtenez de l\'aide quand vous en avez besoin.',
+            ],
+        ],
+        
+        'cta' => [
+            'employers' => 'Commencer à recruter des employés qualifiés',
+            'employees' => 'Commencer à trouver des quarts supplémentaires',
+            'get_started' => 'Commencer',
+        ],
+    ],
 ];

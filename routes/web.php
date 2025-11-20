@@ -18,6 +18,11 @@ Route::get('/', function (Illuminate\Http\Request $request) {
     ]);
 })->name('home');
 
+Route::get('/how-it-works', function (Illuminate\Http\Request $request) {
+    // Translations are loaded by HandleInertiaRequests middleware
+    return Inertia::render('how-it-works');
+})->name('how-it-works');
+
 // Contact form route
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 

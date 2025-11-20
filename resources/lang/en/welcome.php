@@ -795,4 +795,90 @@ return [
             'updates_description' => 'We may update these Terms of Service from time to time. Significant changes will be communicated via email and through the platform. Continued use constitutes acceptance of updated terms.',
         ],
     ],
+
+    'how_it_works' => [
+        'title' => 'How It Works',
+        'subtitle' => 'Canada\'s premier platform for finding and recruiting skilled employees',
+        'intro' => 'SkillOnCall.ca is specifically designed to connect Canadian businesses with skilled employees. Whether you\'re an employer looking to recruit talented professionals or a skilled employee seeking extra shifts and opportunities in your field, we make the connection simple and efficient.',
+        'for_employers' => 'For Employers',
+        'for_employees' => 'For Skilled Employees',
+        'employer_focus' => 'Find & Recruit Skilled Employees',
+        'employee_focus' => 'Find Extra Shifts & Work in Your Field',
+        
+        'employers' => [
+            'title' => 'Find & Recruit Skilled Employees in 5 Simple Steps',
+            'description' => 'Post your job openings and connect with qualified skilled employees who match your requirements. Recruit the talent you need quickly and efficiently.',
+            'step1' => [
+                'title' => 'Create Your Account',
+                'description' => 'Sign up as an employer and complete your business profile. Verify your business to build trust with skilled employees.',
+            ],
+            'step2' => [
+                'title' => 'Post Your Job',
+                'description' => 'Create a detailed job posting for skilled employees with requirements, location, budget, and schedule. Your first job posting is free!',
+            ],
+            'step3' => [
+                'title' => 'Review Applications',
+                'description' => 'Receive applications from qualified skilled employees. Review their profiles, skills, certifications, ratings, and availability to find the perfect match.',
+            ],
+            'step4' => [
+                'title' => 'Connect & Interview',
+                'description' => 'Message skilled employees directly through our platform to discuss details, negotiate terms, and schedule interviews. Recruit the best talent for your team.',
+            ],
+            'step5' => [
+                'title' => 'Hire & Get Started',
+                'description' => 'Select the best skilled employee and mark them as hired. Start working together and build your team with qualified professionals!',
+            ],
+        ],
+        
+        'employees' => [
+            'title' => 'Find Extra Shifts & Work in Your Field in 5 Simple Steps',
+            'description' => 'Discover opportunities in your line of work. Find extra shifts, part-time work, and contract opportunities that match your skills and expertise.',
+            'step1' => [
+                'title' => 'Create Your Profile',
+                'description' => 'Sign up as a skilled employee and build your professional profile. Showcase your skills, experience, certifications, and availability to attract employers.',
+            ],
+            'step2' => [
+                'title' => 'Browse Jobs in Your Field',
+                'description' => 'Search and filter job opportunities by location, category, and your specific skills. Find extra shifts and work opportunities that match your expertise and line of work.',
+            ],
+            'step3' => [
+                'title' => 'Apply to Jobs',
+                'description' => 'Express interest in jobs that fit your skills and field. Employers looking for skilled employees will see your profile and can contact you directly.',
+            ],
+            'step4' => [
+                'title' => 'Get Contacted',
+                'description' => 'Receive messages from employers seeking skilled employees. Discuss job details, rates, and schedules through our secure messaging system.',
+            ],
+            'step5' => [
+                'title' => 'Get Hired & Work',
+                'description' => 'Once hired, complete the work and build your reputation. Find extra shifts and grow your career in your field. Get paid directly by employers!',
+            ],
+        ],
+        
+        'features' => [
+            'title' => 'Why Choose SkillOnCall.ca?',
+            'secure' => [
+                'title' => 'Secure & Verified',
+                'description' => 'All skilled employees and employers are verified with identity checks. Secure messaging keeps your information private.',
+            ],
+            'fast' => [
+                'title' => 'Fast Matching',
+                'description' => 'Connect with skilled employees or find work opportunities quickly. Our platform specializes in matching skilled professionals with the right opportunities.',
+            ],
+            'flexible' => [
+                'title' => 'Flexible Work & Extra Shifts',
+                'description' => 'Find extra shifts and work opportunities in your field. Perfect for skilled employees looking for additional income and flexible schedules.',
+            ],
+            'support' => [
+                'title' => '24/7 Support',
+                'description' => 'Our Canadian support team is here to help you succeed. Get assistance whenever you need it.',
+            ],
+        ],
+        
+        'cta' => [
+            'employers' => 'Start Recruiting Skilled Employees',
+            'employees' => 'Start Finding Extra Shifts',
+            'get_started' => 'Get Started',
+        ],
+    ],
 ];
