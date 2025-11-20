@@ -103,7 +103,43 @@ class EmployerWorkerService
                 break;
         }
 
-        return $query->paginate(12)->withQueryString();
+        $results = $query->paginate(12)->withQueryString();
+        
+        // Normalize profile photos - filter out broken/missing images
+        $results->getCollection()->transform(function ($worker) {
+            $this->normalizeProfilePhoto($worker);
+            return $worker;
+        });
+        
+        return $results;
+    }
+
+    /**
+     * Normalize employee profile photos after loading.
+     */
+    protected function normalizeProfilePhoto($worker)
+    {
+        if ($worker->employeeProfile && $worker->employeeProfile->profile_photo) {
+            $photo = $worker->employeeProfile->profile_photo;
+            
+            // If it's a full URL (likely a broken CDN link), set to null
+            if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://')) {
+                $worker->employeeProfile->profile_photo = null;
+                return;
+            }
+            
+            // Remove any existing storage/ or /storage/ prefix
+            $photo = preg_replace('#^/?storage/#', '', $photo);
+            $photo = ltrim($photo, '/');
+            
+            // Check if file exists
+            if (\Storage::disk('public')->exists($photo)) {
+                $worker->employeeProfile->profile_photo = $photo;
+            } else {
+                // File doesn't exist - set to null so frontend shows initials
+                $worker->employeeProfile->profile_photo = null;
+            }
+        }
     }
 
     /**
@@ -128,15 +164,55 @@ class EmployerWorkerService
         // Normalize image URLs to prevent double /storage/ prefix
         if ($worker->employeeProfile && $worker->employeeProfile->profile_photo) {
             $photo = $worker->employeeProfile->profile_photo;
-            // If it's already a full URL, use it as is
-            if (!str_starts_with($photo, 'http://') && !str_starts_with($photo, 'https://')) {
+            
+            // Check if file exists before trying to serve it
+            $fileExists = false;
+            
+            // If it's a CDN URL that might not be accessible, try to convert to local path
+            if (str_starts_with($photo, 'http://') || str_starts_with($photo, 'https://')) {
+                // Check if it's a CDN URL (like cdn.skilloncall.ca)
+                if (str_contains($photo, 'cdn.skilloncall') || str_contains($photo, 'cdn.')) {
+                    // Try to extract the filename and convert to local storage path
+                    $urlParts = parse_url($photo);
+                    if (isset($urlParts['path'])) {
+                        $pathParts = explode('/', trim($urlParts['path'], '/'));
+                        $filename = end($pathParts);
+                        
+                        // Determine the storage directory based on URL path
+                        if (str_contains($photo, '/profiles/') || str_contains($photo, '/profile_photos/')) {
+                            $localPath = 'profile_photos/' . $filename;
+                        } elseif (str_contains($photo, '/portfolio/') || str_contains($photo, '/portfolio_photos/')) {
+                            $localPath = 'portfolio_photos/' . $filename;
+                        } else {
+                            // Default to profile_photos
+                            $localPath = 'profile_photos/' . $filename;
+                        }
+                        
+                        // Check if file exists in local storage
+                        if (\Storage::disk('public')->exists($localPath)) {
+                            $worker->employeeProfile->profile_photo = $localPath;
+                            $fileExists = true;
+                        }
+                    }
+                }
+                // For other full URLs, assume they're accessible
+                $fileExists = true;
+            } else {
                 // Remove any existing storage/ or /storage/ prefix to avoid duplication
                 $photo = preg_replace('#^/?storage/#', '', $photo);
                 // Ensure path doesn't start with a slash
                 $photo = ltrim($photo, '/');
-                // Store just the relative path (e.g., "profile_photos/filename.jpg")
-                // Frontend will add /storage/ prefix
-                $worker->employeeProfile->profile_photo = $photo;
+                
+                // Check if file exists
+                if (\Storage::disk('public')->exists($photo)) {
+                    $worker->employeeProfile->profile_photo = $photo;
+                    $fileExists = true;
+                }
+            }
+            
+            // If file doesn't exist, set profile_photo to null so frontend shows initials
+            if (!$fileExists) {
+                $worker->employeeProfile->profile_photo = null;
             }
         }
 

@@ -168,6 +168,14 @@ class OnboardingController extends Controller
         $employerProfile->profile_completed_at = now();
         $employerProfile->save();
 
+        // Check if there's an intended URL in session
+        $intendedUrl = $request->session()->get('url.intended');
+        if ($intendedUrl) {
+            $request->session()->forget('url.intended');
+            return redirect($intendedUrl)
+                ->with('success', 'Profile completed successfully!');
+        }
+
         return redirect()->route('employer.dashboard')
             ->with('success', 'Profile completed successfully!');
     }

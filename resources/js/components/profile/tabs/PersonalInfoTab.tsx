@@ -42,10 +42,34 @@ const CANADIAN_PROVINCES = [
     { value: 'YT', label: 'Yukon' },
 ];
 
+// Helper function to normalize image URLs
+const normalizeImageUrl = (photo: string | null | undefined): string | null => {
+    if (!photo || typeof photo !== 'string') return null;
+    
+    // If already a full URL, use it as is
+    if (photo.startsWith('http://') || photo.startsWith('https://')) {
+        return photo;
+    }
+    
+    // Remove any existing /storage/ or storage/ prefix to avoid duplication
+    let cleanPath = photo;
+    if (cleanPath.startsWith('/storage/')) {
+        cleanPath = cleanPath.substring('/storage/'.length);
+    } else if (cleanPath.startsWith('storage/')) {
+        cleanPath = cleanPath.substring('storage/'.length);
+    }
+    
+    // Ensure the path doesn't start with a slash
+    cleanPath = cleanPath.replace(/^\/+/, '');
+    
+    // Return with /storage/ prefix
+    return `/storage/${cleanPath}`;
+};
+
 export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [] }: PersonalInfoTabProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(
-        profile?.profile_photo ? `/storage/${profile.profile_photo}` : null
+        normalizeImageUrl(profile?.profile_photo)
     );
     const [editForm, setEditForm] = useState({
         first_name: profile?.first_name || '',
@@ -79,9 +103,9 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
         console.log('Profile photo effect triggered:', {
             profile_photo: profile?.profile_photo,
             current_url: profilePhotoUrl,
-            new_url: profile?.profile_photo ? `/storage/${profile.profile_photo}` : null
+            new_url: normalizeImageUrl(profile?.profile_photo)
         });
-        setProfilePhotoUrl(profile?.profile_photo ? `/storage/${profile.profile_photo}` : null);
+        setProfilePhotoUrl(normalizeImageUrl(profile?.profile_photo));
     }, [profile?.profile_photo]);
 
     // Fetch cities from API only when user interacts with city field
@@ -357,7 +381,7 @@ export default function PersonalInfoTab({ profile, onUpdate, globalProvinces = [
                                         } catch (error) {
                                             console.error('Error uploading profile photo:', error);
                                             // Reset to previous photo on error
-                                            setProfilePhotoUrl(profile?.profile_photo ? `/storage/${profile.profile_photo}` : null);
+                                            setProfilePhotoUrl(normalizeImageUrl(profile?.profile_photo));
                                         }
                                     }
                                 }}

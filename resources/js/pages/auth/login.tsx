@@ -9,7 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import AuthLayout from '@/layouts/auth-layout';
 import { register } from '@/routes';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { Loader } from 'react-feather';
 
 interface LoginProps {
@@ -18,6 +18,21 @@ interface LoginProps {
 }
 
 export default function Login({ status, canResetPassword }: LoginProps) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const submit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(AuthenticatedSessionController.store.post(), {
+            onSuccess: () => {
+                reset('password');
+            },
+        });
+    };
+
     return (
         <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
             <Head title="Log in" />
@@ -25,16 +40,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             <Card style={{ backgroundColor: '#FFFFFF' }} className="relative shadow-[0_12px_28px_rgba(16,179,214,0.10)]">
                 <div className="pointer-events-none absolute top-0 left-0 right-0 h-1.5 rounded-t-xl bg-[#10B3D6]" />
                 <CardContent className="pt-6">
-                    <Form {...AuthenticatedSessionController.store.form()} resetOnSuccess={['password']} className="flex flex-col gap-6">
-                        {({ processing, errors }) => (
-                            <>
-                                <div className="grid gap-6">
+                    <form onSubmit={submit} className="flex flex-col gap-6">
+                        <div className="grid gap-6">
                                     <div className="grid gap-2">
                                         <Label htmlFor="email">Email address</Label>
                                         <Input
                                             id="email"
                                             type="email"
                                             name="email"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
                                             required
                                             autoFocus
                                             tabIndex={1}
@@ -58,6 +73,8 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                             id="password"
                                             type="password"
                                             name="password"
+                                            value={data.password}
+                                            onChange={(e) => setData('password', e.target.value)}
                                             required
                                             tabIndex={2}
                                             autoComplete="current-password"
@@ -68,7 +85,13 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                     </div>
 
                                     <div className="flex items-center space-x-3">
-                                        <Checkbox id="remember" name="remember" tabIndex={3} />
+                                        <Checkbox 
+                                            id="remember" 
+                                            name="remember" 
+                                            checked={data.remember}
+                                            onCheckedChange={(checked) => setData('remember', checked as boolean)}
+                                            tabIndex={3} 
+                                        />
                                         <Label htmlFor="remember">Remember me</Label>
                                     </div>
 
@@ -84,9 +107,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                         Sign up
                                     </TextLink>
                                 </div>
-                            </>
-                        )}
-                    </Form>
+                    </form>
                 </CardContent>
             </Card>
 

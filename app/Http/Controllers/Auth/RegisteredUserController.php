@@ -18,8 +18,13 @@ class RegisteredUserController extends Controller
     /**
      * Show the registration page.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        // If redirect parameter is provided, set it as intended URL
+        if ($request->has('redirect')) {
+            $request->session()->put('url.intended', $request->get('redirect'));
+        }
+
         return Inertia::render('auth/register');
     }
 
@@ -47,6 +52,21 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         Auth::login($user);
+
+        // Check if there's an intended URL in session
+        $intendedUrl = $request->session()->get('url.intended');
+        
+        // If there's an intended URL and user is employer, redirect there after onboarding check
+        if ($intendedUrl && $user->role === 'employer') {
+            // Check if profile is complete
+            $employerProfile = \App\Models\EmployerProfile::where('user_id', $user->id)->first();
+            if ($employerProfile && $employerProfile->is_profile_complete) {
+                $request->session()->forget('url.intended');
+                return redirect($intendedUrl);
+            }
+            // If profile not complete, go to onboarding first
+            return redirect()->route('employer.onboarding.index');
+        }
 
         // Redirect workers and employers directly to onboarding, others to dashboard
         if ($user->role === 'worker') {

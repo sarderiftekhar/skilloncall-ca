@@ -532,9 +532,9 @@ export default function Welcome() {
 
     const footerEmployerLinks = [
 
-        { label: t('footer.employer_links.post_jobs', 'Post Jobs'), href: '#' },
+        { label: t('footer.employer_links.post_jobs', 'Post Jobs'), href: auth?.user && auth.user.role === 'employer' ? `/employer/jobs/create${queryLang}` : `/login${queryLang}&redirect=/employer/jobs/create` },
 
-        { label: t('footer.employer_links.find_employees', 'Find Employees'), href: '#' },
+        { label: t('footer.employer_links.find_employees', 'Find Employees'), href: auth?.user && auth.user.role === 'employer' ? `/employer/employees${queryLang}` : `/login${queryLang}&redirect=/employer/employees` },
 
         {
 
@@ -944,11 +944,28 @@ export default function Welcome() {
 
                             <nav className="hidden md:flex space-x-8">
 
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</a>
+                                {auth?.user ? (
+                                    <>
+                                        {auth.user.role === 'employer' ? (
+                                            <>
+                                                <Link href={`/employer/employees${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</Link>
+                                                <Link href={`/employer/jobs/create${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</Link>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Link href={`/login${queryLang}&redirect=/employer/employees`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</Link>
+                                                <Link href={`/login${queryLang}&redirect=/employer/jobs/create`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</Link>
+                                            </>
+                                        )}
+                                    </>
+                                ) : (
+                                    <>
+                                        <Link href={`/login${queryLang}&redirect=/employer/employees`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.find_employees')}</Link>
+                                        <Link href={`/login${queryLang}&redirect=/employer/jobs/create`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</Link>
+                                    </>
+                                )}
 
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.post_jobs')}</a>
-
-                                <a href={`/how-it-works${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</a>
+                                <Link href={`/how-it-works${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</Link>
 
                                 <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
 

@@ -542,12 +542,66 @@ export default function WorkerIndex({ workers, filters, skills, provinces }: Pro
                                                 >
                                                     {worker.employee_profile.profile_photo ? (
                                                         <img
-                                                            src={`/storage/${worker.employee_profile.profile_photo}`}
+                                                            src={(() => {
+                                                                const photo = worker.employee_profile.profile_photo;
+                                                                if (!photo || typeof photo !== 'string') return '';
+                                                                
+                                                                // If it's a CDN URL, try to extract local path as fallback
+                                                                if (photo.startsWith('http://') || photo.startsWith('https://')) {
+                                                                    // Check if it's a CDN URL that might fail
+                                                                    if (photo.includes('cdn.skilloncall') || photo.includes('cdn.')) {
+                                                                        // Try to extract filename and check local storage
+                                                                        const urlParts = photo.split('/');
+                                                                        const filename = urlParts[urlParts.length - 1];
+                                                                        // Return CDN URL but onError will handle fallback
+                                                                        return photo;
+                                                                    }
+                                                                    return photo;
+                                                                }
+                                                                
+                                                                // Remove any existing /storage/ or storage/ prefix to avoid duplication
+                                                                let cleanPath = photo;
+                                                                if (cleanPath.startsWith('/storage/')) {
+                                                                    cleanPath = cleanPath.substring('/storage/'.length);
+                                                                } else if (cleanPath.startsWith('storage/')) {
+                                                                    cleanPath = cleanPath.substring('storage/'.length);
+                                                                }
+                                                                
+                                                                // Ensure the path doesn't start with a slash
+                                                                cleanPath = cleanPath.replace(/^\/+/, '');
+                                                                
+                                                                // Return with /storage/ prefix
+                                                                return `/storage/${cleanPath}`;
+                                                            })()}
                                                             alt={worker.name}
                                                             className="h-full w-full object-cover"
                                                             onError={(e) => {
+                                                                const img = e.target as HTMLImageElement;
+                                                                const src = img.src;
+                                                                
+                                                                // If it's a CDN URL that failed, try to extract filename and use local storage
+                                                                if (src.startsWith('http://') || src.startsWith('https://')) {
+                                                                    const urlParts = src.split('/');
+                                                                    const filename = urlParts[urlParts.length - 1];
+                                                                    
+                                                                    // Try local storage path
+                                                                    if (filename) {
+                                                                        // Check if filename contains path info
+                                                                        let localPath = filename;
+                                                                        if (src.includes('/profiles/')) {
+                                                                            localPath = `profile_photos/${filename}`;
+                                                                        } else if (src.includes('/portfolio/')) {
+                                                                            localPath = `portfolio_photos/${filename}`;
+                                                                        }
+                                                                        
+                                                                        // Try the local path
+                                                                        img.src = `/storage/${localPath}`;
+                                                                        return; // Let onError fire again if this also fails
+                                                                    }
+                                                                }
+                                                                
                                                                 // Hide image on error - fallback will show automatically
-                                                                (e.target as HTMLImageElement).style.display = 'none';
+                                                                img.style.display = 'none';
                                                                 const parent = (e.target as HTMLImageElement).parentElement;
                                                                 if (parent) {
                                                                     const fallback = parent.querySelector('.avatar-fallback') as HTMLElement;

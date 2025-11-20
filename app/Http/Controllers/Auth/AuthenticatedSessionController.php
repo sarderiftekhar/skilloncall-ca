@@ -18,6 +18,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(Request $request): Response
     {
+        // If redirect parameter is provided, set it as intended URL
+        if ($request->has('redirect')) {
+            $request->session()->put('url.intended', $request->get('redirect'));
+        }
+
         return Inertia::render('auth/login', [
             'canResetPassword' => Route::has('password.request'),
             'status' => $request->session()->get('status'),
@@ -32,6 +37,22 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Check if there's an intended URL in session
+        $intendedUrl = $request->session()->get('url.intended');
+        $user = Auth::user();
+
+        // If there's an intended URL and user is employer, redirect there after profile check
+        if ($intendedUrl && $user && $user->role === 'employer') {
+            // Check if profile is complete
+            $employerProfile = \App\Models\EmployerProfile::where('user_id', $user->id)->first();
+            if ($employerProfile && $employerProfile->is_profile_complete) {
+                $request->session()->forget('url.intended');
+                return redirect($intendedUrl);
+            }
+            // If profile not complete, go to onboarding first
+            return redirect()->route('employer.onboarding.index');
+        }
 
         return redirect()->intended(route('dashboard', absolute: false));
     }

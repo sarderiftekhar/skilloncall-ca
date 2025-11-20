@@ -328,7 +328,29 @@ export default function EmployeeProfilePage(props: PageProps) {
                       >
                         {profile?.profile_photo ? (
                           <img
-                            src={`/storage/${profile.profile_photo}`}
+                            src={(() => {
+                              const photo = profile.profile_photo;
+                              if (!photo || typeof photo !== 'string') return '';
+                              
+                              // If already a full URL, use it as is
+                              if (photo.startsWith('http://') || photo.startsWith('https://')) {
+                                return photo;
+                              }
+                              
+                              // Remove any existing /storage/ or storage/ prefix to avoid duplication
+                              let cleanPath = photo;
+                              if (cleanPath.startsWith('/storage/')) {
+                                cleanPath = cleanPath.substring('/storage/'.length);
+                              } else if (cleanPath.startsWith('storage/')) {
+                                cleanPath = cleanPath.substring('storage/'.length);
+                              }
+                              
+                              // Ensure the path doesn't start with a slash
+                              cleanPath = cleanPath.replace(/^\/+/, '');
+                              
+                              // Return with /storage/ prefix
+                              return `/storage/${cleanPath}`;
+                            })()}
                             alt="Profile"
                             className="w-full h-full object-cover"
                           />

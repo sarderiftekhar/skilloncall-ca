@@ -384,7 +384,27 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                             >
                                                 {(photo.preview || photo.url || photo.path) ? (
                                                     <img
-                                                        src={photo.preview || photo.url || `/storage/${photo.path}`}
+                                                        src={(() => {
+                                                            if (photo.preview) return photo.preview;
+                                                            if (photo.url) {
+                                                                // If already a full URL, use it as is
+                                                                if (photo.url.startsWith('http://') || photo.url.startsWith('https://')) {
+                                                                    return photo.url;
+                                                                }
+                                                                return photo.url;
+                                                            }
+                                                            if (photo.path) {
+                                                                // If already a full URL, use it as is
+                                                                if (photo.path.startsWith('http://') || photo.path.startsWith('https://')) {
+                                                                    return photo.path;
+                                                                }
+                                                                // Remove any existing /storage/ prefix
+                                                                let cleanPath = photo.path.replace(/^\/?storage\//, '');
+                                                                cleanPath = cleanPath.replace(/^\/+/, '');
+                                                                return `/storage/${cleanPath}`;
+                                                            }
+                                                            return '';
+                                                        })()}
                                                         alt={`Portfolio ${index + 1}`}
                                                         className="w-full h-full object-cover rounded-lg"
                                                         onError={(e) => {
@@ -492,7 +512,27 @@ export default function PortfolioCertificationsTab({ profile, onUpdate }: Portfo
                                             <div className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
                                                 {(photo.url || photo.path || photo.preview) ? (
                                                     <img
-                                                        src={photo.url || `/storage/${photo.path}` || photo.preview}
+                                                        src={(() => {
+                                                            if (photo.preview) return photo.preview;
+                                                            if (photo.url) {
+                                                                // If already a full URL, use it as is
+                                                                if (photo.url.startsWith('http://') || photo.url.startsWith('https://')) {
+                                                                    return photo.url;
+                                                                }
+                                                                return photo.url;
+                                                            }
+                                                            if (photo.path) {
+                                                                // If already a full URL, use it as is
+                                                                if (photo.path.startsWith('http://') || photo.path.startsWith('https://')) {
+                                                                    return photo.path;
+                                                                }
+                                                                // Remove any existing /storage/ prefix
+                                                                let cleanPath = photo.path.replace(/^\/?storage\//, '');
+                                                                cleanPath = cleanPath.replace(/^\/+/, '');
+                                                                return `/storage/${cleanPath}`;
+                                                            }
+                                                            return '';
+                                                        })()}
                                                         alt={photo.caption || `Portfolio ${index + 1}`}
                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                                                         onError={(e) => {
