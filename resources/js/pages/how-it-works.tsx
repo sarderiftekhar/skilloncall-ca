@@ -394,7 +394,7 @@ export default function HowItWorks() {
                                     </div>
                                     
                                     {/* Conclusion Badge */}
-                                    <div className="relative z-10 mt-12 md:mt-0 md:absolute md:top-[78%] md:left-1/2 md:-translate-x-1/2 flex justify-center">
+                                    <div className="relative z-10 mt-12 md:mt-0 md:absolute md:top-[78%] md:left-1/2 md:-translate-x-1/2 flex flex-col items-center gap-24">
                                         <div 
                                             className="inline-flex items-center gap-3 px-6 py-3 rounded-full shadow-xl"
                                             style={{
@@ -407,6 +407,19 @@ export default function HowItWorks() {
                                                 {t('how_it_works.conclusion', 'Conclusion')}
                                             </span>
                                         </div>
+                                        
+                                        {/* CTA Button - Moved closer to conclusion */}
+                                        <Link href={auth?.user ? `/dashboard${queryLang}` : `/register${queryLang}`}>
+                                            <Button 
+                                                className="text-white hover:opacity-90 cursor-pointer"
+                                                style={{ backgroundColor: '#10B3D6', height: '2.7em', paddingLeft: '2rem', paddingRight: '2rem' }}
+                                            >
+                                                {activeTab === 'employers'
+                                                    ? t('how_it_works.cta.employers', 'Start Recruiting Skilled Employees')
+                                                    : t('how_it_works.cta.employees', 'Start Finding Extra Shifts')
+                                                }
+                                            </Button>
+                                        </Link>
                                     </div>
                                 </div>
                                 
@@ -423,26 +436,11 @@ export default function HowItWorks() {
                                     }
                                 `}</style>
                             </div>
-
-                            {/* CTA Section */}
-                            <div className="text-center">
-                                <Link href={`/register${queryLang}`}>
-                                    <Button 
-                                        className="text-white hover:opacity-90 cursor-pointer"
-                                        style={{ backgroundColor: '#10B3D6', height: '2.7em', paddingLeft: '2rem', paddingRight: '2rem' }}
-                                    >
-                                        {activeTab === 'employers'
-                                            ? t('how_it_works.cta.employers', 'Start Recruiting Skilled Workers')
-                                            : t('how_it_works.cta.employees', 'Start Finding Extra Shifts')
-                                        }
-                                    </Button>
-                                </Link>
-                            </div>
                         </div>
                     </section>
 
                     {/* Features Section */}
-                    <section className="py-16" style={{backgroundColor: '#FCF2F0'}}>
+                    <section className="pt-8 pb-16" style={{backgroundColor: '#FCF2F0'}}>
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                             <h2 className="text-2xl md:text-3xl font-bold text-center mb-12" style={{color: '#192341'}}>
                                 {t('how_it_works.features.title', 'Why Choose SkillOnCall.ca?')}
