@@ -212,12 +212,12 @@ export default function IndexJobsPage({ jobs, filters }: IndexJobsPageProps) {
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                                         {t('jobs.status', 'Status')}
                                     </label>
-                                    <Select value={data.status} onValueChange={(value) => setData('status', value)}>
+                                    <Select value={data.status || 'all'} onValueChange={(value) => setData('status', value === 'all' ? '' : value)}>
                                         <SelectTrigger className="cursor-pointer">
                                             <SelectValue placeholder={t('jobs.all_statuses', 'All Statuses')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="" className="cursor-pointer">{t('jobs.all_statuses', 'All Statuses')}</SelectItem>
+                                            <SelectItem value="all" className="cursor-pointer">{t('jobs.all_statuses', 'All Statuses')}</SelectItem>
                                             <SelectItem value="draft" className="cursor-pointer">{t('employer.status.draft', 'Draft')}</SelectItem>
                                             <SelectItem value="active" className="cursor-pointer">{t('employer.status.active', 'Active')}</SelectItem>
                                             <SelectItem value="completed" className="cursor-pointer">{t('employer.status.completed', 'Completed')}</SelectItem>
@@ -229,12 +229,12 @@ export default function IndexJobsPage({ jobs, filters }: IndexJobsPageProps) {
                                     <label className="text-sm font-medium text-gray-700 mb-1 block">
                                         {t('jobs.category', 'Category')}
                                     </label>
-                                    <Select value={data.category} onValueChange={(value) => setData('category', value)}>
+                                    <Select value={data.category || 'all'} onValueChange={(value) => setData('category', value === 'all' ? '' : value)}>
                                         <SelectTrigger className="cursor-pointer">
                                             <SelectValue placeholder={t('jobs.all_categories', 'All Categories')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="" className="cursor-pointer">{t('jobs.all_categories', 'All Categories')}</SelectItem>
+                                            <SelectItem value="all" className="cursor-pointer">{t('jobs.all_categories', 'All Categories')}</SelectItem>
                                             <SelectItem value="personal_services" className="cursor-pointer">Personal Services</SelectItem>
                                             <SelectItem value="food_service" className="cursor-pointer">Food Service</SelectItem>
                                             <SelectItem value="cleaning_maintenance" className="cursor-pointer">Cleaning & Maintenance</SelectItem>
