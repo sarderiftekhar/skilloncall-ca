@@ -262,34 +262,166 @@ export default function HowItWorks() {
                                     </p>
                                 </div>
 
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-                                    {(activeTab === 'employers' ? employerSteps : employeeSteps).map((step, index) => {
-                                        const Icon = step.icon;
-                                        return (
-                                            <Card key={index} className="relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
-                                                <div className="absolute inset-x-0 top-0 h-1.5 bg-[#10B3D6]"></div>
-                                                <CardContent className="p-6">
-                                                    <div className="flex flex-col items-center text-center">
-                                                        <div className="mb-4 p-4 rounded-full" style={{backgroundColor: '#F6FBFD'}}>
-                                                            <Icon className="h-8 w-8" style={{color: '#10B3D6'}} />
+                                {/* Flowing Infographic Design */}
+                                <div className="relative w-full max-w-6xl mx-auto py-12 px-4 min-h-[1400px] md:min-h-[950px]">
+                                    {/* SVG Wave Path Background */}
+                                    <svg 
+                                        className="absolute inset-0 w-full h-full pointer-events-none hidden md:block" 
+                                        viewBox="0 0 1200 950" 
+                                        preserveAspectRatio="xMidYMid meet"
+                                    >
+                                        <defs>
+                                            <linearGradient id="pathGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" style={{ stopColor: '#14B8A6', stopOpacity: 0.5 }} />
+                                                <stop offset="25%" style={{ stopColor: '#F59E0B', stopOpacity: 0.5 }} />
+                                                <stop offset="50%" style={{ stopColor: '#EF4444', stopOpacity: 0.5 }} />
+                                                <stop offset="75%" style={{ stopColor: '#8B5CF6', stopOpacity: 0.5 }} />
+                                                <stop offset="100%" style={{ stopColor: '#10B3D6', stopOpacity: 0.5 }} />
+                                            </linearGradient>
+                                        </defs>
+                                        <path
+                                            d="M 1000 40 Q 900 30, 800 60 Q 650 100, 500 80 Q 350 60, 200 100 Q 100 140, 80 220 Q 60 300, 100 390 Q 150 480, 280 540 Q 400 600, 600 580 Q 750 560, 900 620 Q 1000 660, 1100 740 Q 1150 800, 1150 900"
+                                            fill="none"
+                                            stroke="url(#pathGradient1)"
+                                            strokeWidth="70"
+                                            strokeLinecap="round"
+                                            opacity="0.3"
+                                        />
+                                    </svg>
+
+                                    {/* Step Containers */}
+                                    <div className="relative z-10 space-y-8 md:space-y-0" style={{ height: '100%', minHeight: '900px' }}>
+                                        {(activeTab === 'employers' ? employerSteps : employeeSteps).map((step, index) => {
+                                            const Icon = step.icon;
+                                            
+                                            // Colors for each step matching the sample
+                                            const colors = [
+                                                { bg: '#14B8A6', shadow: 'rgba(20, 184, 166, 0.3)', light: '#5EEAD4' }, // Teal
+                                                { bg: '#F59E0B', shadow: 'rgba(245, 158, 11, 0.3)', light: '#FCD34D' }, // Amber
+                                                { bg: '#EF4444', shadow: 'rgba(239, 68, 68, 0.3)', light: '#FCA5A5' }, // Red/Orange
+                                                { bg: '#8B5CF6', shadow: 'rgba(139, 92, 246, 0.3)', light: '#C4B5FD' }, // Purple
+                                                { bg: '#10B3D6', shadow: 'rgba(16, 179, 214, 0.3)', light: '#67E8F9' }, // Cyan
+                                            ];
+                                            
+                                            const color = colors[index];
+                                            
+                                            // Positioning for flowing layout - All 5 steps visible, no overlaps
+                                            // Steps 3, 4, 5 moved down more for better visibility
+                                            const positionStyles = [
+                                                { top: '0%', right: '25%', zIndex: 15 },     // Step 1 - top right (moved more left)
+                                                { top: '12%', left: '8%', zIndex: 14 },      // Step 2 - upper left  
+                                                { top: '28%', right: '10%', zIndex: 13 },   // Step 3 - middle right (moved down)
+                                                { top: '44%', left: '6%', zIndex: 12 },      // Step 4 - lower left (moved down)
+                                                { top: '60%', right: '12%', zIndex: 11 },   // Step 5 - bottom right (moved down)
+                                            ];
+                                            
+                                            const pos = positionStyles[index];
+                                            
+                                            return (
+                                                <div
+                                                    key={index}
+                                                    className="md:absolute md:w-[280px]"
+                                                    style={{
+                                                        top: pos.top,
+                                                        left: pos.left || 'auto',
+                                                        right: pos.right || 'auto',
+                                                        zIndex: pos.zIndex,
+                                                        animation: `fadeInUp 0.6s ease-out ${index * 0.15}s both`,
+                                                        willChange: 'transform'
+                                                    }}
+                                                >
+                                                    {/* Flowing wave-shaped container */}
+                                                    <div 
+                                                        className="relative p-6 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, ${color.bg} 0%, ${color.light} 100%)`,
+                                                            boxShadow: `0 10px 30px ${color.shadow}, 0 0 0 4px rgba(255, 255, 255, 0.6)`,
+                                                            border: '3px solid rgba(255, 255, 255, 0.9)'
+                                                        }}
+                                                    >
+                                                        {/* Step Number Badge */}
+                                                        <div 
+                                                            className="absolute -top-5 -left-5 w-16 h-16 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg"
+                                                            style={{
+                                                                backgroundColor: '#192341',
+                                                                border: '4px solid white'
+                                                            }}
+                                                        >
+                                                            {String(index + 1).padStart(2, '0')}
                                                         </div>
-                                                        <div className="mb-3">
-                                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-bold text-sm" style={{backgroundColor: '#10B3D6'}}>
-                                                                {index + 1}
-                                                            </span>
+                                                        
+                                                        {/* Icon Badge */}
+                                                        <div 
+                                                            className="absolute -bottom-4 -right-4 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"
+                                                            style={{
+                                                                backgroundColor: 'white',
+                                                                border: `3px solid ${color.bg}`
+                                                            }}
+                                                        >
+                                                            <Icon className="h-6 w-6" style={{color: color.bg}} />
                                                         </div>
-                                                        <h3 className="text-lg font-semibold mb-2" style={{color: '#192341'}}>
-                                                            {step.title}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-600 leading-relaxed">
-                                                            {step.description}
-                                                        </p>
+                                                        
+                                                        {/* Content */}
+                                                        <div className="pt-6 pb-4">
+                                                            <h3 className="text-lg md:text-xl font-bold mb-3 text-white drop-shadow-md">
+                                                                {step.title}
+                                                            </h3>
+                                                            <p className="text-sm text-white/95 leading-relaxed">
+                                                                {step.description}
+                                                            </p>
+                                                        </div>
                                                     </div>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
+                                                    
+                                                    {/* Decorative connecting dots */}
+                                                    {index < 4 && (
+                                                        <div className="hidden md:block absolute" 
+                                                            style={{
+                                                                top: '50%',
+                                                                left: index % 2 === 0 ? '-10%' : 'auto',
+                                                                right: index % 2 === 1 ? '-10%' : 'auto',
+                                                            }}
+                                                        >
+                                                            <div className={`flex gap-2 ${index % 2 === 1 ? 'flex-row-reverse' : ''}`}>
+                                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: color.bg, opacity: 0.7}}></div>
+                                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: color.bg, opacity: 0.5}}></div>
+                                                                <div className="w-2 h-2 rounded-full" style={{backgroundColor: color.bg, opacity: 0.3}}></div>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    
+                                    {/* Conclusion Badge */}
+                                    <div className="relative z-10 mt-12 md:mt-0 md:absolute md:top-[78%] md:left-1/2 md:-translate-x-1/2 flex justify-center">
+                                        <div 
+                                            className="inline-flex items-center gap-3 px-6 py-3 rounded-full shadow-xl"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #192341 0%, #2D3E6F 100%)',
+                                                border: '3px solid white'
+                                            }}
+                                        >
+                                            <CheckCircle className="h-6 w-6 text-[#10B3D6]" />
+                                            <span className="text-white font-bold text-lg">
+                                                {t('how_it_works.conclusion', 'Conclusion')}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
+                                
+                                <style jsx>{`
+                                    @keyframes fadeInUp {
+                                        from {
+                                            opacity: 0;
+                                            transform: translateY(30px);
+                                        }
+                                        to {
+                                            opacity: 1;
+                                            transform: translateY(0);
+                                        }
+                                    }
+                                `}</style>
                             </div>
 
                             {/* CTA Section */}
