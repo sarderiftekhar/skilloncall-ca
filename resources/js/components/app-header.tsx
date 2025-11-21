@@ -298,8 +298,8 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                         {/* Language Switcher */}
                         <LanguageSwitcher variant="compact" />
                         
-                        {/* Subscription Badge */}
-                        <SubscriptionBadge subscription={subscription} />
+                        {/* Subscription Badge - Hidden for admin users */}
+                        {auth.user.role !== 'admin' && <SubscriptionBadge subscription={subscription} />}
                         
                         <Button variant="ghost" size="icon" className="h-8 w-8 lg:h-9 lg:w-9 hidden sm:flex">
                             <Search className="h-4 w-4 lg:h-5 lg:w-5 opacity-80 hover:opacity-100" />
