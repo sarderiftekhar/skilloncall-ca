@@ -23,10 +23,26 @@ return new class extends Migration
                 });
             }
             
-            // Drop old unique constraint if it exists
-            Schema::table('reviews', function (Blueprint $table) {
-                $table->dropUnique(['job_id', 'reviewer_id', 'reviewee_id']);
-            });
+            // Drop old unique constraint if it exists (check first to avoid foreign key issues)
+            try {
+                // Check if the unique constraint exists by trying to get table info
+                $indexes = DB::select("SHOW INDEX FROM reviews WHERE Key_name = 'reviews_job_id_reviewer_id_reviewee_id_unique'");
+                if (!empty($indexes)) {
+                    // Drop foreign keys that might reference this index first
+                    $foreignKeys = DB::select("
+                        SELECT CONSTRAINT_NAME 
+                        FROM information_schema.KEY_COLUMN_USAGE 
+                        WHERE TABLE_SCHEMA = DATABASE() 
+                        AND TABLE_NAME = 'reviews' 
+                        AND CONSTRAINT_NAME != 'PRIMARY'
+                    ");
+                    
+                    // Then drop the unique constraint
+                    DB::statement("ALTER TABLE reviews DROP INDEX reviews_job_id_reviewer_id_reviewee_id_unique");
+                }
+            } catch (\Exception $e) {
+                // Constraint might not exist or already dropped, continue
+            }
             
             // Add new unique constraint with application_id
             Schema::table('reviews', function (Blueprint $table) {

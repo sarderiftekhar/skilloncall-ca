@@ -1,6 +1,6 @@
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useSidebar } from '@/components/ui/sidebar';
 import { SubscriptionBadge } from '@/components/subscription-badge';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem as BreadcrumbItemType, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users, Search } from 'react-feather';
+import { Activity, Bell, Bookmark, Briefcase, ChevronDown, Clock, CreditCard, Grid, LogOut, Menu, MessageCircle, Settings, Shield, Users, Search, AlertCircle, CheckCircle, X } from 'react-feather';
 import AppLogoIcon from './app-logo-icon';
 
 // Helper function to add language parameter to URLs
@@ -157,13 +157,46 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
     const mobileNavItems = getRoleBasedNavItems(auth.user.role || 'admin', t, locale);
 
     // Notification state - in real app, this would come from props/context/API
-    const [notifications] = useState([
-        { id: 1, message: 'New employer registered: Metro Foods Inc.', time: '2 minutes ago', read: false },
-        { id: 2, message: 'Urgent job posted: Evening cashier needed', time: '15 minutes ago', read: false },
-        { id: 3, message: 'Payment received: $49 monthly subscription', time: '1 hour ago', read: true },
+    const [notifications, setNotifications] = useState([
+        { id: 1, message: 'New employer registered: Metro Foods Inc.', time: '2 minutes ago', read: false, type: 'info' },
+        { id: 2, message: 'Urgent job posted: Evening cashier needed', time: '15 minutes ago', read: false, type: 'urgent' },
+        { id: 3, message: 'Payment received: $49 monthly subscription', time: '1 hour ago', read: true, type: 'success' },
+        { id: 4, message: 'Application received for "Cashier Position"', time: '3 hours ago', read: false, type: 'info' },
     ]);
 
     const unreadCount = notifications.filter((n) => !n.read).length;
+    const [alertOpen, setAlertOpen] = useState(false);
+
+    const markAsRead = (id: number) => {
+        setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+    };
+
+    const markAllAsRead = () => {
+        setNotifications(notifications.map(n => ({ ...n, read: true })));
+    };
+
+    const getNotificationIcon = (type: string) => {
+        switch (type) {
+            case 'urgent':
+                return <AlertCircle className="h-4 w-4 text-red-500" />;
+            case 'success':
+                return <CheckCircle className="h-4 w-4 text-green-500" />;
+            default:
+                return <Bell className="h-4 w-4 text-blue-500" />;
+        }
+    };
+
+    const getNotificationBgColor = (type: string, read: boolean) => {
+        if (read) return 'bg-gray-50';
+        switch (type) {
+            case 'urgent':
+                return 'bg-red-50';
+            case 'success':
+                return 'bg-green-50';
+            default:
+                return 'bg-blue-50';
+        }
+    };
 
     return (
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-sidebar-border/50 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sm:px-6">
@@ -302,21 +335,116 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                 {/* Subscription Badge */}
                 <SubscriptionBadge subscription={subscription} />
                 
-                {/* Notification Bell - Hidden on mobile */}
+                {/* Alert/Notification Dropdown - Hidden on mobile */}
                 <div className="relative hidden sm:block">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 cursor-pointer border border-gray-200 transition-transform duration-200 hover:scale-110 hover:border-gray-300 sm:h-9 sm:w-9 lg:h-10 lg:w-10"
-                        onClick={() => console.log('Show notifications')}
-                    >
-                        <Bell style={{ color: '#192341', width: '18px', height: '18px' }} />
-                        {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-4 w-4 animate-pulse items-center justify-center rounded-full bg-red-500 text-xs text-[10px] font-bold text-white sm:h-5 sm:w-5 sm:text-xs">
-                                {unreadCount > 9 ? '9+' : unreadCount}
-                            </span>
-                        )}
-                    </Button>
+                    <DropdownMenu open={alertOpen} onOpenChange={setAlertOpen}>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 cursor-pointer border border-gray-200 transition-transform duration-200 hover:scale-110 hover:border-gray-300 sm:h-9 sm:w-9 lg:h-10 lg:w-10"
+                            >
+                                <Bell style={{ color: '#192341', width: '18px', height: '18px' }} />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 animate-pulse items-center justify-center rounded-full bg-red-500 text-xs text-[10px] font-bold text-white sm:h-5 sm:w-5 sm:text-xs">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent 
+                            className="w-80 rounded-lg p-0 shadow-lg" 
+                            align="end" 
+                            side="bottom" 
+                            sideOffset={8}
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between border-b px-4 py-3">
+                                <div>
+                                    <h3 className="text-sm font-semibold" style={{ color: '#192341' }}>
+                                        {t('alerts.title', 'Alerts')}
+                                    </h3>
+                                    {unreadCount > 0 && (
+                                        <p className="text-xs text-gray-500">
+                                            {unreadCount} {t('alerts.unread', 'unread')}
+                                        </p>
+                                    )}
+                                </div>
+                                {unreadCount > 0 && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-7 text-xs cursor-pointer"
+                                        onClick={markAllAsRead}
+                                    >
+                                        {t('alerts.mark_all_read', 'Mark all read')}
+                                    </Button>
+                                )}
+                            </div>
+
+                            {/* Notifications List */}
+                            <div className="max-h-96 overflow-y-auto">
+                                {notifications.length > 0 ? (
+                                    <div className="divide-y divide-gray-100">
+                                        {notifications.map((notification) => (
+                                            <div
+                                                key={notification.id}
+                                                className={cn(
+                                                    'px-4 py-3 transition-colors hover:bg-gray-50 cursor-pointer',
+                                                    getNotificationBgColor(notification.type, notification.read)
+                                                )}
+                                                onClick={() => !notification.read && markAsRead(notification.id)}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className="mt-0.5 flex-shrink-0">
+                                                        {getNotificationIcon(notification.type)}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className={cn(
+                                                            'text-sm',
+                                                            notification.read ? 'text-gray-600' : 'font-medium text-gray-900'
+                                                        )}>
+                                                            {notification.message}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 mt-1">
+                                                            {notification.time}
+                                                        </p>
+                                                    </div>
+                                                    {!notification.read && (
+                                                        <div className="flex-shrink-0">
+                                                            <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="px-4 py-8 text-center">
+                                        <Bell className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                        <p className="text-sm text-gray-500">
+                                            {t('alerts.no_notifications', 'No notifications')}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Footer */}
+                            {notifications.length > 0 && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <div className="px-4 py-2">
+                                        <Link
+                                            href={`/notifications?lang=${locale}`}
+                                            className="text-xs text-center text-[#10B3D6] hover:underline cursor-pointer block w-full"
+                                        >
+                                            {t('alerts.view_all', 'View all notifications')}
+                                        </Link>
+                                    </div>
+                                </>
+                            )}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
 
                 {/* User Avatar Dropdown - Compact on mobile */}

@@ -19,11 +19,14 @@ return new class extends Migration
             $table->foreignId('reviewee_id')->constrained('users')->onDelete('cascade');
             $table->integer('rating')->unsigned(); // 1-5 stars
             $table->text('comment')->nullable();
-            $table->enum('type', ['employer_to_worker', 'worker_to_employer']);
+            $table->foreignId('application_id')->nullable()->after('job_id')->constrained('applications')->onDelete('cascade');
+            $table->enum('type', ['employer_to_employee', 'employee_to_employer']);
             $table->timestamps();
             
-            $table->unique(['job_id', 'reviewer_id', 'reviewee_id']);
+            $table->unique(['application_id', 'reviewer_id', 'reviewee_id'], 'reviews_application_reviewer_reviewee_unique');
             $table->index(['reviewee_id', 'rating']);
+            $table->index(['application_id']);
+            $table->index(['reviewer_id', 'type']);
             });
         }
     }

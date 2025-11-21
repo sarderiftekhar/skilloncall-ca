@@ -36,27 +36,6 @@ export default function PublicLayout({ title = 'SkillOnCall.ca', children }: Pub
                                 </p>
                             </div>
                         </div>
-                        <nav className="flex items-center gap-4">
-                            <a 
-                                href="/" 
-                                className="text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer"
-                            >
-                                Home
-                            </a>
-                            <a 
-                                href="/login" 
-                                className="text-gray-300 hover:text-white transition-colors duration-200 cursor-pointer"
-                            >
-                                Login
-                            </a>
-                            <a 
-                                href="/register" 
-                                className="text-white px-4 py-2 rounded-md transition-all duration-200 cursor-pointer hover:opacity-90"
-                                style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                            >
-                                Register
-                            </a>
-                        </nav>
                     </div>
                 </div>
             </header>
