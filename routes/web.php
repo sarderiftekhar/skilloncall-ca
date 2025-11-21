@@ -192,6 +192,22 @@ Route::resource('progress', App\Http\Controllers\SkillOnCallProgressController::
 ]);
 Route::post('/progress/upload-screenshot', [App\Http\Controllers\SkillOnCallProgressController::class, 'uploadPastedScreenshot'])->name('progress.upload-screenshot');
 
+// UAT Testing Portal routes (Public access)
+Route::get('/uat-testing', [App\Http\Controllers\UatTestingController::class, 'index'])->name('uat-testing.index');
+Route::post('/uat-testing/update', [App\Http\Controllers\UatTestingController::class, 'update'])->name('uat-testing.update');
+Route::post('/uat-testing/session/start', [App\Http\Controllers\UatTestingController::class, 'startSession'])->name('uat-testing.session.start');
+Route::post('/uat-testing/session/end', [App\Http\Controllers\UatTestingController::class, 'endSession'])->name('uat-testing.session.end');
+Route::post('/uat-testing/session/status', [App\Http\Controllers\UatTestingController::class, 'getSessionStatus'])->name('uat-testing.session.status');
+Route::post('/uat-testing/log-action', [App\Http\Controllers\UatTestingController::class, 'logTestAction'])->name('uat-testing.log-action');
+Route::post('/uat-testing/custom-tests', [App\Http\Controllers\UatTestingController::class, 'storeCustomTest'])->name('uat-testing.custom-tests.store');
+Route::get('/uat-testing/custom-tests', [App\Http\Controllers\UatTestingController::class, 'getCustomTests'])->name('uat-testing.custom-tests.index');
+Route::put('/uat-testing/custom-tests/{id}', [App\Http\Controllers\UatTestingController::class, 'updateCustomTest'])->name('uat-testing.custom-tests.update');
+Route::delete('/uat-testing/custom-tests/{id}', [App\Http\Controllers\UatTestingController::class, 'deleteCustomTest'])->name('uat-testing.custom-tests.destroy');
+Route::post('/uat-testing/admin/login', [App\Http\Controllers\UatTestingController::class, 'adminLogin'])->name('uat-testing.admin.login');
+Route::post('/uat-testing/admin/logout', [App\Http\Controllers\UatTestingController::class, 'adminLogout'])->name('uat-testing.admin.logout');
+Route::get('/uat-testing/admin/records', [App\Http\Controllers\UatTestingController::class, 'getAdminRecords'])->name('uat-testing.admin.records');
+Route::get('/uat-testing/admin/check-auth', [App\Http\Controllers\UatTestingController::class, 'checkAdminAuth'])->name('uat-testing.admin.check-auth');
+
 require __DIR__.'/admin.php';
 require __DIR__.'/employer.php';
 require __DIR__.'/employee.php';
