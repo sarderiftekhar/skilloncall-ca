@@ -3,8 +3,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Briefcase, MapPin } from 'react-feather';
+import { ArrowLeft, ArrowRight, Briefcase, MapPin, X } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
+import { logout } from '@/routes';
 
 import FeedbackModal from '@/components/feedback-modal';
 import BusinessInfoStep from '@/components/onboarding/employer/BusinessInfoStep';
@@ -188,6 +189,15 @@ export default function EmployerOnboarding({
         }
     };
 
+    const handleCancel = () => {
+        // Logout and redirect to homepage
+        router.post(logout.url(), {}, {
+            onSuccess: () => {
+                router.visit('/');
+            },
+        });
+    };
+
     const handleComplete = async () => {
         setIsSubmitting(true);
 
@@ -320,13 +330,26 @@ export default function EmployerOnboarding({
                     {/* Progress Header */}
                     <Card className="mb-6 border" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                         <CardContent className="p-6">
-                            <div className="mb-4 flex items-center justify-between">
+                            <div className="mb-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                                 <h1 className="text-2xl font-bold md:text-3xl" style={{ color: '#192341' }}>
                                     {t('employer.title', 'Employer Setup')}
                                 </h1>
-                                <span className="text-sm font-medium text-gray-600">
-                                    {t('employer.step_of', 'Step :step of :total', { step, total: OnboardingSteps.length })}
-                                </span>
+                                <div className="flex items-center justify-between gap-4 md:justify-end">
+                                    <span className="text-sm font-medium text-gray-600">
+                                        {t('employer.step_of', 'Step :step of :total', { step, total: OnboardingSteps.length })}
+                                    </span>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={handleCancel}
+                                        disabled={isSubmitting}
+                                        className="cursor-pointer"
+                                        style={{ height: '2.7em' }}
+                                    >
+                                        <X className="mr-2 h-4 w-4" />
+                                        {t('nav.cancel', 'Cancel')}
+                                    </Button>
+                                </div>
                             </div>
 
                             <Progress value={progress} className="h-2" />
