@@ -33,7 +33,11 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string, loca
 
     if (userRole === 'admin') {
         return [
-            ...baseItems,
+            {
+                title: t('nav.dashboard', 'Dashboard'),
+                href: addLangParam('/admin/dashboard', locale),
+                icon: Grid,
+            },
             {
                 title: 'User Management',
                 href: addLangParam('/admin/users', locale),

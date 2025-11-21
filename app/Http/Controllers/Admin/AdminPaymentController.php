@@ -22,10 +22,12 @@ class AdminPaymentController extends Controller
     public function index(Request $request): Response
     {
         $payments = $this->paymentService->getPayments($request->all());
+        $financialSummary = $this->paymentService->getFinancialSummary();
 
         return Inertia::render('admin/payments/index', [
             'payments' => $payments,
             'filters' => $request->only(['search', 'status', 'type']),
+            'financialSummary' => $financialSummary,
         ]);
     }
 
@@ -37,7 +39,8 @@ class AdminPaymentController extends Controller
         $paymentDetails = $this->paymentService->getPaymentDetails($payment);
 
         return Inertia::render('admin/payments/show', [
-            'payment' => $paymentDetails,
+            'payment' => $paymentDetails['payment'],
+            'timeline' => $paymentDetails['timeline'],
         ]);
     }
 

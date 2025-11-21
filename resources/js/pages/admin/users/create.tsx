@@ -1,0 +1,189 @@
+import { Head, router, useForm } from '@inertiajs/react';
+import AppLayout from '@/layouts/app-layout';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { type BreadcrumbItem } from '@/types';
+import { ArrowLeft, Save } from 'react-feather';
+import { useTranslations } from '@/hooks/useTranslations';
+import InputError from '@/components/input-error';
+
+const getBreadcrumbs = (t: (key: string, fallback?: string) => string, locale: string): BreadcrumbItem[] => [
+    {
+        title: t('admin.users.title', 'User Management'),
+        href: `/admin/users?lang=${locale}`,
+    },
+    {
+        title: t('admin.users.create.title', 'Create User'),
+        href: `/admin/users/create?lang=${locale}`,
+    },
+];
+
+export default function CreateUserPage() {
+    const { t, locale } = useTranslations();
+    const breadcrumbs = getBreadcrumbs(t, locale);
+
+    const { data, setData, post, processing, errors } = useForm({
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+        role: 'employee',
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        post(`/admin/users?lang=${locale}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                router.visit(`/admin/users?lang=${locale}`);
+            },
+        });
+    };
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title={t('admin.users.create.title', 'Create User')}>
+                <style>{`
+                    * { cursor: default; }
+                    a, button, [role="button"], .cursor-pointer { cursor: pointer !important; }
+                    .page-title { color: #192341 !important; }
+                    .text-default { color: #192341 !important; }
+                    .card-with-border { border-top: .5px solid #192341 !important; }
+                `}</style>
+            </Head>
+
+            <div className="w-full px-6 py-8">
+                <div className="max-w-2xl mx-auto">
+                    <div className="flex items-center gap-4 mb-6">
+                        <Button
+                            variant="outline"
+                            className="cursor-pointer"
+                            onClick={() => router.get(`/admin/users?lang=${locale}`)}
+                            style={{ height: '2.7em' }}
+                        >
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            {t('admin.common.cancel', 'Cancel')}
+                        </Button>
+                    </div>
+
+                    <Card className="card-with-border rounded-xl bg-white shadow-sm">
+                        <CardHeader>
+                            <CardTitle className="text-lg font-semibold page-title">
+                                {t('admin.users.create.title', 'Create User')}
+                            </CardTitle>
+                            <CardDescription>
+                                {t('admin.users.create.subtitle', 'Add a new user to the platform')}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <div>
+                                    <Label htmlFor="name" className="text-default">
+                                        {t('admin.users.create.form.name', 'Name')} *
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        type="text"
+                                        value={data.name}
+                                        onChange={(e) => setData('name', e.target.value)}
+                                        className="mt-1 cursor-pointer"
+                                        required
+                                    />
+                                    <InputError message={errors.name} />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="email" className="text-default">
+                                        {t('admin.users.create.form.email', 'Email')} *
+                                    </Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        value={data.email}
+                                        onChange={(e) => setData('email', e.target.value)}
+                                        className="mt-1 cursor-pointer"
+                                        required
+                                    />
+                                    <InputError message={errors.email} />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="password" className="text-default">
+                                        {t('admin.users.create.form.password', 'Password')} *
+                                    </Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        value={data.password}
+                                        onChange={(e) => setData('password', e.target.value)}
+                                        className="mt-1 cursor-pointer"
+                                        required
+                                    />
+                                    <InputError message={errors.password} />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="password_confirmation" className="text-default">
+                                        {t('admin.users.create.form.password_confirmation', 'Confirm Password')} *
+                                    </Label>
+                                    <Input
+                                        id="password_confirmation"
+                                        type="password"
+                                        value={data.password_confirmation}
+                                        onChange={(e) => setData('password_confirmation', e.target.value)}
+                                        className="mt-1 cursor-pointer"
+                                        required
+                                    />
+                                    <InputError message={errors.password_confirmation} />
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="role" className="text-default">
+                                        {t('admin.users.create.form.role', 'Role')} *
+                                    </Label>
+                                    <Select value={data.role} onValueChange={(value) => setData('role', value)}>
+                                        <SelectTrigger className="mt-1 cursor-pointer">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="admin" className="cursor-pointer">{t('admin.roles.admin', 'Admin')}</SelectItem>
+                                            <SelectItem value="employer" className="cursor-pointer">{t('admin.roles.employer', 'Employer')}</SelectItem>
+                                            <SelectItem value="employee" className="cursor-pointer">{t('admin.roles.employee', 'Employee')}</SelectItem>
+                                            <SelectItem value="worker" className="cursor-pointer">{t('admin.roles.worker', 'Worker')}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <InputError message={errors.role} />
+                                </div>
+
+                                <div className="flex items-center gap-4 pt-4">
+                                    <Button
+                                        type="submit"
+                                        className="text-white cursor-pointer"
+                                        disabled={processing}
+                                        style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
+                                    >
+                                        <Save className="h-4 w-4 mr-2" />
+                                        {t('admin.users.create.form.submit', 'Create User')}
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        className="cursor-pointer"
+                                        onClick={() => router.get(`/admin/users?lang=${locale}`)}
+                                        style={{ height: '2.7em' }}
+                                    >
+                                        {t('admin.users.create.form.cancel', 'Cancel')}
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </AppLayout>
+    );
+}
+

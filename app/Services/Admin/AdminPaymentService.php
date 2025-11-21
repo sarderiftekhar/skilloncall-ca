@@ -41,7 +41,7 @@ class AdminPaymentService
      */
     public function getPaymentDetails(Payment $payment): array
     {
-        $payment->load(['payer', 'payee', 'job']);
+        $payment->load(['payer', 'payee', 'job', 'processor']);
 
         return [
             'payment' => $payment->toArray(),
@@ -89,5 +89,17 @@ class AdminPaymentService
         }
 
         return $timeline;
+    }
+
+    /**
+     * Get financial summary.
+     */
+    public function getFinancialSummary(): array
+    {
+        return [
+            'totalRevenue' => Payment::where('status', 'completed')->sum('amount'),
+            'pendingAmount' => Payment::where('status', 'pending')->sum('amount'),
+            'commission' => Payment::where('status', 'completed')->sum('commission_amount'),
+        ];
     }
 }

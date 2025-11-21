@@ -40,7 +40,11 @@ function getNavItems(userRole: string, t: (key: string) => string, locale: strin
 
     if (userRole === 'admin') {
         return [
-            ...baseItems,
+            {
+                title: t('nav.dashboard', 'Dashboard'),
+                href: addLangParam('/admin/dashboard', locale),
+                icon: Grid,
+            },
             {
                 title: 'User Management',
                 href: addLangParam('/admin/users', locale),
@@ -60,11 +64,6 @@ function getNavItems(userRole: string, t: (key: string) => string, locale: strin
                 title: 'Reports & Analytics',
                 href: addLangParam('/admin/reports', locale),
                 icon: Activity,
-            },
-            {
-                title: 'Subscriptions',
-                href: addLangParam('/subscriptions', locale),
-                icon: CreditCard,
             },
             {
                 title: 'System Settings',

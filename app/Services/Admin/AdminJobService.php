@@ -42,7 +42,7 @@ class AdminJobService
      */
     public function getJobDetails(Job $job): array
     {
-        $job->load(['employer', 'applications.worker']);
+        $job->load(['employer', 'applications.employee']);
 
         return [
             'job' => $job->toArray(),
@@ -55,7 +55,10 @@ class AdminJobService
      */
     public function approveJob(Job $job): Job
     {
-        $job->update(['status' => 'approved']);
+        $job->update([
+            'status' => 'active',
+            'published_at' => now(),
+        ]);
 
         event(new JobApproved($job));
 

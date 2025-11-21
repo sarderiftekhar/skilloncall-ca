@@ -37,7 +37,8 @@ class AdminJobController extends Controller
         $jobDetails = $this->jobService->getJobDetails($job);
 
         return Inertia::render('admin/jobs/show', [
-            'job' => $jobDetails,
+            'job' => $jobDetails['job'],
+            'stats' => $jobDetails['stats'],
         ]);
     }
 
