@@ -54,6 +54,7 @@ class DatabaseSeeder extends Seeder
             SubscriptionPlanSeeder::class,
             JobSeeder::class,
             CompaniesAndJobsSeeder::class,
+            UatTestScenariosSeeder::class,
         ]);
     }
 }
