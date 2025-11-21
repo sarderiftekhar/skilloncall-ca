@@ -14,9 +14,10 @@ class SubscriptionPlanSeeder extends Seeder
     public function run(): void
     {
         // Employer Plans
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employer-starter'],
+            [
             'name' => 'Starter',
-            'slug' => 'employer-starter',
             'description' => 'Perfect for small businesses just getting started with hiring skilled workers.',
             'type' => 'employer',
             'price' => 0.00,
@@ -41,9 +42,10 @@ class SubscriptionPlanSeeder extends Seeder
             ],
         ]);
 
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employer-professional'],
+            [
             'name' => 'Professional',
-            'slug' => 'employer-professional',
             'description' => 'Ideal for growing businesses that need to hire skilled workers regularly.',
             'type' => 'employer',
             'price' => 49.99,
@@ -71,9 +73,10 @@ class SubscriptionPlanSeeder extends Seeder
             ],
         ]);
 
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employer-enterprise'],
+            [
             'name' => 'Enterprise',
-            'slug' => 'employer-enterprise',
             'description' => 'For large organizations with extensive hiring needs and custom requirements.',
             'type' => 'employer',
             'price' => 149.99,
@@ -105,9 +108,10 @@ class SubscriptionPlanSeeder extends Seeder
         ]);
 
         // Employee Plans
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employee-basic'],
+            [
             'name' => 'Basic',
-            'slug' => 'employee-basic',
             'description' => 'Get started finding work opportunities in your area.',
             'type' => 'employee',
             'price' => 0.00,
@@ -132,9 +136,10 @@ class SubscriptionPlanSeeder extends Seeder
             ],
         ]);
 
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employee-pro'],
+            [
             'name' => 'Pro Employee',
-            'slug' => 'employee-pro',
             'description' => 'Stand out from the competition and get more job opportunities.',
             'type' => 'employee',
             'price' => 19.99,
@@ -163,9 +168,10 @@ class SubscriptionPlanSeeder extends Seeder
             ],
         ]);
 
-        SubscriptionPlan::create([
+        SubscriptionPlan::updateOrCreate(
+            ['slug' => 'employee-premium'],
+            [
             'name' => 'Premium Employee',
-            'slug' => 'employee-premium',
             'description' => 'Maximum visibility and tools for professional skilled employees.',
             'type' => 'employee',
             'price' => 39.99,

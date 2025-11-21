@@ -128,27 +128,31 @@ class CompaniesAndJobsSeeder extends Seeder
 
         // Create employer users and profiles
         foreach ($companies as $company) {
-            $user = User::create([
-                'name' => $company['name'],
-                'email' => $company['email'],
-                'email_verified_at' => now(),
-                'password' => bcrypt('password'),
-                'role' => 'employer',
-            ]);
+            $user = User::updateOrCreate(
+                ['email' => $company['email']],
+                [
+                    'name' => $company['name'],
+                    'email_verified_at' => now(),
+                    'password' => bcrypt('password'),
+                    'role' => 'employer',
+                ]
+            );
 
-            $profile = EmployerProfile::create([
-                'user_id' => $user->id,
-                'business_name' => $company['business_name'],
-                'phone' => $company['phone'],
-                'city' => $company['city'],
-                'province' => $company['province'],
-                'address_line_1' => $company['address_line_1'],
-                'postal_code' => $company['postal_code'],
-                'country' => 'Canada',
-                'is_profile_complete' => true,
-                'profile_completed_at' => now(),
-                'onboarding_step' => 5,
-            ]);
+            $profile = EmployerProfile::updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'business_name' => $company['business_name'],
+                    'phone' => $company['phone'],
+                    'city' => $company['city'],
+                    'province' => $company['province'],
+                    'address_line_1' => $company['address_line_1'],
+                    'postal_code' => $company['postal_code'],
+                    'country' => 'Canada',
+                    'is_profile_complete' => true,
+                    'profile_completed_at' => now(),
+                    'onboarding_step' => 5,
+                ]
+            );
 
             $employers[] = $user;
         }
@@ -832,12 +836,18 @@ class CompaniesAndJobsSeeder extends Seeder
             for ($i = 0; $i < 5; $i++) {
                 if ($jobIndex < count($jobs)) {
                     $jobData = $jobs[$jobIndex];
-                    Job::create(array_merge($jobData, [
-                        'employer_id' => $employer->id,
-                        'views_count' => rand(5, 50),
-                        'applications_count' => rand(0, 8),
-                        'payment_status' => 'pending',
-                    ]));
+                    Job::updateOrCreate(
+                        [
+                            'employer_id' => $employer->id,
+                            'title' => $jobData['title'],
+                            'location' => $jobData['location'],
+                        ],
+                        array_merge($jobData, [
+                            'views_count' => rand(5, 50),
+                            'applications_count' => rand(0, 8),
+                            'payment_status' => 'pending',
+                        ])
+                    );
                     $jobIndex++;
                 }
             }

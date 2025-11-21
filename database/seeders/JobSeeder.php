@@ -287,12 +287,18 @@ class JobSeeder extends Seeder
         ];
 
         foreach ($jobs as $jobData) {
-            Job::create(array_merge($jobData, [
-                'employer_id' => $employer->id,
-                'views_count' => rand(5, 50),
-                'applications_count' => rand(0, 8),
-                'payment_status' => 'pending',
-            ]));
+            Job::updateOrCreate(
+                [
+                    'employer_id' => $employer->id,
+                    'title' => $jobData['title'],
+                    'location' => $jobData['location'],
+                ],
+                array_merge($jobData, [
+                    'views_count' => rand(5, 50),
+                    'applications_count' => rand(0, 8),
+                    'payment_status' => 'pending',
+                ])
+            );
         }
 
         $this->command->info('Sample jobs created successfully!');

@@ -14,16 +14,6 @@ class GlobalProvincesAndCitiesSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing data
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        }
-        GlobalCity::truncate();
-        GlobalProvince::truncate();
-        if (DB::getDriverName() === 'mysql') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
-        }
-
         // Province and city data
         $provincesWithCities = [
             'Alberta' => ['AB', ['Calgary', 'Edmonton', 'Red Deer', 'Lethbridge', 'Medicine Hat', 'Grande Prairie', 'Airdrie', 'Spruce Grove', 'Okotoks', 'Fort McMurray', 'Chestermere', 'Cochrane', 'Camrose', 'Brooks', 'Cold Lake', 'Lacombe', 'Banff', 'Canmore', 'Stony Plain', 'Leduc', 'Sylvan Lake', 'St. Albert', 'Sherwood Park', 'Fort Saskatchewan', 'Beaumont', 'Devon', 'Morinville', 'Drayton Valley', 'Wetaskiwin', 'Hinton', 'Strathmore', 'High River', 'Jasper', 'Slave Lake', 'Whitecourt', 'Peace River', 'Bonnyville', 'Vegreville', 'Rocky Mountain House', 'Innisfail', 'Olds', 'Vulcan', 'Redwater', 'Raymond', 'Taber', 'Drumheller', 'Penhold', 'Coaldale', 'Claresholm', 'High Level', 'Cardston', 'Ponoka', 'Picture Butte', 'Wainwright', 'Grimshaw', 'Didsbury', 'Lamont', 'Manning', 'Fairview', 'Athabasca', 'Edson', 'Barrhead', 'Vermilion', 'Provost', 'Lac La Biche', 'Magrath', 'Rimbey', 'Bow Island', 'Sundre', 'Westlock', 'Three Hills', 'Stettler', 'Tofield', 'Nanton', 'Smoky Lake', 'Pincher Creek', 'Beaverlodge', 'Crossfield', 'Black Diamond', 'Carstairs', 'Elk Point', 'Trochu', 'Blackfalds', 'Vauxhall', 'Bruderheim', 'Mayerthorpe', 'Legal', 'Rockyford', 'Foremost', 'Coalhurst', 'Two Hills', 'Millet', 'Castor', 'Falher', 'Hanna', 'Daysland', 'Bassano', 'Duchess', 'Valleyview', 'Viking', 'Gibbons', 'Thorhild', 'Myrnam', 'St. Paul', 'Grande Cache', 'Calmar', 'Warburg', 'Thorsby']],
@@ -44,16 +34,18 @@ class GlobalProvincesAndCitiesSeeder extends Seeder
         foreach ($provincesWithCities as $provinceName => $data) {
             [$provinceCode, $cities] = $data;
 
-            $province = GlobalProvince::create([
-                'name' => $provinceName,
-                'code' => $provinceCode,
-            ]);
+            $province = GlobalProvince::updateOrCreate(
+                ['code' => $provinceCode],
+                ['name' => $provinceName]
+            );
 
             foreach ($cities as $cityName) {
-                GlobalCity::create([
-                    'name' => $cityName,
-                    'global_province_id' => $province->id,
-                ]);
+                GlobalCity::updateOrCreate(
+                    [
+                        'name' => $cityName,
+                        'global_province_id' => $province->id,
+                    ]
+                );
             }
         }
 
