@@ -165,6 +165,16 @@ class HandleInertiaRequests extends Middleware
                 $translations = __('uat-testing');
             } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/' || str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
                 $translations = __('welcome');
+            } elseif (str_contains($routeName ?? '', 'pricing') || str_contains($currentPath, 'pricing')) {
+                $pricingTranslations = __('pricing');
+                $welcomeTranslations = __('welcome');
+                if (is_array($pricingTranslations) && is_array($welcomeTranslations)) {
+                    $translations = array_merge($pricingTranslations, ['welcome' => $welcomeTranslations]);
+                } elseif (is_array($pricingTranslations)) {
+                    $translations = $pricingTranslations;
+                } else {
+                    $translations = [];
+                }
             }
             
             // Always include common translations

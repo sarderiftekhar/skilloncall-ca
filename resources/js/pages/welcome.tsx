@@ -968,7 +968,7 @@ export default function Welcome() {
 
                                 <Link href={`/how-it-works${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</Link>
 
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
+                                <Link href={`/pricing${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</Link>
 
                             </nav>
 
