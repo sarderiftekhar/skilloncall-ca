@@ -18,18 +18,11 @@ import { useState } from 'react';
 
 export default function Pricing() {
     const { auth, translations } = usePage<SharedData>().props as any;
-    const { t, locale } = useTranslations();
-    const isFrench = locale === 'fr';
-    const queryLang = `?lang=${locale}`;
+    const { t } = useTranslations();
+    const queryLang = `?lang=en`;
 
     const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
     const [activeTab, setActiveTab] = useState<'employees' | 'employers'>('employees');
-
-    const switchLang = (newLocale: string) => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', newLocale);
-        window.location.href = url.toString();
-    };
 
     const formatPrice = (price: number) => {
         if (price === 0) return t('free', 'Free');
@@ -49,13 +42,13 @@ export default function Pricing() {
 
     const getPlanIcon = (planName: string) => {
         const name = planName.toLowerCase();
-        if (name === 'free' || name === 'starter' || name === 'gratuit' || name === 'démarrage') {
+        if (name === 'free' || name === 'starter') {
             return <Users className="h-6 w-6" style={{color: '#10B3D6'}} />;
         }
-        if (name === 'pro' || name === 'professional' || name === 'professionnel') {
+        if (name === 'pro' || name === 'professional') {
             return <Zap className="h-6 w-6" style={{color: '#10B3D6'}} />;
         }
-        if (name === 'premium' || name === 'enterprise' || name === 'entreprise') {
+        if (name === 'premium' || name === 'enterprise') {
             return <Award className="h-6 w-6" style={{color: '#10B3D6'}} />;
         }
         return <Shield className="h-6 w-6" style={{color: '#10B3D6'}} />;
@@ -204,29 +197,6 @@ export default function Pricing() {
                         </Link>
 
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
-                                <button 
-                                    onClick={() => switchLang('en')} 
-                                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                        locale === 'en' 
-                                            ? 'bg-white text-gray-900' 
-                                            : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                    }`}
-                                >
-                                    EN
-                                </button>
-                                <button
-                                    onClick={() => switchLang('fr')} 
-                                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                        locale === 'fr' 
-                                            ? 'bg-white text-gray-900' 
-                                            : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                    }`}
-                                >
-                                    FR
-                                </button>
-                            </div>
-
                             {auth?.user ? (
                                 <Link 
                                     href={`/dashboard${queryLang}`}

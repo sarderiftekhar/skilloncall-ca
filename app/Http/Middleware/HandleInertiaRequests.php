@@ -166,8 +166,13 @@ class HandleInertiaRequests extends Middleware
             } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/' || str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
                 $translations = __('welcome');
             } elseif (str_contains($routeName ?? '', 'pricing') || str_contains($currentPath, 'pricing')) {
+                // Force English locale for pricing page to avoid crashes
+                $originalLocale = app()->getLocale();
+                app()->setLocale('en');
                 $pricingTranslations = __('pricing');
                 $welcomeTranslations = __('welcome');
+                app()->setLocale($originalLocale);
+                
                 if (is_array($pricingTranslations) && is_array($welcomeTranslations)) {
                     $translations = array_merge($pricingTranslations, ['welcome' => $welcomeTranslations]);
                 } elseif (is_array($pricingTranslations)) {
