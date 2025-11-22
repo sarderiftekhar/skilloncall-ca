@@ -541,7 +541,7 @@ export default function Welcome() {
 
             label: t('footer.employer_links.subscription_plans', 'Subscription Plans'),
 
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
 
             highlight: true,
 
@@ -565,7 +565,7 @@ export default function Welcome() {
 
             label: t('footer.employee_links.pro_plans', 'Pro Plans'),
 
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
 
             highlight: true,
 
@@ -1054,7 +1054,7 @@ export default function Welcome() {
 
                                                 <DropdownMenuItem asChild>
 
-                                                    <Link href={logout()} method="post" className="cursor-pointer">
+                                                    <Link href={logout.url()} method="post" className="cursor-pointer">
 
                                                         <LogOut className="mr-2 h-4 w-4" />
 
