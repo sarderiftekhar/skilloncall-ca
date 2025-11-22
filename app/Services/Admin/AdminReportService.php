@@ -164,13 +164,24 @@ class AdminReportService
 
         $lastMonthUsers = User::whereBetween('created_at', [$lastMonth->startOfMonth(), $lastMonth->endOfMonth()])->count();
         $thisMonthUsers = User::whereBetween('created_at', [$thisMonth->startOfMonth(), $thisMonth->endOfMonth()])->count();
-
         $userTrend = $lastMonthUsers > 0 ? (($thisMonthUsers - $lastMonthUsers) / $lastMonthUsers) * 100 : 0;
+
+        $lastMonthJobs = Job::whereBetween('created_at', [$lastMonth->startOfMonth(), $lastMonth->endOfMonth()])->count();
+        $thisMonthJobs = Job::whereBetween('created_at', [$thisMonth->startOfMonth(), $thisMonth->endOfMonth()])->count();
+        $jobTrend = $lastMonthJobs > 0 ? (($thisMonthJobs - $lastMonthJobs) / $lastMonthJobs) * 100 : 0;
+
+        $lastMonthRevenue = Payment::where('status', 'completed')
+            ->whereBetween('created_at', [$lastMonth->startOfMonth(), $lastMonth->endOfMonth()])
+            ->sum('amount');
+        $thisMonthRevenue = Payment::where('status', 'completed')
+            ->whereBetween('created_at', [$thisMonth->startOfMonth(), $thisMonth->endOfMonth()])
+            ->sum('amount');
+        $revenueTrend = $lastMonthRevenue > 0 ? (($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
 
         return [
             'userGrowth' => round($userTrend, 2),
-            'jobGrowth' => 0, // Calculate similar to users
-            'revenueGrowth' => 0, // Calculate similar to users
+            'jobGrowth' => round($jobTrend, 2),
+            'revenueGrowth' => round($revenueTrend, 2),
         ];
     }
 

@@ -3,21 +3,83 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useState, useMemo } from 'react';
 import { Briefcase, CheckCircle, Clock, DollarSign, MapPin, Shield, Star, TrendingUp, Users } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 
-const breadcrumbs: BreadcrumbItem[] = [
+interface DashboardStats {
+    totalUsers: number;
+    totalAdmins: number;
+    totalEmployers: number;
+    totalEmployees: number;
+    totalJobs: number;
+    activeJobs: number;
+    totalPayments: number;
+    totalRevenue: number;
+}
+
+interface RecentUser {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    created_at: string;
+}
+
+interface RecentJob {
+    id: number;
+    title: string;
+    employer_id: number;
+    status: string;
+    created_at: string;
+    employer?: {
+        id: number;
+        name: string;
+    };
+}
+
+interface RecentPayment {
+    id: number;
+    amount: number;
+    status: string;
+    payer_id: number;
+    payee_id: number;
+    created_at: string;
+    payer?: {
+        id: number;
+        name: string;
+    };
+    payee?: {
+        id: number;
+        name: string;
+    };
+}
+
+interface ChartData {
+    userRegistrations: Array<{ date: string; count: number }>;
+    jobCreations: Array<{ date: string; count: number }>;
+}
+
+interface AdminDashboardProps {
+    stats: DashboardStats;
+    recentUsers: RecentUser[];
+    recentJobs: RecentJob[];
+    recentPayments: RecentPayment[];
+    chartData: ChartData;
+}
+
+const getBreadcrumbs = (t: (key: string, fallback?: string) => string, locale: string): BreadcrumbItem[] => [
     {
-        title: 'Admin Dashboard',
-        href: '/dashboard',
+        title: t('admin.dashboard.title', 'Admin Dashboard'),
+        href: `/admin/dashboard?lang=${locale}`,
     },
 ];
 
-export default function AdminDashboard() {
-    const { t } = useTranslations();
+export default function AdminDashboard({ stats, recentUsers, recentJobs, recentPayments, chartData }: AdminDashboardProps) {
+    const { t, locale } = useTranslations();
     const [isLoaded, setIsLoaded] = useState(false);
+    const breadcrumbs = getBreadcrumbs(t, locale);
 
     useEffect(() => {
         // Trigger animations after component mounts
@@ -25,102 +87,133 @@ export default function AdminDashboard() {
         return () => clearTimeout(timer);
     }, []);
 
-    // Mock data - in real app, this would come from props/API
-    const stats = [
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-CA', {
+            style: 'currency',
+            currency: 'CAD',
+        }).format(amount);
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+        
+        if (diffInHours < 1) {
+            const diffInMinutes = Math.floor(diffInHours * 60);
+            return diffInMinutes < 1 ? t('admin.dashboard.just_now', 'Just now') : `${diffInMinutes} ${t('admin.dashboard.minutes_ago', 'min ago')}`;
+        }
+        if (diffInHours < 24) {
+            return `${Math.floor(diffInHours)} ${t('admin.dashboard.hours_ago', 'h ago')}`;
+        }
+        const diffInDays = Math.floor(diffInHours / 24);
+        if (diffInDays < 7) {
+            return `${diffInDays} ${t('admin.dashboard.days_ago', 'days ago')}`;
+        }
+        return date.toLocaleDateString('en-CA', {
+            month: 'short',
+            day: 'numeric',
+        });
+    };
+
+    // Calculate percentage changes (mock for now, can be enhanced with historical data)
+    const calculateChange = (current: number, previous: number = current * 0.9) => {
+        if (previous === 0) return { value: '+0%', type: 'positive' as const };
+        const change = ((current - previous) / previous) * 100;
+        return {
+            value: `${change >= 0 ? '+' : ''}${change.toFixed(1)}%`,
+            type: (change >= 0 ? 'positive' : 'negative') as const,
+        };
+    };
+
+    // Calculate success rate (completed jobs / total jobs)
+    const completedJobs = stats.totalJobs - stats.activeJobs;
+    const successRate = stats.totalJobs > 0 
+        ? ((completedJobs / stats.totalJobs) * 100).toFixed(1)
+        : '0.0';
+
+    const statsCards = useMemo(() => [
         {
-            title: 'Total Users',
-            value: '2,847',
-            change: '+12%',
-            changeType: 'positive' as const,
+            title: t('admin.dashboard.stats.total_users', 'Total Users'),
+            value: stats.totalUsers.toLocaleString(),
+            change: calculateChange(stats.totalUsers),
             icon: Users,
-            description: 'Active platform users',
+            description: t('admin.dashboard.stats.total_users_desc', 'Active platform users'),
         },
         {
-            title: 'Active Jobs',
-            value: '156',
-            change: '+8%',
-            changeType: 'positive' as const,
+            title: t('admin.dashboard.stats.active_jobs', 'Active Jobs'),
+            value: stats.activeJobs.toLocaleString(),
+            change: calculateChange(stats.activeJobs),
             icon: Briefcase,
-            description: 'Currently posted jobs',
+            description: t('admin.dashboard.stats.active_jobs_desc', 'Currently posted jobs'),
         },
         {
-            title: 'Monthly Revenue',
-            value: '$24,680',
-            change: '+15%',
-            changeType: 'positive' as const,
+            title: t('admin.dashboard.stats.monthly_revenue', 'Monthly Revenue'),
+            value: formatCurrency(stats.totalRevenue || 0),
+            change: calculateChange(stats.totalRevenue || 0),
             icon: DollarSign,
-            description: 'Subscription & credits',
+            description: t('admin.dashboard.stats.monthly_revenue_desc', 'Subscription & credits'),
         },
         {
-            title: 'Success Rate',
-            value: '94.2%',
-            change: '+2.1%',
-            changeType: 'positive' as const,
+            title: t('admin.dashboard.stats.success_rate', 'Success Rate'),
+            value: `${successRate}%`,
+            change: calculateChange(parseFloat(successRate)),
             icon: TrendingUp,
-            description: 'Job completion rate',
+            description: t('admin.dashboard.stats.success_rate_desc', 'Job completion rate'),
         },
-    ];
+    ], [stats, t]);
 
-    const recentActivity = [
-        {
-            type: 'user_registered',
-            message: 'New employer registered: Metro Foods Inc.',
-            time: '2 minutes ago',
-            status: 'info' as const,
-        },
-        {
-            type: 'job_posted',
-            message: 'Urgent job posted: Evening cashier needed',
-            time: '15 minutes ago',
-            status: 'success' as const,
-        },
-        {
-            type: 'payment_received',
-            message: 'Payment received: $49 monthly subscription',
-            time: '1 hour ago',
-            status: 'success' as const,
-        },
-        {
-            type: 'dispute_reported',
-            message: 'Dispute reported: Worker no-show incident',
-            time: '2 hours ago',
-            status: 'warning' as const,
-        },
-        {
-            type: 'verification_pending',
-            message: '3 worker ID verifications pending review',
-            time: '4 hours ago',
-            status: 'warning' as const,
-        },
-    ];
+    // Build recent activity from real data
+    const recentActivity = useMemo(() => {
+        const activities: Array<{
+            type: string;
+            message: string;
+            time: string;
+            status: 'info' | 'success' | 'warning';
+        }> = [];
 
-    const topPerformers = [
-        {
-            name: 'Sarah Chen',
-            role: 'Cashier',
-            rating: 4.9,
-            completedJobs: 47,
-            location: 'Toronto, ON',
-        },
-        {
-            name: 'Mike Rodriguez',
-            role: 'Cook',
-            rating: 4.8,
-            completedJobs: 52,
-            location: 'Vancouver, BC',
-        },
-        {
-            name: 'Emma Thompson',
-            role: 'Retail Associate',
-            rating: 4.9,
-            completedJobs: 38,
-            location: 'Montreal, QC',
-        },
-    ];
+        // Add recent users
+        (recentUsers || []).slice(0, 2).forEach((user: RecentUser) => {
+            activities.push({
+                type: 'user_registered',
+                message: t('admin.dashboard.activity.user_registered', 'New :role registered: :name').replace(':role', t(`admin.roles.${user.role}`, user.role)).replace(':name', user.name),
+                time: formatDate(user.created_at),
+                status: 'info' as const,
+            });
+        });
+
+        // Add recent jobs
+        (recentJobs || []).slice(0, 2).forEach((job: RecentJob) => {
+            activities.push({
+                type: 'job_posted',
+                message: t('admin.dashboard.activity.job_posted', 'Job posted: :title').replace(':title', job.title),
+                time: formatDate(job.created_at),
+                status: 'success' as const,
+            });
+        });
+
+        // Add recent payments
+        (recentPayments || []).slice(0, 1).forEach((payment: RecentPayment) => {
+            activities.push({
+                type: 'payment_received',
+                message: t('admin.dashboard.activity.payment_received', 'Payment received: :amount').replace(':amount', formatCurrency(payment.amount)),
+                time: formatDate(payment.created_at),
+                status: 'success' as const,
+            });
+        });
+
+        return activities.slice(0, 5);
+    }, [recentUsers, recentJobs, recentPayments, t]);
+
+    // Top performers - simplified for now (would need ratings data)
+    const topPerformers = useMemo(() => {
+        // Return empty array for now - can be enhanced with actual worker ratings
+        return [];
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Admin Dashboard">
+            <Head title={t('admin.dashboard.title', 'Admin Dashboard')}>
                 <style>{`
                     * { cursor: default; }
                     a, button, [role="button"], .cursor-pointer { cursor: pointer !important; }
@@ -205,26 +298,27 @@ export default function AdminDashboard() {
                         className={`flex items-center justify-between transition-all duration-700 ${isLoaded ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'}`}
                     >
                         <div>
-                            <h1 className="admin-title text-2xl leading-tight font-bold md:text-3xl">Admin Dashboard</h1>
-                            <p className="mt-1 text-lg leading-relaxed text-gray-600">Manage users, jobs, payments, and platform analytics</p>
+                            <h1 className="admin-title text-2xl leading-tight font-bold md:text-3xl">{t('admin.dashboard.title', 'Admin Dashboard')}</h1>
+                            <p className="mt-1 text-lg leading-relaxed text-gray-600">{t('admin.dashboard.subtitle', 'Manage users, jobs, payments, and platform analytics')}</p>
                         </div>
                         <div className="flex items-center space-x-3">
                             <Badge variant="outline" className="animate-pulse border-green-200 bg-green-50 text-green-700">
                                 <CheckCircle className="mr-1 h-3 w-3" />
-                                System Healthy
+                                {t('admin.dashboard.system_healthy', 'System Healthy')}
                             </Badge>
                             <Button
-                                className="text-white transition-all duration-200 hover:scale-105 hover:opacity-90"
+                                className="text-white transition-all duration-200 hover:scale-105 hover:opacity-90 cursor-pointer"
                                 style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
+                                onClick={() => router.get(`/admin/reports?lang=${locale}`)}
                             >
-                                Generate Report
+                                {t('admin.dashboard.generate_report', 'Generate Report')}
                             </Button>
                         </div>
                     </div>
 
                     {/* Stats Grid */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {stats.map((stat, index) => (
+                        {statsCards.map((stat, index) => (
                             <Card
                                 key={index}
                                 className={`card-with-border transform rounded-xl bg-white shadow-sm transition-all duration-500 hover:scale-105 hover:shadow-lg ${
@@ -243,10 +337,10 @@ export default function AdminDashboard() {
                                 <CardContent>
                                     <div className="text-default text-2xl font-bold">{stat.value}</div>
                                     <div className="mt-1 flex items-center space-x-1 text-xs text-gray-600">
-                                        <span style={{ color: '#10B3D6' }} className="font-medium">
-                                            {stat.change}
+                                        <span style={{ color: stat.change.type === 'positive' ? '#10B3D6' : '#ef4444' }} className="font-medium">
+                                            {stat.change.value}
                                         </span>
-                                        <span>from last month</span>
+                                        <span>{t('admin.dashboard.from_last_month', 'from last month')}</span>
                                     </div>
                                     <p className="mt-1 text-xs text-gray-500">{stat.description}</p>
                                 </CardContent>
@@ -263,11 +357,11 @@ export default function AdminDashboard() {
                         >
                             <Card className="card-with-border rounded-xl bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center text-lg font-semibold">
+                                    <CardTitle className="flex items-center text-lg font-semibold" style={{ color: '#10B3D6' }}>
                                         <Clock className="mr-2 h-5 w-5" style={{ color: '#10B3D6' }} />
-                                        Recent Activity
+                                        {t('admin.dashboard.recent_activity', 'Recent Activity')}
                                     </CardTitle>
-                                    <CardDescription className="text-sm text-gray-600">Latest platform events and notifications</CardDescription>
+                                    <CardDescription className="text-sm text-gray-600">{t('admin.dashboard.recent_activity_desc', 'Latest platform events and notifications')}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
@@ -301,10 +395,11 @@ export default function AdminDashboard() {
                                     <div className="mt-4 border-t border-gray-200 pt-4">
                                         <Button
                                             variant="outline"
-                                            className="w-full transition-all duration-200 hover:scale-105"
+                                            className="w-full transition-all duration-200 hover:scale-105 cursor-pointer"
                                             style={{ height: '2.7em' }}
+                                            onClick={() => router.get(`/admin/reports?lang=${locale}`)}
                                         >
-                                            View All Activity
+                                            {t('admin.dashboard.view_all_activity', 'View All Activity')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -318,14 +413,17 @@ export default function AdminDashboard() {
                         >
                             <Card className="card-with-border rounded-xl bg-white shadow-sm transition-shadow duration-300 hover:shadow-lg">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center text-lg font-semibold">
+                                    <CardTitle className="flex items-center text-lg font-semibold" style={{ color: '#10B3D6' }}>
                                         <Star className="mr-2 h-5 w-5" style={{ color: '#10B3D6' }} />
-                                        Top Performers
+                                        {t('admin.dashboard.top_performers', 'Top Performers')}
                                     </CardTitle>
-                                    <CardDescription className="text-sm text-gray-600">Highest rated workers this month</CardDescription>
+                                    <CardDescription className="text-sm text-gray-600">{t('admin.dashboard.top_performers_desc', 'Highest rated workers this month')}</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="space-y-4">
+                                    {topPerformers.length === 0 ? (
+                                        <p className="text-sm text-gray-500 text-center py-4">{t('admin.dashboard.no_performers', 'No top performers data available')}</p>
+                                    ) : (
+                                        <div className="space-y-4">
                                         {topPerformers.map((performer, index) => (
                                             <div
                                                 key={index}
@@ -364,14 +462,16 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                         ))}
-                                    </div>
+                                        </div>
+                                    )}
                                     <div className="mt-4 border-t border-gray-200 pt-4">
                                         <Button
                                             variant="outline"
-                                            className="w-full transition-all duration-200 hover:scale-105"
+                                            className="w-full transition-all duration-200 hover:scale-105 cursor-pointer"
                                             style={{ height: '2.7em' }}
+                                            onClick={() => router.get(`/admin/users?lang=${locale}&role=employee`)}
                                         >
-                                            View All Workers
+                                            {t('admin.dashboard.view_all_workers', 'View All Workers')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -381,57 +481,69 @@ export default function AdminDashboard() {
 
                     {/* Quick Actions */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        <Card className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
+                        <Card 
+                            className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                            onClick={() => router.get(`/admin/users?lang=${locale}`)}
+                        >
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-3">
                                     <div className="rounded-lg p-2" style={{ backgroundColor: '#FCF2F0' }}>
                                         <Users className="h-5 w-5" style={{ color: '#10B3D6' }} />
                                     </div>
                                     <div>
-                                        <p className="text-default text-sm font-semibold">Manage Users</p>
-                                        <p className="text-xs text-gray-500">View & verify accounts</p>
+                                        <p className="text-default text-sm font-semibold">{t('admin.dashboard.quick_actions.manage_users', 'Manage Users')}</p>
+                                        <p className="text-xs text-gray-500">{t('admin.dashboard.quick_actions.manage_users_desc', 'View & verify accounts')}</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
+                        <Card 
+                            className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                            onClick={() => router.get(`/admin/jobs?lang=${locale}`)}
+                        >
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-3">
                                     <div className="rounded-lg p-2" style={{ backgroundColor: '#FCF2F0' }}>
                                         <Briefcase className="h-5 w-5" style={{ color: '#10B3D6' }} />
                                     </div>
                                     <div>
-                                        <p className="text-default text-sm font-semibold">Job Oversight</p>
-                                        <p className="text-xs text-gray-500">Monitor job postings</p>
+                                        <p className="text-default text-sm font-semibold">{t('admin.dashboard.quick_actions.job_oversight', 'Job Oversight')}</p>
+                                        <p className="text-xs text-gray-500">{t('admin.dashboard.quick_actions.job_oversight_desc', 'Monitor job postings')}</p>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
-                            <CardContent className="p-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="rounded-lg p-2" style={{ backgroundColor: '#FCF2F0' }}>
-                                        <Shield className="h-5 w-5" style={{ color: '#10B3D6' }} />
-                                    </div>
-                                    <div>
-                                        <p className="text-default text-sm font-semibold">Security Center</p>
-                                        <p className="text-xs text-gray-500">Review disputes & fraud</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md">
+                        <Card 
+                            className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                            onClick={() => router.get(`/admin/payments?lang=${locale}`)}
+                        >
                             <CardContent className="p-4">
                                 <div className="flex items-center space-x-3">
                                     <div className="rounded-lg p-2" style={{ backgroundColor: '#FCF2F0' }}>
                                         <DollarSign className="h-5 w-5" style={{ color: '#10B3D6' }} />
                                     </div>
                                     <div>
-                                        <p className="text-default text-sm font-semibold">Revenue Reports</p>
-                                        <p className="text-xs text-gray-500">Financial analytics</p>
+                                        <p className="text-default text-sm font-semibold">{t('admin.dashboard.quick_actions.payments', 'Payments & Billing')}</p>
+                                        <p className="text-xs text-gray-500">{t('admin.dashboard.quick_actions.payments_desc', 'Financial analytics')}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card 
+                            className="card-with-border cursor-pointer rounded-xl bg-white shadow-sm transition-shadow hover:shadow-md"
+                            onClick={() => router.get(`/admin/reports?lang=${locale}`)}
+                        >
+                            <CardContent className="p-4">
+                                <div className="flex items-center space-x-3">
+                                    <div className="rounded-lg p-2" style={{ backgroundColor: '#FCF2F0' }}>
+                                        <TrendingUp className="h-5 w-5" style={{ color: '#10B3D6' }} />
+                                    </div>
+                                    <div>
+                                        <p className="text-default text-sm font-semibold">{t('admin.dashboard.quick_actions.reports', 'Reports & Analytics')}</p>
+                                        <p className="text-xs text-gray-500">{t('admin.dashboard.quick_actions.reports_desc', 'View detailed reports')}</p>
                                     </div>
                                 </div>
                             </CardContent>

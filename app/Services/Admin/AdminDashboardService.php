@@ -32,7 +32,7 @@ class AdminDashboardService
             'totalUsers' => User::count(),
             'totalAdmins' => User::where('role', 'admin')->count(),
             'totalEmployers' => User::where('role', 'employer')->count(),
-            'totalEmployees' => User::where('role', 'employee')->count(),
+            'totalEmployees' => User::whereIn('role', ['employee', 'worker'])->count(),
             'totalJobs' => Job::count(),
             'activeJobs' => Job::where('status', 'active')->count(),
             'totalPayments' => Payment::count(),

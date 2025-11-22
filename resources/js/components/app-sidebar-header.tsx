@@ -33,7 +33,11 @@ function getRoleBasedNavItems(userRole: string, t: (key: string) => string, loca
 
     if (userRole === 'admin') {
         return [
-            ...baseItems,
+            {
+                title: t('nav.dashboard', 'Dashboard'),
+                href: addLangParam('/admin/dashboard', locale),
+                icon: Grid,
+            },
             {
                 title: 'User Management',
                 href: addLangParam('/admin/users', locale),
@@ -332,8 +336,8 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
 
             {/* Right side - Subscription Badge, Notification Bell and User Avatar */}
             <div className="ml-auto flex items-center gap-2 sm:gap-3 lg:gap-4">
-                {/* Subscription Badge */}
-                <SubscriptionBadge subscription={subscription} />
+                {/* Subscription Badge - Hidden for admin users */}
+                {auth.user.role !== 'admin' && <SubscriptionBadge subscription={subscription} />}
                 
                 {/* Alert/Notification Dropdown - Hidden on mobile */}
                 <div className="relative hidden sm:block">

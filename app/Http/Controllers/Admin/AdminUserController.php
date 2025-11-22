@@ -58,7 +58,9 @@ class AdminUserController extends Controller
         $userDetails = $this->userService->getUserDetails($user);
 
         return Inertia::render('admin/users/show', [
-            'user' => $userDetails,
+            'user' => $userDetails['user'],
+            'stats' => $userDetails['stats'],
+            'recentActivity' => $userDetails['recentActivity'],
         ]);
     }
 
