@@ -1576,7 +1576,7 @@ export default function Welcome() {
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
 
-                            <Link href={`/subscriptions${queryLang}`} className="w-full sm:w-auto">
+                            <Link href={`/pricing${queryLang}`} className="w-full sm:w-auto">
 
                                 <Button 
 
@@ -1594,21 +1594,23 @@ export default function Welcome() {
 
                             </Link>
 
-                            <Button 
+                            <Link href={`/how-it-works${queryLang}`} className="w-full sm:w-auto">
+                                <Button 
 
-                                variant="outline" 
+                                    variant="outline" 
 
-                                size="lg" 
+                                    size="lg" 
 
-                                className="w-full sm:w-auto border-2 bg-white/10 hover:bg-white/20 px-10 py-6 text-base font-medium cursor-pointer transition-all"
+                                    className="w-full sm:w-auto border-2 bg-white/10 hover:bg-white/20 px-10 py-6 text-base font-medium cursor-pointer transition-all"
 
-                                style={{borderColor: '#10B3D6', color: 'white', height: '2.7em'}}
+                                    style={{borderColor: '#10B3D6', color: 'white', height: '2.7em'}}
 
-                            >
+                                >
 
-                                {t('cta.learn_more', 'Learn More')}
+                                    {t('cta.learn_more', 'Learn More')}
 
-                            </Button>
+                                </Button>
+                            </Link>
 
                         </div>
 

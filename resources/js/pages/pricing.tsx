@@ -193,23 +193,14 @@ export default function Pricing() {
             <header className="w-full shadow-sm" style={{ backgroundColor: '#192341' }}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
-                        <Link href={`/${queryLang}`} className="flex items-center gap-3 cursor-pointer">
-                            <div 
-                                className="rounded-full flex items-center justify-center text-white font-bold"
-                                style={{
-                                    backgroundColor: '#10B3D6', 
-                                    width: '40px', 
-                                    height: '40px', 
-                                    fontSize: '16px'
-                                }}
-                            >
-                                S
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold text-white">
-                                    SkillOnCall.ca
-                                </h1>
-                            </div>
+                        <Link href={`/${queryLang}`} className="flex-shrink-0 flex items-center cursor-pointer">
+                            <img 
+                                src="/logo-white.png" 
+                                alt="SkillOnCall Logo" 
+                                className="w-8 h-8 mr-3"
+                            />
+                            <span className="text-xl font-bold text-white">SkillOnCall</span>
+                            <span className="ml-1" style={{color: '#10B3D6'}}>.ca</span>
                         </Link>
 
                         <div className="flex items-center gap-4">
