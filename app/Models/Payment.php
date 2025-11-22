@@ -18,6 +18,7 @@ class Payment extends Model
      */
     protected $fillable = [
         'job_id',
+        'subscription_id',
         'payer_id',
         'payee_id',
         'amount',
@@ -56,6 +57,14 @@ class Payment extends Model
     public function job(): BelongsTo
     {
         return $this->belongsTo(Job::class);
+    }
+
+    /**
+     * Get the subscription that the payment is for.
+     */
+    public function subscription(): BelongsTo
+    {
+        return $this->belongsTo(Subscription::class);
     }
 
     /**

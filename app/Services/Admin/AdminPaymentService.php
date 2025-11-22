@@ -13,13 +13,17 @@ class AdminPaymentService
      */
     public function getPayments(array $filters = []): LengthAwarePaginator
     {
-        $query = Payment::with(['payer:id,name', 'payee:id,name', 'job:id,title']);
+        $query = Payment::with(['payer:id,name', 'payee:id,name', 'job:id,title', 'subscription.plan:id,name']);
 
         if (!empty($filters['search'])) {
-            $query->whereHas('payer', function ($q) use ($filters) {
-                $q->where('name', 'like', '%' . $filters['search'] . '%');
-            })->orWhereHas('payee', function ($q) use ($filters) {
-                $q->where('name', 'like', '%' . $filters['search'] . '%');
+            $query->where(function($q) use ($filters) {
+                $q->whereHas('payer', function ($subQ) use ($filters) {
+                    $subQ->where('name', 'like', '%' . $filters['search'] . '%');
+                })->orWhereHas('payee', function ($subQ) use ($filters) {
+                    $subQ->where('name', 'like', '%' . $filters['search'] . '%');
+                })->orWhereHas('subscription.plan', function ($subQ) use ($filters) {
+                    $subQ->where('name', 'like', '%' . $filters['search'] . '%');
+                })->orWhere('transaction_id', 'like', '%' . $filters['search'] . '%');
             });
         }
 
@@ -99,7 +103,9 @@ class AdminPaymentService
         return [
             'totalRevenue' => Payment::where('status', 'completed')->sum('amount'),
             'pendingAmount' => Payment::where('status', 'pending')->sum('amount'),
-            'commission' => Payment::where('status', 'completed')->sum('commission_amount'),
+            'commission' => Payment::where('status', 'completed')
+                ->where('type', '!=', 'subscription') // Commission only on job payments
+                ->sum('commission_amount'),
         ];
     }
 }

@@ -25,6 +25,9 @@ class EventServiceProvider extends ServiceProvider
         EmployeeRegistered::class => [
             SendEmployeeRegistrationEmail::class,
         ],
+        \Laravel\Paddle\Events\TransactionCompleted::class => [
+            \App\Listeners\RecordSubscriptionPayment::class,
+        ],
     ];
 
     /**
