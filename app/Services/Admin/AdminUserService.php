@@ -16,7 +16,7 @@ class AdminUserService
      */
     public function getUsers(array $filters = []): LengthAwarePaginator
     {
-        $query = User::query();
+        $query = User::query()->with(['subscriptions.plan']);
 
         if (!empty($filters['search'])) {
             $query->where(function ($q) use ($filters) {
@@ -37,9 +37,18 @@ class AdminUserService
             }
         }
 
-        return $query->latest()
+        $paginator = $query->latest()
             ->paginate(15)
             ->withQueryString();
+
+        // Transform users to include subscription information
+        $paginator->getCollection()->transform(function ($user) {
+            $subscription = $user->activeSubscription();
+            $user->subscription_plan_name = $subscription && $subscription->plan ? $subscription->plan->name : null;
+            return $user;
+        });
+
+        return $paginator;
     }
 
     /**
@@ -73,8 +82,16 @@ class AdminUserService
      */
     public function updateUser(User $user, array $data): User
     {
+        // Remove role from data as it should not be editable
+        unset($data['role']);
+
         if (isset($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
+            if (empty($data['password'])) {
+                // If password is empty, don't update it
+                unset($data['password']);
+            } else {
+                $data['password'] = Hash::make($data['password']);
+            }
         }
 
         $user->update($data);

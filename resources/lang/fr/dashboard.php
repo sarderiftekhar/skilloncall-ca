@@ -207,6 +207,7 @@ return [
             'find_workers' => 'Trouver des Travailleurs',
             'find_workers_desc' => 'Parcourir les profils de travailleurs',
             'worker_profile' => 'Profil du travailleur',
+            'export_pdf' => 'Exporter PDF',
             'quick_stats' => 'Statistiques rapides',
             'total_skills' => 'Compétences totales',
             'languages' => 'Langues',

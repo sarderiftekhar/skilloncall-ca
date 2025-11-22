@@ -3,6 +3,10 @@ import { type SharedData } from '@/types';
 import { useTranslations } from '@/hooks/useTranslations';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { PrivacyPolicyModal } from '@/components/privacy-policy-modal';
+import { TermsModal } from '@/components/terms-modal';
+import { ContactModal } from '@/components/contact-modal';
 import { 
     UserPlus, 
     FileText, 
@@ -23,6 +27,76 @@ export default function HowItWorks() {
     const queryLang = `?lang=${locale}`;
 
     const [activeTab, setActiveTab] = useState<'employers' | 'employees'>('employers');
+    const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+    const [showTermsModal, setShowTermsModal] = useState(false);
+    const [showContactModal, setShowContactModal] = useState(false);
+    const [email, setEmail] = useState('');
+    const [isSubscribing, setIsSubscribing] = useState(false);
+
+    const platformDescription = t('footer.platform_description', "Canada's premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.");
+
+    const footerEmployerLinks = [
+        { label: t('footer.employer_links.post_jobs', 'Post Jobs'), href: auth?.user && auth.user.role === 'employer' ? `/employer/jobs/create${queryLang}` : `/login${queryLang}&redirect=/employer/jobs/create` },
+        { label: t('footer.employer_links.find_employees', 'Find Employees'), href: auth?.user && auth.user.role === 'employer' ? `/employer/employees${queryLang}` : `/login${queryLang}&redirect=/employer/employees` },
+        {
+            label: t('footer.employer_links.subscription_plans', 'Subscription Plans'),
+            href: `/subscriptions${queryLang}`,
+            highlight: true,
+            prefix: '💎 ',
+        },
+        { label: t('footer.employer_links.success_stories', 'Success Stories'), href: '#' },
+    ];
+
+    const footerEmployeeLinks = [
+        { label: t('footer.employee_links.create_profile', 'Create Profile'), href: '#' },
+        { label: t('footer.employee_links.browse_jobs', 'Browse Jobs'), href: '#' },
+        {
+            label: t('footer.employee_links.pro_plans', 'Pro Plans'),
+            href: `/subscriptions${queryLang}`,
+            highlight: true,
+        },
+        { label: t('footer.employee_links.help_center', 'Help Center'), href: '#' },
+    ];
+
+    const handleNewsletterSubscribe = async () => {
+        if (!email.trim()) {
+            alert(isFrench ? 'Veuillez entrer votre email' : 'Please enter your email');
+            return;
+        }
+
+        setIsSubscribing(true);
+
+        try {
+            const response = await fetch('/contact', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({
+                    name: 'Newsletter Subscriber',
+                    email: email,
+                    phone: '',
+                    message: 'Newsletter subscription request',
+                }),
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(isFrench ? 'Abonnement réussi!' : 'Subscription successful!');
+                setEmail('');
+            } else {
+                alert(isFrench ? 'Échec de l\'abonnement. Veuillez réessayer.' : 'Subscription failed. Please try again.');
+            }
+        } catch (error) {
+            alert(isFrench ? 'Échec de l\'abonnement. Veuillez réessayer.' : 'Subscription failed. Please try again.');
+        } finally {
+            setIsSubscribing(false);
+        }
+    };
 
     const switchLang = (newLocale: string) => {
         const url = new URL(window.location.href);
@@ -472,19 +546,276 @@ export default function HowItWorks() {
                     </section>
                 </main>
 
-                {/* Footer */}
-                <footer className="w-full py-12 text-white" style={{ backgroundColor: '#10B3D6' }}>
+                {/* Footer with Newsletter */}
+
+                <footer className="text-white py-12" style={{backgroundColor: '#10B3D6'}}>
+
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <p className="text-sm mb-2">
-                                {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
-                            </p>
-                            <p className="text-xs opacity-90">
-                                {t('footer.platform_description', 'Canada\'s premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.')}
-                            </p>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+                            <div className="lg:col-span-2">
+
+                                <div className="flex items-center mb-4">
+
+                                    <div className="flex-shrink-0 flex items-center">
+
+                                        <img 
+
+                                            src="/logo-white.png" 
+
+                                            alt="SkillOnCall Logo" 
+
+                                            className="w-8 h-8 mr-3"
+
+                                        />
+
+                                        <span className="text-xl font-bold text-white">SkillOnCall</span>
+
+                                        <span className="ml-1" style={{color: '#FCF2F0'}}>.ca</span>
+
+                                    </div>
+
+                                </div>
+
+                                <p className="text-gray-100 mb-6 max-w-md">
+
+                                    {platformDescription}
+
+                                </p>
+
+                                <div>
+
+                                    <h3 className="text-lg font-semibold mb-4">📧 {t('footer.newsletter', 'Newsletter Signup')}</h3>
+
+                                    <p className="text-gray-200 text-sm mb-3">{t('footer.newsletter_hint', 'Get updates on new jobs, platform features, and industry news')}</p>
+
+                                    <div className="flex space-x-3">
+
+                                        <Input 
+
+                                            type="email" 
+
+                                            placeholder={t('footer.enter_email', 'Enter your email')} 
+
+                                            className="flex-1 text-gray-900" 
+
+                                            style={{backgroundColor: '#FFFFFF', borderColor: '#F6FBFD'}}
+
+                                            value={email}
+
+                                            onChange={(e) => setEmail(e.target.value)}
+
+                                            onKeyPress={(e) => e.key === 'Enter' && handleNewsletterSubscribe()}
+
+                                        />
+
+                                        <Button 
+
+                                            className="text-white hover:opacity-90 cursor-pointer" 
+
+                                            style={{backgroundColor: '#FCF2F0', color: '#10B3D6'}}
+
+                                            onClick={handleNewsletterSubscribe}
+
+                                            disabled={isSubscribing}
+
+                                        >
+
+                                            {isSubscribing ? (
+
+                                                <>
+
+                                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+
+                                                    {t('footer.subscribing', 'Subscribing...')}
+
+                                                </>
+
+                                            ) : (
+
+                                                t('footer.subscribe', 'Subscribe')
+
+                                            )}
+
+                                        </Button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_employers', 'For Employers')}</h3>
+
+                                <ul className="space-y-2 text-gray-100">
+
+                                    {footerEmployerLinks.map((item, index) => {
+
+                                        const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
+
+                                        const label = `${item.prefix ?? ''}${item.label}`;
+
+
+
+                                        return (
+
+                                            <li key={index}>
+
+                                                {item.href.startsWith('/') ? (
+
+                                                    <Link href={item.href} className={commonClasses}>
+
+                                                        {label}
+
+                                                    </Link>
+
+                                                ) : (
+
+                                                    <a href={item.href} className={commonClasses}>
+
+                                                        {label}
+
+                                                    </a>
+
+                                                )}
+
+                                            </li>
+
+                                        );
+
+                                    })}
+
+                                </ul>
+
+                            </div>
+
+
+
+                            <div>
+
+                                <h3 className="text-lg font-semibold mb-4">{t('footer.for_employees', 'For Employees')}</h3>
+
+                                <ul className="space-y-2 text-gray-100">
+
+                                    {footerEmployeeLinks.map((item, index) => {
+
+                                        const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
+
+
+
+                                        return (
+
+                                            <li key={index}>
+
+                                                {item.href.startsWith('/') ? (
+
+                                                    <Link href={item.href} className={commonClasses}>
+
+                                                        {item.label}
+
+                                                    </Link>
+
+                                                ) : (
+
+                                                    <a href={item.href} className={commonClasses}>
+
+                                                        {item.label}
+
+                                                    </a>
+
+                                                )}
+
+                                            </li>
+
+                                        );
+
+                                    })}
+
+                            </ul>
+
                         </div>
-                    </div>
+
+                        </div>
+
+                        <div className="mt-8 pt-8" style={{borderTop: '1px solid #FFFFFF'}}>
+
+                            <div className="flex flex-col md:flex-row justify-between items-center">
+
+                                <p className="text-gray-100 text-sm">
+
+                                    © 2025 SkillOnCall.ca. {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
+
+                                </p>
+
+                                <div className="flex space-x-6 mt-4 md:mt-0">
+
+                                    <button 
+
+                                        onClick={() => setShowContactModal(true)}
+
+                                        className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
+
+                                    >
+
+                                        {t('footer.contact', 'Contact')}
+
+                                    </button>
+
+                                    <button 
+
+                                        onClick={() => setShowPrivacyModal(true)}
+
+                                        className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
+
+                                    >
+
+                                        {t('footer.privacy', 'Privacy')}
+
+                                    </button>
+
+                                    <button 
+
+                                        onClick={() => setShowTermsModal(true)}
+
+                                        className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
+
+                                    >
+
+                                        {t('footer.terms', 'Terms')}
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                </div>
+
                 </footer>
+
+                {/* Modals */}
+                {showContactModal && (
+                    <ContactModal 
+                        isOpen={showContactModal} 
+                        onClose={() => setShowContactModal(false)} 
+                    />
+                )}
+                {showPrivacyModal && (
+                    <PrivacyPolicyModal 
+                        isOpen={showPrivacyModal} 
+                        onClose={() => setShowPrivacyModal(false)} 
+                    />
+                )}
+                {showTermsModal && (
+                    <TermsModal 
+                        isOpen={showTermsModal} 
+                        onClose={() => setShowTermsModal(false)} 
+                    />
+                )}
             </div>
         </>
     );

@@ -45,11 +45,12 @@ export default function EditUserPage({ user }: EditUserPageProps) {
         email: user.email || '',
         password: '',
         password_confirmation: '',
-        role: user.role || 'employee',
+        // Role is not included in form data as it should not be editable
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        // Role is already excluded from form data, so we can submit directly
         put(`/admin/users/${user.id}?lang=${locale}`, {
             preserveScroll: true,
             onSuccess: () => {
@@ -155,20 +156,19 @@ export default function EditUserPage({ user }: EditUserPageProps) {
 
                                 <div>
                                     <Label htmlFor="role" className="text-default">
-                                        {t('admin.users.edit.form.role', 'Role')} *
+                                        {t('admin.users.edit.form.role', 'Role')}
                                     </Label>
-                                    <Select value={data.role} onValueChange={(value) => setData('role', value)}>
-                                        <SelectTrigger className="mt-1 cursor-pointer">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="admin" className="cursor-pointer">{t('admin.roles.admin', 'Admin')}</SelectItem>
-                                            <SelectItem value="employer" className="cursor-pointer">{t('admin.roles.employer', 'Employer')}</SelectItem>
-                                            <SelectItem value="employee" className="cursor-pointer">{t('admin.roles.employee', 'Employee')}</SelectItem>
-                                            <SelectItem value="worker" className="cursor-pointer">{t('admin.roles.worker', 'Worker')}</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={errors.role} />
+                                    <Input
+                                        id="role"
+                                        type="text"
+                                        value={t(`admin.roles.${user.role}`, user.role)}
+                                        className="mt-1 bg-gray-100 cursor-not-allowed"
+                                        disabled
+                                        readOnly
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        {t('admin.users.edit.form.role_readonly', 'Role cannot be changed after user creation')}
+                                    </p>
                                 </div>
 
                                 <div className="flex items-center gap-4 pt-4">

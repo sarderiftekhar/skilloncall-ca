@@ -7,6 +7,7 @@ use App\Http\Requests\Employer\HireWorkerRequest;
 use App\Http\Requests\Employer\RateWorkerRequest;
 use App\Models\User;
 use App\Services\Employer\EmployerWorkerService;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -75,5 +76,32 @@ class EmployerWorkerController extends Controller
 
         return redirect()->back()
             ->with('success', 'Worker rated successfully.');
+    }
+
+    /**
+     * Export worker profile as PDF.
+     */
+    public function exportPdf($employee)
+    {
+        // Find the user by ID - ensure they have employee role
+        $worker = User::where('id', $employee)
+            ->where('role', 'employee')
+            ->firstOrFail();
+
+        // Check if worker has an employee profile
+        if (!$worker->employeeProfile) {
+            abort(404, 'Employee profile not found');
+        }
+
+        $workerDetails = $this->workerService->getWorkerDetails($worker);
+
+        $pdf = PDF::loadView('pdfs.employee-profile', [
+            'worker' => $workerDetails,
+            'generatedAt' => now()->format('F j, Y \a\t g:i A'),
+        ])->setPaper('a4', 'portrait');
+
+        $filename = 'employee-profile-' . str_replace(' ', '-', strtolower($worker->name)) . '-' . date('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

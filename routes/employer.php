@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified', 'employer'])->prefix('employer')->name('e
     // Employee Management
     Route::get('employees', [EmployerWorkerController::class, 'index'])->name('employees.index');
     Route::get('employees/{employee}', [EmployerWorkerController::class, 'show'])->name('employees.show');
+    Route::get('employees/{employee}/export-pdf', [EmployerWorkerController::class, 'exportPdf'])->name('employees.export-pdf');
     Route::post('employees/{employee}/hire', [EmployerWorkerController::class, 'hire'])->name('employees.hire');
     Route::put('employees/{employee}/rate', [EmployerWorkerController::class, 'rate'])->name('employees.rate');
     

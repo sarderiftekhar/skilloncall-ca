@@ -30,7 +30,8 @@ import {
     BookOpen,
     Navigation,
     AlertCircle,
-    XCircle
+    XCircle,
+    Download
 } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 import { type BreadcrumbItem } from '@/types';
@@ -444,10 +445,21 @@ export default function WorkerShow({ worker }: Props) {
                                 {/* Name and Basic Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                        <div>
-                                            <h1 className="text-3xl md:text-4xl font-bold leading-tight page-title mb-2">
-                                                {workerName}
-                                            </h1>
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <h1 className="text-3xl md:text-4xl font-bold leading-tight page-title">
+                                                    {workerName}
+                                                </h1>
+                                                <Button
+                                                    onClick={() => window.open(`/employer/employees/${worker.id}/export-pdf?lang=${locale}`, '_blank')}
+                                                    className="cursor-pointer"
+                                                    style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
+                                                    variant="default"
+                                                >
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t('dashboard.export_pdf', 'Export PDF')}
+                                                </Button>
+                                            </div>
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                                                 <div className="flex items-center gap-1">
                                                     <MapPin className="h-4 w-4" />

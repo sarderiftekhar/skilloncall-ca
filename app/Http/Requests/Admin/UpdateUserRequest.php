@@ -28,7 +28,7 @@ class UpdateUserRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($userId)],
             'password' => ['sometimes', 'nullable', 'string', 'min:8', 'confirmed'],
-            'role' => ['sometimes', 'required', Rule::in(['admin', 'employer', 'worker'])],
+            // Role is intentionally excluded - it cannot be changed after user creation
         ];
     }
 }

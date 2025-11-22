@@ -207,6 +207,7 @@ return [
             'find_workers' => 'Find Workers',
             'find_workers_desc' => 'Browse worker profiles',
             'worker_profile' => 'Worker Profile',
+            'export_pdf' => 'Export PDF',
             'quick_stats' => 'Quick Stats',
             'total_skills' => 'Total Skills',
             'languages' => 'Languages',

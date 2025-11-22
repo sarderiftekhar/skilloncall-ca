@@ -16,6 +16,7 @@ interface User {
     role: string;
     email_verified_at: string | null;
     created_at: string;
+    subscription_plan_name?: string | null;
 }
 
 interface PaginatedUsers {
@@ -241,6 +242,7 @@ export default function IndexUsersPage({ users, filters }: IndexUsersPageProps) 
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.name', 'Name')}</th>
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.email', 'Email')}</th>
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.role', 'Role')}</th>
+                                                <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.subscription', 'Subscription Type')}</th>
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.status', 'Status')}</th>
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.created_at', 'Created')}</th>
                                                 <th className="text-left py-3 px-4 text-sm font-semibold text-default">{t('admin.users.index.columns.actions', 'Actions')}</th>
@@ -270,6 +272,17 @@ export default function IndexUsersPage({ users, filters }: IndexUsersPageProps) 
                                                         <Badge className={getRoleBadgeColor(user.role)} style={{ fontSize: '11px' }}>
                                                             {t(`admin.roles.${user.role}`, user.role)}
                                                         </Badge>
+                                                    </td>
+                                                    <td className="py-3 px-4">
+                                                        {user.subscription_plan_name ? (
+                                                            <Badge className="bg-gradient-to-r from-[#10B3D6] to-[#0D8FA8] text-white" style={{ fontSize: '11px' }}>
+                                                                {user.subscription_plan_name}
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge className="bg-gray-100 text-gray-600" style={{ fontSize: '11px' }}>
+                                                                {t('admin.users.index.free_tier', 'Free Tier')}
+                                                            </Badge>
+                                                        )}
                                                     </td>
                                                     <td className="py-3 px-4">
                                                         <Badge
