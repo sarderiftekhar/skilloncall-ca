@@ -118,6 +118,12 @@ class SubscriptionService
     public function cancelSubscription(Subscription $subscription, bool $immediately = false): bool
     {
         try {
+            // If subscription has Paddle subscription ID, cancel in Paddle first
+            if ($subscription->paddle_subscription_id) {
+                // Paddle integration handled by Laravel Cashier
+                $paddleService->cancelSubscription($subscription->paddle_subscription_id, $immediately);
+            }
+
             if ($immediately) {
                 $subscription->update([
                     'status' => 'cancelled',
@@ -364,5 +370,105 @@ class SubscriptionService
         $newDailyRate = $newPlan->getPriceForInterval($billingInterval) / $totalDays;
         
         return ($newDailyRate - $oldDailyRate) * $daysRemaining;
+    }
+
+    /**
+     * Sync subscription data from Paddle webhook
+     */
+    public function syncFromPaddle(array $paddleData): ?Subscription
+    {
+        try {
+            $paddleSubscriptionId = $paddleData['id'] ?? null;
+            if (!$paddleSubscriptionId) {
+                return null;
+            }
+
+            // Find existing subscription by Paddle subscription ID
+            $subscription = Subscription::where('paddle_subscription_id', $paddleSubscriptionId)->first();
+
+            if (!$subscription) {
+                // Try to find by customer ID and custom data
+                $customerId = $paddleData['customer_id'] ?? null;
+                $customData = $paddleData['custom_data'] ?? [];
+                $userId = $customData['user_id'] ?? null;
+                $planId = $customData['plan_id'] ?? null;
+
+                if ($userId && $planId) {
+                    $subscription = Subscription::where('user_id', $userId)
+                        ->where('subscription_plan_id', $planId)
+                        ->whereNull('paddle_subscription_id')
+                        ->latest()
+                        ->first();
+                }
+            }
+
+            if (!$subscription) {
+                Log::warning('Paddle subscription sync: No local subscription found', [
+                    'paddle_subscription_id' => $paddleSubscriptionId,
+                    'paddle_data' => $paddleData,
+                ]);
+                return null;
+            }
+
+            // Update subscription with Paddle data
+            $status = $this->mapPaddleStatus($paddleData['status'] ?? 'active');
+            $startsAt = isset($paddleData['started_at']) 
+                ? Carbon::parse($paddleData['started_at']) 
+                : $subscription->starts_at;
+            $endsAt = isset($paddleData['next_billed_at']) 
+                ? Carbon::parse($paddleData['next_billed_at']) 
+                : $subscription->ends_at;
+
+            $subscription->update([
+                'paddle_subscription_id' => $paddleSubscriptionId,
+                'paddle_customer_id' => $paddleData['customer_id'] ?? $subscription->paddle_customer_id,
+                'paddle_product_id' => $paddleData['items'][0]['price']['product_id'] ?? $subscription->paddle_product_id,
+                'paddle_price_id' => $paddleData['items'][0]['price']['id'] ?? $subscription->paddle_price_id,
+                'status' => $status,
+                'starts_at' => $startsAt,
+                'ends_at' => $endsAt,
+                'next_payment_at' => $endsAt,
+                'last_payment_at' => isset($paddleData['last_payment_at']) 
+                    ? Carbon::parse($paddleData['last_payment_at']) 
+                    : $subscription->last_payment_at,
+                'cancelled_at' => isset($paddleData['canceled_at']) 
+                    ? Carbon::parse($paddleData['canceled_at']) 
+                    : $subscription->cancelled_at,
+                'payment_method' => 'paddle',
+                'metadata' => array_merge($subscription->metadata ?? [], [
+                    'paddle_synced_at' => now()->toIso8601String(),
+                    'paddle_data' => $paddleData,
+                ]),
+            ]);
+
+            Log::info('Subscription synced from Paddle', [
+                'subscription_id' => $subscription->id,
+                'paddle_subscription_id' => $paddleSubscriptionId,
+                'status' => $status,
+            ]);
+
+            return $subscription;
+        } catch (\Exception $e) {
+            Log::error('Failed to sync subscription from Paddle', [
+                'paddle_data' => $paddleData,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Map Paddle subscription status to local status
+     */
+    protected function mapPaddleStatus(string $paddleStatus): string
+    {
+        return match (strtolower($paddleStatus)) {
+            'active' => 'active',
+            'canceled', 'cancelled' => 'cancelled',
+            'past_due' => 'suspended',
+            'paused' => 'suspended',
+            'expired' => 'expired',
+            default => 'active',
+        };
     }
 }

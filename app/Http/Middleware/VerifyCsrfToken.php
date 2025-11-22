@@ -12,8 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        // Add any routes that should be excluded from CSRF protection
-        // Only add routes that are truly stateless or have alternative authentication
+        // Paddle webhook endpoint (Paddle handles authentication via signature)
+        'webhooks/paddle',
     ];
 
     /**

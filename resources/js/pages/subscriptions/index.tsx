@@ -163,11 +163,46 @@ export default function SubscriptionsIndex({
         }
     };
 
-    const handleSubscribe = (plan: any) => {
-        // This will be implemented with actual subscription logic
-        console.log('Subscribe to plan:', plan.name, 'with interval:', billingInterval);
-        // For now, just show a placeholder
-        alert(`Subscribing to ${plan.name} plan (${billingInterval}) - This feature will be implemented soon!`);
+    const handleSubscribe = async (plan: any) => {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            
+            // Call backend to create Paddle checkout
+            const response = await fetch('/subscriptions/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    plan_id: plan.id,
+                    billing_interval: billingInterval,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.checkout_url) {
+                    // Redirect to Paddle checkout
+                    window.location.href = data.checkout_url;
+                } else if (data.redirect) {
+                    // For free plans, redirect to subscriptions page
+                    router.visit(data.redirect);
+                } else {
+                    // Show success message and reload
+                    alert(data.message || 'Subscription created successfully!');
+                    router.reload();
+                }
+            } else {
+                alert(data.message || 'Failed to create subscription. Please try again.');
+            }
+        } catch (error) {
+            console.error('Subscription error:', error);
+            alert('An error occurred. Please try again.');
+        }
     };
 
     const isCurrentPlan = (plan: any) => {

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubscriptionPlan;
-use App\Services\SubscriptionService;
-use App\Services\EmailService;
+use App\Models\PaddleProduct;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -14,15 +13,6 @@ use Inertia\Response;
 
 class SubscriptionController extends Controller
 {
-    protected SubscriptionService $subscriptionService;
-    protected EmailService $emailService;
-
-    public function __construct(SubscriptionService $subscriptionService, EmailService $emailService)
-    {
-        $this->subscriptionService = $subscriptionService;
-        $this->emailService = $emailService;
-    }
-
     /**
      * Display subscription plans
      */
@@ -32,9 +22,18 @@ class SubscriptionController extends Controller
             /** @var \App\Models\User $user */
             $user = Auth::user();
             
-            $employerPlans = $this->subscriptionService->getEmployerPlans();
-            $employeePlans = $this->subscriptionService->getEmployeePlans();
-            $currentSubscription = $user->activeSubscription();
+            $employerPlans = SubscriptionPlan::where('type', 'employer')
+                ->where('is_active', true)
+                ->orderBy('price')
+                ->get();
+            
+            $employeePlans = SubscriptionPlan::where('type', 'employee')
+                ->where('is_active', true)
+                ->orderBy('price')
+                ->get();
+            
+            // Get current Cashier subscription
+            $currentPaddleSubscription = $user->subscription();
 
             // Transform plans to match frontend expectations
             $transformPlan = function($plan) {
@@ -52,17 +51,15 @@ class SubscriptionController extends Controller
             return Inertia::render('subscriptions/index', [
                 'employerPlans' => $employerPlans->map($transformPlan)->toArray(),
                 'employeePlans' => $employeePlans->map($transformPlan)->toArray(),
-                'currentSubscription' => $currentSubscription ? [
-                    'id' => $currentSubscription->id,
-                    'plan' => $transformPlan($currentSubscription->plan),
-                    'status' => $currentSubscription->status,
-                    'amount' => $currentSubscription->getFormattedAmount(),
-                    'billing_interval' => $currentSubscription->billing_interval,
-                    'ends_at' => $currentSubscription->ends_at?->format('M j, Y'),
-                    'cancelled_at' => $currentSubscription->cancelled_at?->format('M j, Y'),
-                    'days_until_expiration' => $currentSubscription->daysUntilExpiration(),
-                    'is_cancelled' => $currentSubscription->isCancelled(),
-                    'next_billing_date' => $currentSubscription->getNextBillingDate()?->format('M j, Y'),
+                'currentSubscription' => $currentPaddleSubscription ? [
+                    'id' => $currentPaddleSubscription->id,
+                    'status' => $currentPaddleSubscription->status,
+                    'ends_at' => $currentPaddleSubscription->ends_at?->format('M j, Y'),
+                    'trial_ends_at' => $currentPaddleSubscription->trial_ends_at?->format('M j, Y'),
+                    'paused_at' => $currentPaddleSubscription->paused_at?->format('M j, Y'),
+                    'on_trial' => $currentPaddleSubscription->onTrial(),
+                    'cancelled' => $currentPaddleSubscription->cancelled(),
+                    'recurring' => $currentPaddleSubscription->recurring(),
                 ] : null,
                 'userRole' => $user->role,
             ]);
@@ -72,7 +69,6 @@ class SubscriptionController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Return a simplified view on error
             return Inertia::render('subscriptions/index', [
                 'employerPlans' => [],
                 'employeePlans' => [],
@@ -90,61 +86,32 @@ class SubscriptionController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->subscription();
 
         if (!$subscription) {
             return redirect()->route('subscriptions.index')
                 ->with('error', 'You don\'t have an active subscription.');
         }
 
-        // Get usage statistics
-        $usage = [];
-        $plan = $subscription->plan;
-        
-        if ($plan->job_posts_limit) {
-            $usage['job_posts'] = [
-                'used' => $subscription->getUsage('job_posts'),
-                'limit' => $plan->job_posts_limit,
-                'remaining' => $subscription->getRemainingUsage('job_posts'),
-            ];
-        }
-
-        if ($plan->job_applications_limit) {
-            $usage['job_applications'] = [
-                'used' => $subscription->getUsage('job_applications'),
-                'limit' => $plan->job_applications_limit,
-                'remaining' => $subscription->getRemainingUsage('job_applications'),
-            ];
-        }
-
-        if ($plan->featured_jobs_limit) {
-            $usage['featured_jobs'] = [
-                'used' => $subscription->getUsage('featured_jobs'),
-                'limit' => $plan->featured_jobs_limit,
-                'remaining' => $subscription->getRemainingUsage('featured_jobs'),
-            ];
-        }
-
         return Inertia::render('subscriptions/show', [
             'subscription' => [
                 'id' => $subscription->id,
-                'plan' => $subscription->plan,
+                'paddle_id' => $subscription->paddle_id,
                 'status' => $subscription->status,
-                'amount' => $subscription->getFormattedAmount(),
-                'billing_interval' => $subscription->billing_interval,
-                'starts_at' => $subscription->starts_at->format('M j, Y'),
+                'type' => $subscription->type,
+                'trial_ends_at' => $subscription->trial_ends_at?->format('M j, Y'),
+                'paused_at' => $subscription->paused_at?->format('M j, Y'),
                 'ends_at' => $subscription->ends_at?->format('M j, Y'),
-                'cancelled_at' => $subscription->cancelled_at?->format('M j, Y'),
-                'days_until_expiration' => $subscription->daysUntilExpiration(),
-                'is_cancelled' => $subscription->isCancelled(),
-                'next_billing_date' => $subscription->getNextBillingDate()?->format('M j, Y'),
-                'usage' => $usage,
+                'on_trial' => $subscription->onTrial(),
+                'cancelled' => $subscription->cancelled(),
+                'recurring' => $subscription->recurring(),
+                'on_grace_period' => $subscription->onGracePeriod(),
             ],
         ]);
     }
 
     /**
-     * Subscribe to a plan
+     * Subscribe to a plan - Initiate Paddle checkout using Cashier
      */
     public function subscribe(Request $request): JsonResponse
     {
@@ -166,61 +133,101 @@ class SubscriptionController extends Controller
             ], 400);
         }
 
+        // Get or create Paddle product mapping
+        $paddleProduct = PaddleProduct::where('subscription_plan_id', $plan->id)
+            ->where('environment', config('paddle.sandbox') ? 'sandbox' : 'production')
+            ->first();
+
+        if (!$paddleProduct) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This plan is not configured for Paddle checkout. Please contact support.',
+            ], 400);
+        }
+
+        // Get the appropriate price ID based on billing interval
+        $priceId = $request->billing_interval === 'monthly' 
+            ? $paddleProduct->paddle_price_id_monthly 
+            : $paddleProduct->paddle_price_id_yearly;
+
+        if (!$priceId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pricing not available for this billing interval. Please contact support.',
+            ], 400);
+        }
+
         try {
-            $subscription = $this->subscriptionService->subscribe(
-                $user,
-                $plan,
-                $request->billing_interval,
-                [
-                    'payment_method' => 'stripe', // This would come from payment processing
-                    'metadata' => [
-                        'source' => 'web',
-                        'user_agent' => $request->userAgent(),
-                    ]
-                ]
-            );
-
-            // Send confirmation email
-            $emailData = [
-                'user_name' => $user->name,
-                'user_email' => $user->email,
-                'plan_name' => $plan->name,
-                'amount' => $subscription->getFormattedAmount(),
-                'billing_interval' => $subscription->billing_interval,
-                'next_billing_date' => $subscription->getNextBillingDate()?->format('M j, Y') ?? 'N/A',
-                'features' => $plan->features ?? [
-                    'Access to all platform features',
-                    'Customer support',
-                    'Regular updates and improvements'
-                ]
-            ];
-
-            $emailSent = $this->emailService->sendSubscriptionConfirmation($emailData);
+            // Use Cashier's checkout method
+            $checkout = $user->checkout($priceId)
+                ->customData([
+                    'plan_id' => $plan->id,
+                    'plan_name' => $plan->name,
+                    'billing_interval' => $request->billing_interval,
+                ])
+                ->returnTo(route('subscriptions.paddle.callback'))
+                ->create();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Successfully subscribed to ' . $plan->name . ' plan!' . 
-                           ($emailSent ? ' A confirmation email has been sent to your inbox.' : ''),
-                'subscription_id' => $subscription->id,
-                'email_sent' => $emailSent,
+                'redirect_url' => $checkout->url,
+                'message' => 'Redirecting to checkout...',
             ]);
         } catch (\Exception $e) {
+            Log::error('Paddle checkout creation failed', [
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'price_id' => $priceId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create subscription. Please try again.',
+                'message' => 'Failed to initiate checkout. Please try again.',
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
 
     /**
-     * Cancel subscription
+     * Handle Paddle checkout callback
+     */
+    public function handlePaddleCallback(Request $request)
+    {
+        try {
+            // The webhook will handle the actual subscription creation
+            // This callback just confirms the user completed checkout
+            return redirect()->route('subscriptions.show')
+                ->with('success', 'Your subscription is active! Welcome aboard.');
+        } catch (\Exception $e) {
+            Log::error('Paddle callback error', [
+                'error' => $e->getMessage(),
+                'request' => $request->all(),
+            ]);
+
+            return redirect()->route('subscriptions.index')
+                ->with('error', 'An error occurred processing your subscription. Please contact support.');
+        }
+    }
+
+    /**
+     * Handle cancelled Paddle checkout
+     */
+    public function handlePaddleCancel(Request $request)
+    {
+        return redirect()->route('subscriptions.index')
+            ->with('info', 'Checkout was cancelled. You can try again anytime.');
+    }
+
+    /**
+     * Cancel subscription using Cashier
      */
     public function cancel(Request $request): JsonResponse
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->subscription();
 
         if (!$subscription) {
             return response()->json([
@@ -229,38 +236,88 @@ class SubscriptionController extends Controller
             ], 404);
         }
 
-        $immediately = $request->boolean('immediately', false);
-
-        if ($this->subscriptionService->cancelSubscription($subscription, $immediately)) {
-            $message = $immediately 
-                ? 'Your subscription has been cancelled immediately.'
-                : 'Your subscription will be cancelled at the end of the current billing period.';
+        try {
+            // Cancel subscription at period end (default behavior)
+            $subscription->cancel();
 
             return response()->json([
                 'success' => true,
-                'message' => $message,
+                'message' => 'Your subscription will be cancelled at the end of the current billing period.',
             ]);
-        }
+        } catch (\Exception $e) {
+            Log::error('Subscription cancellation failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage(),
+            ]);
 
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to cancel subscription. Please try again.',
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel subscription. Please try again.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
     }
 
     /**
-     * Change subscription plan
+     * Resume a cancelled subscription
      */
-    public function changePlan(Request $request): JsonResponse
+    public function resume(Request $request): JsonResponse
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $subscription = $user->subscription();
+
+        if (!$subscription) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No subscription found.',
+            ], 404);
+        }
+
+        if (!$subscription->cancelled()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Subscription is not cancelled.',
+            ], 400);
+        }
+
+        try {
+            // Resume the subscription
+            $subscription->resume();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Your subscription has been resumed successfully!',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Subscription resume failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to resume subscription. Please try again.',
+                'error' => config('app.debug') ? $e->getMessage() : null,
+            ], 500);
+        }
+    }
+
+    /**
+     * Swap to a different price/plan
+     */
+    public function swap(Request $request): JsonResponse
     {
         $request->validate([
             'plan_id' => 'required|exists:subscription_plans,id',
-            'billing_interval' => 'sometimes|in:monthly,yearly',
+            'billing_interval' => 'required|in:monthly,yearly',
         ]);
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $subscription = $user->activeSubscription();
+        $subscription = $user->subscription();
 
         if (!$subscription) {
             return response()->json([
@@ -280,94 +337,50 @@ class SubscriptionController extends Controller
             ], 400);
         }
 
+        // Get Paddle product mapping
+        $paddleProduct = PaddleProduct::where('subscription_plan_id', $newPlan->id)
+            ->where('environment', config('paddle.sandbox') ? 'sandbox' : 'production')
+            ->first();
+
+        if (!$paddleProduct) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This plan is not configured for Paddle. Please contact support.',
+            ], 400);
+        }
+
+        $newPriceId = $request->billing_interval === 'monthly' 
+            ? $paddleProduct->paddle_price_id_monthly 
+            : $paddleProduct->paddle_price_id_yearly;
+
+        if (!$newPriceId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pricing not available for this billing interval.',
+            ], 400);
+        }
+
         try {
-            $updatedSubscription = $this->subscriptionService->changePlan(
-                $subscription,
-                $newPlan,
-                $request->billing_interval
-            );
+            // Swap to new price (Paddle handles proration automatically)
+            $subscription->swap($newPriceId);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Successfully changed to ' . $newPlan->name . ' plan!',
-                'subscription' => [
-                    'id' => $updatedSubscription->id,
-                    'plan_name' => $newPlan->name,
-                    'amount' => $updatedSubscription->getFormattedAmount(),
-                ],
             ]);
         } catch (\Exception $e) {
+            Log::error('Subscription swap failed', [
+                'user_id' => $user->id,
+                'subscription_id' => $subscription->id,
+                'new_price_id' => $newPriceId,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to change subscription plan. Please try again.',
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
-    }
-
-    /**
-     * Get usage statistics
-     */
-    public function usage(): JsonResponse
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-        $subscription = $user->activeSubscription();
-
-        if (!$subscription) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No active subscription found.',
-            ], 404);
-        }
-
-        $plan = $subscription->plan;
-        $usage = [];
-
-        // Job posts usage (for employers)
-        if ($plan->job_posts_limit !== null) {
-            $usage['job_posts'] = [
-                'used' => $subscription->getUsage('job_posts'),
-                'limit' => $plan->job_posts_limit,
-                'remaining' => $subscription->getRemainingUsage('job_posts'),
-                'percentage' => $plan->job_posts_limit > 0 
-                    ? round(($subscription->getUsage('job_posts') / $plan->job_posts_limit) * 100, 1)
-                    : 0,
-            ];
-        }
-
-        // Job applications usage (for workers)
-        if ($plan->job_applications_limit !== null) {
-            $usage['job_applications'] = [
-                'used' => $subscription->getUsage('job_applications'),
-                'limit' => $plan->job_applications_limit,
-                'remaining' => $subscription->getRemainingUsage('job_applications'),
-                'percentage' => $plan->job_applications_limit > 0 
-                    ? round(($subscription->getUsage('job_applications') / $plan->job_applications_limit) * 100, 1)
-                    : 0,
-            ];
-        }
-
-        // Featured jobs usage
-        if ($plan->featured_jobs_limit !== null) {
-            $usage['featured_jobs'] = [
-                'used' => $subscription->getUsage('featured_jobs'),
-                'limit' => $plan->featured_jobs_limit,
-                'remaining' => $subscription->getRemainingUsage('featured_jobs'),
-                'percentage' => $plan->featured_jobs_limit > 0 
-                    ? round(($subscription->getUsage('featured_jobs') / $plan->featured_jobs_limit) * 100, 1)
-                    : 0,
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'usage' => $usage,
-            'subscription' => [
-                'plan_name' => $plan->name,
-                'status' => $subscription->status,
-                'days_remaining' => $subscription->daysUntilExpiration(),
-            ],
-        ]);
     }
 }

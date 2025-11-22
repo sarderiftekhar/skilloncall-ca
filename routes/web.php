@@ -170,14 +170,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Include role-specific routes
-// Subscription routes
+// Subscription routes (using Laravel Cashier Paddle)
 Route::middleware(['auth', 'verified', 'check.user.active'])->group(function () {
     Route::get('/subscriptions', [App\Http\Controllers\SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('/subscription', [App\Http\Controllers\SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::post('/subscriptions/subscribe', [App\Http\Controllers\SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
     Route::post('/subscriptions/cancel', [App\Http\Controllers\SubscriptionController::class, 'cancel'])->name('subscriptions.cancel');
-    Route::post('/subscriptions/change-plan', [App\Http\Controllers\SubscriptionController::class, 'changePlan'])->name('subscriptions.change-plan');
-    Route::get('/subscriptions/usage', [App\Http\Controllers\SubscriptionController::class, 'usage'])->name('subscriptions.usage');
+    Route::post('/subscriptions/resume', [App\Http\Controllers\SubscriptionController::class, 'resume'])->name('subscriptions.resume');
+    Route::post('/subscriptions/swap', [App\Http\Controllers\SubscriptionController::class, 'swap'])->name('subscriptions.swap');
+    
+    // Paddle checkout callback routes
+    Route::get('/subscriptions/paddle/callback', [App\Http\Controllers\SubscriptionController::class, 'handlePaddleCallback'])->name('subscriptions.paddle.callback');
+    Route::get('/subscriptions/paddle/cancel', [App\Http\Controllers\SubscriptionController::class, 'handlePaddleCancel'])->name('subscriptions.paddle.cancel');
 });
 
 // SkillOnCall Progress Tracker routes (Public access)
