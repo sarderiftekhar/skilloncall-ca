@@ -83,6 +83,74 @@ class User extends Authenticatable
     }
 
     /**
+     * Subscription helpers
+     */
+    
+    /**
+     * Check if user has an active subscription to a specific plan
+     * using the local subscriptions table.
+     */
+    public function hasActivePlan(string $planName): bool
+    {
+        $subscription = $this->activeSubscription();
+
+        if (! $subscription || ! $subscription->plan) {
+            return false;
+        }
+
+        return $subscription->plan->name === $planName;
+    }
+
+    /**
+     * Check if employer has Professional plan
+     */
+    public function hasProfessionalPlan(): bool
+    {
+        return $this->hasActivePlan('Professional');
+    }
+
+    /**
+     * Check if employer has Enterprise plan
+     */
+    public function hasEnterprisePlan(): bool
+    {
+        return $this->hasActivePlan('Enterprise');
+    }
+
+    /**
+     * Check if employee has Pro Employee plan
+     */
+    public function hasProEmployeePlan(): bool
+    {
+        return $this->hasActivePlan('Pro Employee');
+    }
+
+    /**
+     * Check if employee has Premium Employee plan
+     */
+    public function hasPremiumEmployeePlan(): bool
+    {
+        return $this->hasActivePlan('Premium Employee');
+    }
+
+    /**
+     * Get the user's current active plan based on the local subscriptions table.
+     */
+    public function getCurrentPlan(): ?SubscriptionPlan
+    {
+        return $this->subscriptionPlan();
+    }
+
+    /**
+     * Check if user has any active paid subscription
+     */
+    public function hasPaidSubscription(): bool
+    {
+        $plan = $this->getCurrentPlan();
+        return $plan && !$plan->isFree();
+    }
+
+    /**
      * Get the jobs posted by the employer.
      */
     public function jobs(): HasMany

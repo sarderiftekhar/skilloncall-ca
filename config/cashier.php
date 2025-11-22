@@ -23,6 +23,8 @@ return [
 
     'webhook_secret' => env('PADDLE_WEBHOOK_SECRET'),
 
+    'sandbox' => env('PADDLE_SANDBOX', true),
+
     /*
     |--------------------------------------------------------------------------
     | Cashier Path

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionController extends Controller
 {
@@ -32,8 +33,43 @@ class SubscriptionController extends Controller
                 ->orderBy('price')
                 ->get();
             
-            // Get current Cashier subscription
+            // Get current subscription (prefer local subscription over Cashier)
+            $currentLocalSubscription = $user->activeSubscription();
             $currentPaddleSubscription = $user->subscription();
+            
+            $currentSubscription = null;
+            if ($currentLocalSubscription && $currentLocalSubscription->plan) {
+                // Use local subscription with plan info
+                $currentSubscription = [
+                    'id' => $currentLocalSubscription->id,
+                    'status' => $currentLocalSubscription->status,
+                    'ends_at' => $currentLocalSubscription->ends_at?->format('M j, Y'),
+                    'next_billing_date' => $currentLocalSubscription->next_payment_at?->format('M j, Y'),
+                    'is_cancelled' => $currentLocalSubscription->status === 'cancelled',
+                    'plan' => [
+                        'id' => $currentLocalSubscription->plan->id,
+                        'name' => $currentLocalSubscription->plan->name,
+                        'slug' => $currentLocalSubscription->plan->slug,
+                        'type' => $currentLocalSubscription->plan->type,
+                    ],
+                ];
+            } elseif ($currentPaddleSubscription) {
+                // Fallback to Cashier subscription - get plan from price ID
+                $currentPlan = $user->getCurrentPlan();
+                $currentSubscription = [
+                    'id' => $currentPaddleSubscription->id,
+                    'status' => $currentPaddleSubscription->status ?? 'active',
+                    'ends_at' => $currentPaddleSubscription->ends_at?->format('M j, Y'),
+                    'next_billing_date' => $currentPaddleSubscription->ends_at?->format('M j, Y'),
+                    'is_cancelled' => $currentPaddleSubscription->cancelled(),
+                    'plan' => $currentPlan ? [
+                        'id' => $currentPlan->id,
+                        'name' => $currentPlan->name,
+                        'slug' => $currentPlan->slug,
+                        'type' => $currentPlan->type,
+                    ] : null,
+                ];
+            }
 
             // Transform plans to match frontend expectations
             $transformPlan = function($plan) {
@@ -51,16 +87,7 @@ class SubscriptionController extends Controller
             return Inertia::render('subscriptions/index', [
                 'employerPlans' => $employerPlans->map($transformPlan)->toArray(),
                 'employeePlans' => $employeePlans->map($transformPlan)->toArray(),
-                'currentSubscription' => $currentPaddleSubscription ? [
-                    'id' => $currentPaddleSubscription->id,
-                    'status' => $currentPaddleSubscription->status,
-                    'ends_at' => $currentPaddleSubscription->ends_at?->format('M j, Y'),
-                    'trial_ends_at' => $currentPaddleSubscription->trial_ends_at?->format('M j, Y'),
-                    'paused_at' => $currentPaddleSubscription->paused_at?->format('M j, Y'),
-                    'on_trial' => $currentPaddleSubscription->onTrial(),
-                    'cancelled' => $currentPaddleSubscription->cancelled(),
-                    'recurring' => $currentPaddleSubscription->recurring(),
-                ] : null,
+                'currentSubscription' => $currentSubscription,
                 'userRole' => $user->role,
             ]);
         } catch (\Exception $e) {
@@ -135,7 +162,7 @@ class SubscriptionController extends Controller
 
         // Get or create Paddle product mapping
         $paddleProduct = PaddleProduct::where('subscription_plan_id', $plan->id)
-            ->where('environment', config('paddle.sandbox') ? 'sandbox' : 'production')
+            ->where('environment', config('cashier.sandbox') ? 'sandbox' : 'production')
             ->first();
 
         if (!$paddleProduct) {
@@ -158,20 +185,40 @@ class SubscriptionController extends Controller
         }
 
         try {
-            // Use Cashier's checkout method
-            $checkout = $user->checkout($priceId)
+            // Log what we're about to send
+            Log::info('Creating Paddle checkout', [
+                'user_id' => $user->id,
+                'user_email' => $user->email,
+                'price_id' => $priceId,
+                'plan_name' => $plan->name,
+                'billing_interval' => $request->billing_interval,
+            ]);
+
+            // Use Cashier's subscribe method for subscriptions.
+            // This returns a Checkout instance that we can pass to the frontend.
+            $checkout = $user->subscribe($priceId)
                 ->customData([
                     'plan_id' => $plan->id,
                     'plan_name' => $plan->name,
                     'billing_interval' => $request->billing_interval,
                 ])
-                ->returnTo(route('subscriptions.paddle.callback'))
-                ->create();
+                // Include basic plan info in the return URL so we can
+                // update our local subscriptions table after checkout.
+                ->returnTo(route('subscriptions.paddle.callback', [
+                    'plan_id' => $plan->id,
+                    'billing_interval' => $request->billing_interval,
+                ]));
+
+            $options = $checkout->options();
+            
+            Log::info('Paddle checkout created successfully', [
+                'checkout_options' => $options,
+            ]);
 
             return response()->json([
                 'success' => true,
-                'redirect_url' => $checkout->url,
-                'message' => 'Redirecting to checkout...',
+                'checkout_options' => $options,
+                'message' => 'Opening Paddle checkout...',
             ]);
         } catch (\Exception $e) {
             Log::error('Paddle checkout creation failed', [
@@ -182,10 +229,13 @@ class SubscriptionController extends Controller
                 'trace' => $e->getTraceAsString(),
             ]);
 
+            // Return detailed error in development
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to initiate checkout. Please try again.',
-                'error' => config('app.debug') ? $e->getMessage() : null,
+                'error' => $e->getMessage(), // Always show error for debugging
+                'price_id' => $priceId,
+                'user_email' => $user->email,
             ], 500);
         }
     }
@@ -193,11 +243,29 @@ class SubscriptionController extends Controller
     /**
      * Handle Paddle checkout callback
      */
-    public function handlePaddleCallback(Request $request)
+    public function handlePaddleCallback(Request $request, \App\Services\SubscriptionService $subscriptionService)
     {
         try {
-            // The webhook will handle the actual subscription creation
-            // This callback just confirms the user completed checkout
+            /** @var \App\Models\User|null $user */
+            $user = Auth::user();
+
+            // Create / update our local subscription record so the
+            // platform immediately reflects the new plan.
+            if ($user && $request->filled('plan_id')) {
+                $plan = SubscriptionPlan::find($request->integer('plan_id'));
+                $billingInterval = $request->get('billing_interval', 'monthly');
+
+                if ($plan) {
+                    $subscriptionService->subscribe($user, $plan, $billingInterval, [
+                        'payment_method' => 'paddle',
+                        'payment_id' => $request->get('transaction_id'),
+                        'metadata' => [
+                            'paddle_checkout_id' => $request->get('checkout_id'),
+                        ],
+                    ]);
+                }
+            }
+
             return redirect()->route('subscriptions.show')
                 ->with('success', 'Your subscription is active! Welcome aboard.');
         } catch (\Exception $e) {
@@ -339,7 +407,7 @@ class SubscriptionController extends Controller
 
         // Get Paddle product mapping
         $paddleProduct = PaddleProduct::where('subscription_plan_id', $newPlan->id)
-            ->where('environment', config('paddle.sandbox') ? 'sandbox' : 'production')
+            ->where('environment', config('cashier.sandbox') ? 'sandbox' : 'production')
             ->first();
 
         if (!$paddleProduct) {

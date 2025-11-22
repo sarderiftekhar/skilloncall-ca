@@ -63,9 +63,12 @@ export function SubscriptionBadge({ subscription }: SubscriptionBadgeProps) {
             if (subscription.days_until_expiration !== null && subscription.days_until_expiration <= 7) {
                 return 'Expiring Soon';
             }
-            return subscription.plan_name;
+            return subscription.plan_name || 'Active';
         }
-        return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+        if (subscription.status && typeof subscription.status === 'string') {
+            return subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1);
+        }
+        return subscription.plan_name || 'Subscription';
     };
 
     const getTooltipContent = () => {

@@ -70,23 +70,53 @@ class HandleInertiaRequests extends Middleware
         // Get current subscription info
         $subscription = null;
         $isFreeTier = true; // Default to free tier
+        $subscriptionStatus = [
+            'has_professional' => false,
+            'has_enterprise' => false,
+            'has_pro_employee' => false,
+            'has_premium_employee' => false,
+            'has_paid_plan' => false,
+        ];
+        
         if ($user) {
             try {
-                $activeSubscription = $user->activeSubscription();
-                if ($activeSubscription) {
-                    $plan = $activeSubscription->plan;
-                    $isFreeTier = $plan->slug === 'free' || $plan->price == 0;
+                // Get current plan using Cashier or custom subscriptions
+                $currentPlan = $user->getCurrentPlan();
+                
+                if ($currentPlan) {
+                    $isFreeTier = $currentPlan->isFree();
                     $subscription = [
-                        'plan_name' => $plan->name,
-                        'plan_slug' => $plan->slug,
-                        'plan_type' => $plan->type,
-                        'status' => $activeSubscription->status,
-                        'ends_at' => $activeSubscription->ends_at?->format('M j, Y'),
-                        'days_until_expiration' => $activeSubscription->daysUntilExpiration(),
-                        'is_cancelled' => $activeSubscription->isCancelled(),
+                        'plan_name' => $currentPlan->name ?? '',
+                        'plan_slug' => $currentPlan->slug ?? strtolower(str_replace(' ', '-', $currentPlan->name ?? '')),
+                        'plan_type' => $currentPlan->type ?? '',
+                        'price' => $currentPlan->price ?? 0,
                         'is_free_tier' => $isFreeTier,
+                        'status' => 'active',
+                        'is_cancelled' => false,
                     ];
+                    
+                    // Add Cashier subscription details if available
+                    if ($user->subscribed()) {
+                        try {
+                            $cashierSub = $user->subscription();
+                            if ($cashierSub) {
+                                $subscription['status'] = $cashierSub->paddle_status ?? 'active';
+                                $subscription['is_cancelled'] = $cashierSub->cancelled() ?? false;
+                            }
+                        } catch (\Exception $e) {
+                            // Ignore Cashier errors, use defaults
+                        }
+                    }
                 }
+                
+                // Check specific plan access for easy frontend usage
+                $subscriptionStatus = [
+                    'has_professional' => $user->hasProfessionalPlan(),
+                    'has_enterprise' => $user->hasEnterprisePlan(),
+                    'has_pro_employee' => $user->hasProEmployeePlan(),
+                    'has_premium_employee' => $user->hasPremiumEmployeePlan(),
+                    'has_paid_plan' => $user->hasPaidSubscription(),
+                ];
             } catch (\Exception $e) {
                 Log::warning('Failed to load subscription in HandleInertiaRequests: ' . $e->getMessage());
             }
@@ -165,7 +195,12 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
             ],
             'subscription' => $subscription,
+            'subscriptionStatus' => $subscriptionStatus,
             'isFreeTier' => $isFreeTier,
+            'paddle' => [
+                'environment' => config('cashier.sandbox') ? 'sandbox' : 'production',
+                'clientToken' => config('cashier.client_side_token'),
+            ],
             'locale' => $locale,
             'translations' => $translations,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',

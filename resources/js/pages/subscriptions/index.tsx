@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,8 +14,26 @@ import {
     X
 } from 'react-feather';
 import { useState, useEffect } from 'react';
-import { router } from '@inertiajs/react';
 import { useTranslations } from '@/hooks/useTranslations';
+
+declare global {
+    interface Window {
+        Paddle?: any;
+        PaddleInitialized?: boolean;
+    }
+}
+
+interface PaddleConfig {
+    environment: 'sandbox' | 'production';
+    clientToken: string | null;
+}
+
+interface PaddleCheckoutOptions {
+    settings?: Record<string, any>;
+    items?: Array<Record<string, any>>;
+    customData?: Record<string, any>;
+    customer?: Record<string, any>;
+}
 
 // Define types for the subscription data
 interface SubscriptionPlan {
@@ -47,6 +65,7 @@ interface SubscriptionsPageProps {
     currentSubscription: CurrentSubscription | null;
     userRole: string;
     error?: string;
+    paddle?: PaddleConfig;
 }
 
 // Hardcoded plan data for now (as requested)
@@ -105,6 +124,97 @@ const HARDCODED_EMPLOYEE_PLANS = [
     }
 ];
 
+const HARDCODED_EMPLOYER_PLANS = [
+    {
+        id: 1,
+        name: 'Starter',
+        type: 'employer',
+        price_monthly: 0,
+        price_yearly: 0,
+        features: [
+            'Basic job posting',
+            'Access to worker profiles',
+            'Basic messaging',
+            'Standard support'
+        ],
+        is_popular: false
+    },
+    {
+        id: 2,
+        name: 'Professional',
+        type: 'employer',
+        price_monthly: 19.99,
+        price_yearly: 191.99,
+        features: [
+            'Enhanced job posting',
+            'Featured job listings',
+            'Advanced worker search',
+            'Priority messaging',
+            'Analytics dashboard',
+            'Priority support',
+            'Team collaboration tools'
+        ],
+        is_popular: true
+    },
+    {
+        id: 3,
+        name: 'Enterprise',
+        type: 'employer',
+        price_monthly: 49.99,
+        price_yearly: 479.99,
+        features: [
+            'Unlimited job postings',
+            'Featured job listings',
+            'Advanced worker search',
+            'Priority messaging',
+            'Advanced analytics',
+            'Custom branding',
+            'API access',
+            'Dedicated account manager',
+            'Custom integrations',
+            'White-label solutions'
+        ],
+        is_popular: false
+    }
+];
+
+const loadPaddleScript = (() => {
+    let loadingPromise: Promise<void> | null = null;
+
+    return () => {
+        if (typeof window === 'undefined') {
+            return Promise.reject(new Error('Window is not available.'));
+        }
+
+        if (window.Paddle) {
+            return Promise.resolve();
+        }
+
+        if (loadingPromise) {
+            return loadingPromise;
+        }
+
+        loadingPromise = new Promise<void>((resolve, reject) => {
+            const existingScript = document.getElementById('paddle-js');
+            if (existingScript) {
+                existingScript.addEventListener('load', () => resolve());
+                existingScript.addEventListener('error', () => reject(new Error('Failed to load Paddle JS.')));
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.id = 'paddle-js';
+            script.src = 'https://cdn.paddle.com/paddle/v2/paddle.js';
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load Paddle JS.'));
+            document.body.appendChild(script);
+        });
+
+        return loadingPromise;
+    };
+})();
+
 export default function SubscriptionsIndex({ 
     employerPlans = [], 
     employeePlans = [], 
@@ -113,12 +223,14 @@ export default function SubscriptionsIndex({
     error
 }: SubscriptionsPageProps) {
     const { t } = useTranslations();
+    const { paddle } = usePage<{ paddle: PaddleConfig | undefined }>().props;
     const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
     const [isLoading, setIsLoading] = useState(true);
     const [showContent, setShowContent] = useState(false);
+    const [activePlanId, setActivePlanId] = useState<number | null>(null);
     
-    // Use hardcoded plans for employees, fallback to server data
-    const plansToShow = userRole === 'employee' ? HARDCODED_EMPLOYEE_PLANS : employeePlans;
+    // Use server data for employers, hardcoded plans for employees
+    const plansToShow = userRole === 'employee' ? HARDCODED_EMPLOYEE_PLANS : employerPlans;
 
     useEffect(() => {
         const loadingTimer = setTimeout(() => {
@@ -130,7 +242,7 @@ export default function SubscriptionsIndex({
     }, []);
 
     const formatPrice = (plan: any) => {
-        if (plan.name === 'Free') {
+        if (plan.name === 'Free' || plan.name === 'Starter' || plan.price_monthly === 0) {
             return 'Free';
         }
         
@@ -141,7 +253,7 @@ export default function SubscriptionsIndex({
     };
 
     const getSavings = (plan: any) => {
-        if (plan.name === 'Free') return null;
+        if (plan.name === 'Free' || plan.name === 'Starter' || plan.price_monthly === 0) return null;
         
         const monthlyTotal = plan.price_monthly * 12;
         const yearlyPrice = plan.price_yearly;
@@ -153,18 +265,75 @@ export default function SubscriptionsIndex({
     const getPlanIcon = (planName: string) => {
         switch (planName.toLowerCase()) {
             case 'free':
+            case 'starter':
                 return <Users className="h-6 w-6" style={{color: '#10B3D6'}} />;
             case 'pro':
+            case 'professional':
                 return <Zap className="h-6 w-6" style={{color: '#10B3D6'}} />;
             case 'premium':
+            case 'enterprise':
                 return <Award className="h-6 w-6" style={{color: '#10B3D6'}} />;
             default:
                 return <Shield className="h-6 w-6" style={{color: '#10B3D6'}} />;
         }
     };
 
-    const handleSubscribe = async (plan: any) => {
+    const initializePaddle = async () => {
+        if (!paddle?.clientToken) {
+            throw new Error('Paddle client token is not configured.');
+        }
+
+        await loadPaddleScript();
+
+        const Paddle = window.Paddle;
+        if (!Paddle) {
+            throw new Error('Paddle library failed to load.');
+        }
+
+        if (!window.PaddleInitialized) {
+            Paddle.Environment.set(paddle.environment === 'sandbox' ? 'sandbox' : 'production');
+            Paddle.Setup({ token: paddle.clientToken });
+            window.PaddleInitialized = true;
+        }
+
+        return Paddle;
+    };
+
+    const openPaddleCheckout = async (options: PaddleCheckoutOptions) => {
         try {
+            const Paddle = await initializePaddle();
+
+            // Cashier returns checkout options configured for INLINE mode by default.
+            // We want a full overlay, so we strip inline-specific settings like
+            // frameTarget / frameStyle and force displayMode to 'overlay'.
+            const { settings, ...rest } = options as any;
+            const { frameTarget, frameStyle, ...restSettings } = settings || {};
+
+            const checkoutOptions: PaddleCheckoutOptions = {
+                ...(rest as PaddleCheckoutOptions),
+                settings: {
+                    ...restSettings,
+                    displayMode: 'overlay',
+                    theme: 'light',
+                },
+            };
+
+            Paddle.Checkout.open(checkoutOptions);
+        } catch (error) {
+            console.error('Failed to open Paddle checkout:', error);
+            throw error; // Re-throw to be caught by handleSubscribe
+        }
+    };
+
+    const handleSubscribe = async (plan: any) => {
+        if (plan.price_monthly === 0) {
+            // Free/starter plan: simply redirect to dashboard
+            router.visit('/subscriptions');
+            return;
+        }
+
+        try {
+            setActivePlanId(plan.id);
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
             
             // Call backend to create Paddle checkout
@@ -185,8 +354,14 @@ export default function SubscriptionsIndex({
             const data = await response.json();
 
             if (data.success) {
-                if (data.checkout_url) {
-                    // Redirect to Paddle checkout
+                if (data.checkout_options) {
+                    try {
+                        await openPaddleCheckout(data.checkout_options);
+                    } catch (paddleError) {
+                        console.error('Paddle checkout failed:', paddleError);
+                        alert('Unable to open checkout. This may be a temporary issue with the payment provider. Please try again in a moment, or contact support if the problem persists.');
+                    }
+                } else if (data.checkout_url) {
                     window.location.href = data.checkout_url;
                 } else if (data.redirect) {
                     // For free plans, redirect to subscriptions page
@@ -196,17 +371,43 @@ export default function SubscriptionsIndex({
                     alert(data.message || 'Subscription created successfully!');
                     router.reload();
                 }
+            } else if (data.error) {
+                console.error('Subscription error:', data.error);
+                alert(data.error);
             } else {
                 alert(data.message || 'Failed to create subscription. Please try again.');
             }
         } catch (error) {
             console.error('Subscription error:', error);
             alert('An error occurred. Please try again.');
+        } finally {
+            setActivePlanId(null);
         }
     };
 
     const isCurrentPlan = (plan: any) => {
         return currentSubscription?.plan?.name?.toLowerCase() === plan.name.toLowerCase();
+    };
+
+    const getPlanTier = (planName: string): number => {
+        const name = planName.toLowerCase();
+        if (name === 'starter' || name === 'free' || name === 'basic') return 0;
+        if (name === 'professional' || name === 'pro' || name === 'pro employee') return 1;
+        if (name === 'enterprise' || name === 'premium' || name === 'premium employee') return 2;
+        return 0; // Default to lowest tier
+    };
+
+    const isUpgradeable = (plan: any): boolean => {
+        if (!currentSubscription?.plan) {
+            // No current plan, all paid plans are upgradeable
+            return plan.price_monthly > 0;
+        }
+        
+        const currentTier = getPlanTier(currentSubscription.plan.name);
+        const planTier = getPlanTier(plan.name);
+        
+        // Only show upgrade for plans higher than current tier
+        return planTier > currentTier;
     };
 
     return (
@@ -397,9 +598,19 @@ export default function SubscriptionsIndex({
                                             {plan.name}
                                         </CardTitle>
                                         <p className="text-gray-600 text-sm mb-4">
-                                            {plan.name === 'Free' && 'Perfect for getting started'}
-                                            {plan.name === 'Pro' && 'Ideal for active job seekers'}
-                                            {plan.name === 'Premium' && 'For professionals who want it all'}
+                                            {plan.type === 'employer' ? (
+                                                <>
+                                                    {plan.name === 'Starter' && 'Perfect for small businesses'}
+                                                    {plan.name === 'Professional' && 'Ideal for growing businesses'}
+                                                    {plan.name === 'Enterprise' && 'For large organizations'}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {plan.name === 'Free' && 'Perfect for getting started'}
+                                                    {plan.name === 'Pro' && 'Ideal for active job seekers'}
+                                                    {plan.name === 'Premium' && 'For professionals who want it all'}
+                                                </>
+                                            )}
                                         </p>
                                         <div className="space-y-1">
                                             <div className="text-3xl font-bold" style={{color: '#192341'}}>
@@ -426,33 +637,47 @@ export default function SubscriptionsIndex({
                                         <Button
                                             className={`w-full cursor-pointer hover:scale-105 transition-all duration-200 ${
                                                 isCurrentPlan(plan) 
-                                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200' 
-                                                    : plan.is_popular
-                                                        ? 'text-white hover:opacity-90'
-                                                        : 'border-2 hover:text-white'
+                                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200 cursor-not-allowed' 
+                                                    : !isUpgradeable(plan)
+                                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                        : plan.is_popular
+                                                            ? 'text-white hover:opacity-90'
+                                                            : 'border-2 hover:text-white'
                                             }`}
                                             style={{
                                                 height: '2.7em',
                                                 backgroundColor: isCurrentPlan(plan) 
                                                     ? undefined 
-                                                    : plan.is_popular 
-                                                        ? '#10B3D6' 
-                                                        : 'transparent',
-                                                borderColor: plan.is_popular ? undefined : '#10B3D6',
-                                                color: isCurrentPlan(plan) 
-                                                    ? undefined 
+                                                    : !isUpgradeable(plan)
+                                                        ? undefined
+                                                        : plan.is_popular 
+                                                            ? '#10B3D6' 
+                                                            : 'transparent',
+                                                borderColor: isCurrentPlan(plan) || !isUpgradeable(plan)
+                                                    ? undefined
                                                     : plan.is_popular 
                                                         ? undefined 
-                                                        : '#10B3D6'
+                                                        : '#10B3D6',
+                                                color: isCurrentPlan(plan) 
+                                                    ? undefined 
+                                                    : !isUpgradeable(plan)
+                                                        ? undefined
+                                                        : plan.is_popular 
+                                                            ? undefined 
+                                                            : '#10B3D6'
                                             }}
                                             onClick={() => handleSubscribe(plan)}
-                                            disabled={isCurrentPlan(plan)}
+                                            disabled={isCurrentPlan(plan) || !isUpgradeable(plan) || activePlanId === plan.id}
                                         >
                                             {isCurrentPlan(plan) 
                                                 ? 'Current Plan' 
-                                                : plan.name === 'Free' 
-                                                    ? 'Get Started' 
-                                                    : 'Upgrade Now'
+                                                : !isUpgradeable(plan)
+                                                    ? (plan.name === 'Free' || plan.name === 'Starter' || plan.price_monthly === 0)
+                                                        ? 'Get Started'
+                                                        : 'Not Available'
+                                                    : (plan.name === 'Free' || plan.name === 'Starter' || plan.price_monthly === 0)
+                                                        ? 'Get Started' 
+                                                        : 'Upgrade Now'
                                             }
                                         </Button>
                                     </CardContent>

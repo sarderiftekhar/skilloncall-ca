@@ -12,8 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        // Paddle webhook endpoint (Paddle handles authentication via signature)
-        'webhooks/paddle',
+        // Paddle webhook endpoints (Cashier verifies signatures)
+        'paddle/webhook',
+        'subscriptions', // temporary backward-compatible webhook URL
     ];
 
     /**

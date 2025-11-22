@@ -62,6 +62,56 @@ return [
         ]
     ],
     
+    // Employer plan names and descriptions
+    'starter' => [
+        'name' => 'Starter',
+        'description' => 'Perfect for small businesses',
+        'price' => 'Free',
+        'features' => [
+            'Basic job posting',
+            'Access to worker profiles',
+            'Basic messaging',
+            'Standard support'
+        ]
+    ],
+    
+    'professional' => [
+        'name' => 'Professional',
+        'description' => 'Ideal for growing businesses',
+        'price_monthly' => '$49.99',
+        'price_yearly' => '$479.99',
+        'savings' => 'Save 20%',
+        'features' => [
+            'Enhanced job posting',
+            'Featured job listings',
+            'Advanced worker search',
+            'Priority messaging',
+            'Analytics dashboard',
+            'Priority support',
+            'Team collaboration tools'
+        ]
+    ],
+    
+    'enterprise' => [
+        'name' => 'Enterprise',
+        'description' => 'For large organizations',
+        'price_monthly' => '$149.99',
+        'price_yearly' => '$1,439.99',
+        'savings' => 'Save 20%',
+        'features' => [
+            'Unlimited job postings',
+            'Featured job listings',
+            'Advanced worker search',
+            'Priority messaging',
+            'Advanced analytics',
+            'Custom branding',
+            'API access',
+            'Dedicated account manager',
+            'Custom integrations',
+            'White-label solutions'
+        ]
+    ],
+    
     // Action buttons
     'get_started' => 'Get Started',
     'upgrade_now' => 'Upgrade Now',

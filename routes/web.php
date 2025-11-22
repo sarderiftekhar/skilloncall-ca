@@ -2,6 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Laravel\Paddle\Http\Controllers\WebhookController;
+
+// Load debug routes in local environment
+if (app()->environment('local')) {
+    require __DIR__.'/debug.php';
+}
 
 Route::get('/', function (Illuminate\Http\Request $request) {
     $user = $request->user();
@@ -218,3 +224,9 @@ require __DIR__.'/employee.php';
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+// Laravel Cashier Paddle webhook endpoints
+Route::post('/paddle/webhook', WebhookController::class)->name('paddle.webhook');
+
+// Temporary compatibility route (current Paddle dashboard webhook URL)
+Route::post('/subscriptions', WebhookController::class)->name('paddle.webhook.compat');

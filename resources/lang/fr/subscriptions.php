@@ -62,6 +62,56 @@ return [
         ]
     ],
     
+    // Employer plan names and descriptions
+    'starter' => [
+        'name' => 'Démarrage',
+        'description' => 'Parfait pour les petites entreprises',
+        'price' => 'Gratuit',
+        'features' => [
+            'Publication d\'emploi de base',
+            'Accès aux profils des travailleurs',
+            'Messagerie de base',
+            'Support standard'
+        ]
+    ],
+    
+    'professional' => [
+        'name' => 'Professionnel',
+        'description' => 'Idéal pour les entreprises en croissance',
+        'price_monthly' => '49,99 $',
+        'price_yearly' => '479,99 $',
+        'savings' => 'Économisez 20%',
+        'features' => [
+            'Publication d\'emploi améliorée',
+            'Offres d\'emploi en vedette',
+            'Recherche avancée de travailleurs',
+            'Messagerie prioritaire',
+            'Tableau de bord analytique',
+            'Support prioritaire',
+            'Outils de collaboration d\'équipe'
+        ]
+    ],
+    
+    'enterprise' => [
+        'name' => 'Entreprise',
+        'description' => 'Pour les grandes organisations',
+        'price_monthly' => '149,99 $',
+        'price_yearly' => '1 439,99 $',
+        'savings' => 'Économisez 20%',
+        'features' => [
+            'Publications d\'emploi illimitées',
+            'Offres d\'emploi en vedette',
+            'Recherche avancée de travailleurs',
+            'Messagerie prioritaire',
+            'Analytiques avancées',
+            'Image de marque personnalisée',
+            'Accès API',
+            'Gestionnaire de compte dédié',
+            'Intégrations personnalisées',
+            'Solutions en marque blanche'
+        ]
+    ],
+    
     // Action buttons
     'get_started' => 'Commencer',
     'upgrade_now' => 'Mettre à Niveau',

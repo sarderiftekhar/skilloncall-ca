@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\CheckSubscriptionPlan;
 use App\Http\Middleware\CheckUserActive;
 use App\Http\Middleware\EmployerMiddleware;
 use App\Http\Middleware\EmployeeMiddleware;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.employee.profile.complete' => EnsureEmployeeProfileComplete::class,
             'ensure.worker.profile.complete' => EnsureWorkerProfileComplete::class, // Keep for backward compatibility
             'check.user.active' => CheckUserActive::class,
+            'subscription.plan' => CheckSubscriptionPlan::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
