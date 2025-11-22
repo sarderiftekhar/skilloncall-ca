@@ -2,685 +2,390 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Profile - {{ $worker->name ?? 'Unknown' }}</title>
     <style>
         @page {
-            margin: 0;
-            padding: 0;
+            margin: 15mm;
+            size: A4;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 11px;
-            line-height: 1.6;
-            color: #192341;
-            background: #F6FBFD;
-        }
-        
-        .page {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm;
-            background: white;
-            position: relative;
-        }
-        
-        /* Header */
-        .header {
-            border-bottom: 3px solid #10B3D6;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .logo-box {
-            width: 40px;
-            height: 40px;
-            background: #10B3D6;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .logo-text {
-            font-size: 18px;
-            font-weight: bold;
-            color: #192341;
-        }
-        
-        .header-right {
-            text-align: right;
-            font-size: 9px;
-            color: #6B7280;
-        }
-        
-        /* Profile Header Section */
-        .profile-header {
-            background: linear-gradient(135deg, #F6FBFD 0%, #FCF2F0 100%);
-            padding: 25px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border-left: 5px solid #10B3D6;
-        }
-        
-        .profile-top {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .profile-photo {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid #10B3D6;
-        }
-        
-        .profile-info {
-            flex: 1;
-        }
-        
-        .profile-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #192341;
-            margin-bottom: 8px;
-        }
-        
-        .profile-title {
-            font-size: 14px;
-            color: #10B3D6;
-            font-weight: 600;
-            margin-bottom: 12px;
-        }
-        
-        .profile-contact {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            font-size: 10px;
-            color: #6B7280;
-        }
-        
-        .profile-stats {
-            display: flex;
-            gap: 30px;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #E5E7EB;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #192341;
-        }
-        
-        .stat-label {
-            font-size: 9px;
-            color: #6B7280;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Section Styles */
-        .section {
-            margin-bottom: 25px;
-            page-break-inside: avoid;
-        }
-        
-        .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #192341;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #10B3D6;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .section-icon {
-            width: 20px;
-            height: 20px;
-            background: #10B3D6;
-            border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-        }
-        
-        .section-content {
-            padding: 15px;
-            background: #FCF2F0;
-            border-radius: 8px;
-            border-left: 3px solid #10B3D6;
-        }
-        
-        /* Badge/Tag Styles */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 9px;
-            font-weight: 500;
-            margin: 3px;
-            background: #E5E7EB;
-            color: #192341;
-        }
-        
-        .badge-primary {
-            background: #10B3D6;
-            color: white;
-        }
-        
-        .badge-success {
-            background: #10B981;
-            color: white;
-        }
-        
-        .badge-warning {
-            background: #F59E0B;
-            color: white;
-        }
-        
-        /* Experience/Work History */
-        .experience-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        .experience-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .experience-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        
-        .experience-title {
-            font-size: 13px;
-            font-weight: bold;
-            color: #192341;
-        }
-        
-        .experience-date {
-            font-size: 10px;
-            color: #6B7280;
-        }
-        
-        .experience-company {
-            font-size: 11px;
-            color: #10B3D6;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-        
-        .experience-description {
-            font-size: 10px;
-            color: #4B5563;
-            line-height: 1.5;
-        }
-        
-        /* Skills Grid */
-        .skills-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        /* Two Column Layout */
-        .two-column {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .column {
-            flex: 1;
-        }
-        
-        /* Table Styles */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 10px;
-        }
-        
-        .info-table td {
-            padding: 8px;
-            border-bottom: 1px solid #E5E7EB;
-        }
-        
-        .info-table td:first-child {
-            font-weight: 600;
-            color: #192341;
-            width: 35%;
-        }
-        
-        .info-table td:last-child {
-            color: #4B5563;
-        }
-        
-        /* Footer */
-        .footer {
-            position: absolute;
-            bottom: 15mm;
-            left: 20mm;
-            right: 20mm;
-            text-align: center;
-            font-size: 9px;
-            color: #6B7280;
-            border-top: 1px solid #E5E7EB;
-            padding-top: 10px;
-        }
-        
-        /* Utilities */
-        .text-center {
-            text-align: center;
-        }
-        
-        .mt-10 {
-            margin-top: 10px;
-        }
-        
-        .mb-10 {
-            margin-bottom: 10px;
-        }
-        
-        .text-muted {
-            color: #6B7280;
-        }
-        
-        .font-bold {
-            font-weight: bold;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
 <body>
-    <div class="page">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo-section">
-                <div class="logo-box">S</div>
-                <div class="logo-text">SkillOnCall.ca</div>
-            </div>
-            <div class="header-right">
-                Employee Profile<br>
-                Generated: {{ $generatedAt }}
-            </div>
-        </div>
-
-        @php
-            $profile = $worker->employee_profile ?? null;
-            $name = $worker->name ?? 'Unknown Employee';
-            $email = $worker->email ?? '';
-            $bio = $profile->bio ?? '';
-            $phone = $profile->phone ?? '';
-            $city = $profile->city ?? '';
-            $province = $profile->province ?? '';
-            $postalCode = $profile->postal_code ?? '';
-            $hourlyRateMin = $profile->hourly_rate_min ?? 0;
-            $hourlyRateMax = $profile->hourly_rate_max ?? null;
-            $overallExperience = $profile->overall_experience ?? '0';
-            $skills = $profile->skills ?? [];
-            $languages = $profile->languages ?? [];
-            $workExperiences = $profile->work_experiences ?? [];
-            $certifications = $profile->certifications ?? [];
-            $references = $profile->references ?? [];
-            $reviews = $profile->reviews ?? [];
-            $availability = $profile->availability ?? [];
-            $serviceAreas = $profile->service_areas ?? [];
-            
-            // Calculate average rating
-            $avgRating = 0;
-            if (!empty($reviews)) {
-                $avgRating = round(array_sum(array_column($reviews, 'rating')) / count($reviews), 1);
+    @php
+        $profile = $worker->employeeProfile ?? null;
+        $name = $worker->name ?? 'Unknown Employee';
+        $email = $worker->email ?? '';
+        $phone = is_object($profile) ? ($profile->phone_number ?? '') : '';
+        $address = is_object($profile) ? ($profile->address ?? '') : '';
+        $city = is_object($profile) ? ($profile->city ?? '') : '';
+        $province = is_object($profile) ? ($profile->province ?? '') : '';
+        $postalCode = is_object($profile) ? ($profile->postal_code ?? '') : '';
+        $fullAddress = trim("$address, $city, $province $postalCode");
+        
+        $hourlyRateMin = is_object($profile) ? (float)($profile->hourly_rate_min ?? 0) : 0;
+        $hourlyRateMax = is_object($profile) ? (float)($profile->hourly_rate_max ?? 0) : 0;
+        $bio = is_object($profile) ? ($profile->bio ?? '') : '';
+        $photo = is_object($profile) ? ($profile->profile_photo ?? $profile->photo_path ?? null) : null;
+        
+        $skills = is_object($profile) ? ($profile->skills ?? []) : [];
+        $languages = is_object($profile) ? ($profile->languages ?? []) : [];
+        $workExperiences = is_object($profile) ? ($profile->workExperiences ?? []) : [];
+        $certifications = is_object($profile) ? ($profile->certifications ?? []) : [];
+        $references = is_object($profile) ? ($profile->references ?? []) : [];
+        $reviews = is_object($profile) ? ($profile->reviews ?? []) : [];
+        $availability = is_object($profile) ? ($profile->availability ?? []) : [];
+        
+        $avgRating = 0;
+        $reviewCount = count($reviews);
+        if ($reviewCount > 0) {
+            $totalRating = 0;
+            foreach ($reviews as $review) {
+                $totalRating += is_object($review) ? (float)($review->rating ?? 0) : 0;
             }
-        @endphp
+            $avgRating = round($totalRating / $reviewCount, 1);
+        }
+        
+        $overallExperience = is_object($profile) ? ($profile->years_of_experience ?? 'N/A') : 'N/A';
+        
+        $nameParts = explode(' ', $name);
+        $initials = '';
+        foreach ($nameParts as $part) {
+            $initials .= strtoupper(substr($part, 0, 1));
+        }
+        $initials = substr($initials, 0, 2);
+    @endphp
 
-        <!-- Profile Header -->
-        <div class="profile-header">
-            <div class="profile-top">
-                @if(!empty($profile->profile_photo))
+    <!-- Header -->
+    <div style="border: 2px solid #10B3D6; background: #F0F8FA; padding: 12px; margin-bottom: 10px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 60px; vertical-align: middle; padding-right: 10px;">
                     @php
-                        $photoPath = $profile->profile_photo;
-                        // Remove any existing /storage/ or storage/ prefix
-                        if (str_starts_with($photoPath, '/storage/')) {
-                            $photoPath = substr($photoPath, 9);
-                        } elseif (str_starts_with($photoPath, 'storage/')) {
-                            $photoPath = substr($photoPath, 8);
+                        $showPhoto = false;
+                        $finalPhotoPath = null;
+                        
+                        if ($photo && !empty($photo)) {
+                            $photoPath = $photo;
+                            
+                            // Handle different path formats
+                            if (str_starts_with($photoPath, 'http://') || str_starts_with($photoPath, 'https://')) {
+                                // It's a URL - can't use in PDF
+                                $showPhoto = false;
+                            } else {
+                                // Clean up the path - remove storage prefix if present
+                                $photoPath = str_replace('\\', '/', $photoPath);
+                                if (str_starts_with($photoPath, '/storage/')) {
+                                    $photoPath = substr($photoPath, 9);
+                                } elseif (str_starts_with($photoPath, 'storage/')) {
+                                    $photoPath = substr($photoPath, 8);
+                                }
+                                
+                                // Build the full path
+                                $fullPhotoPath = public_path('storage' . DIRECTORY_SEPARATOR . $photoPath);
+                                
+                                // Check if file exists
+                                if (file_exists($fullPhotoPath) && is_file($fullPhotoPath)) {
+                                    // Use forward slashes for consistency in PDF rendering
+                                    $finalPhotoPath = str_replace('\\', '/', $fullPhotoPath);
+                                    $showPhoto = true;
+                                }
+                            }
                         }
-                        $fullPath = public_path('storage/' . $photoPath);
                     @endphp
-                    @if(file_exists($fullPath))
-                        <img src="{{ $fullPath }}" alt="{{ $name }}" class="profile-photo">
+                    @if($showPhoto && $finalPhotoPath)
+                        <img src="{{ $finalPhotoPath }}" alt="Profile" style="width: 50px; height: 50px; border-radius: 50%; border: 2px solid #10B3D6; object-fit: cover; display: block;">
+                    @else
+                        <div style="position: relative; width: 50px; height: 50px; border-radius: 50%; background: #10B3D6; border: 2px solid #10B3D6; overflow: hidden;">
+                            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #FFF; font-size: 18px; font-weight: bold;">{{ $initials }}</span>
+                        </div>
                     @endif
-                @endif
-                <div class="profile-info">
-                    <div class="profile-name">{{ $name }}</div>
-                    @if(!empty($bio))
-                        <div class="profile-title">{{ Str::limit($bio, 100) }}</div>
+                </td>
+                <td style="vertical-align: middle; width: 35%;">
+                    <div style="font-size: 14px; font-weight: bold; color: #000; margin-bottom: 2px;">{{ $name }}</div>
+                    @if($email)<div style="font-size: 6px; color: #000; margin-bottom: 1px;">✉ {{ $email }}</div>@endif
+                    @if($phone)<div style="font-size: 6px; color: #000; margin-bottom: 1px;">📞 {{ $phone }}</div>@endif
+                    @if($fullAddress != ', ,')<div style="font-size: 6px; color: #000;">📍 {{ $fullAddress }}</div>@endif
+                </td>
+                <td style="vertical-align: middle; text-align: right; width: 40%;">
+                    <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                        <tr>
+                            <td style="width: 25%; text-align: center; padding: 0 5px; border-left: 1px solid #10B3D6;">
+                                <div style="font-size: 9px; font-weight: bold; color: #000;">${{ number_format($hourlyRateMin, 2) }}@if($hourlyRateMax && $hourlyRateMax != $hourlyRateMin)-${{ number_format($hourlyRateMax, 2) }}@endif</div>
+                                <div style="font-size: 5px; color: #666; text-transform: uppercase;">HOURLY RATE</div>
+                            </td>
+                            <td style="width: 25%; text-align: center; padding: 0 5px; border-left: 1px solid #10B3D6;">
+                                <div style="font-size: 9px; font-weight: bold; color: #000;">{{ $avgRating > 0 ? $avgRating . ' ⭐' : 'N/A' }}</div>
+                                <div style="font-size: 5px; color: #666; text-transform: uppercase;">0 REVIEWS</div>
+                            </td>
+                            <td style="width: 25%; text-align: center; padding: 0 5px; border-left: 1px solid #10B3D6;">
+                                <div style="font-size: 9px; font-weight: bold; color: #000;">{{ $overallExperience }}</div>
+                                <div style="font-size: 5px; color: #666; text-transform: uppercase;">YEARS EXP</div>
+                            </td>
+                            <td style="width: 25%; text-align: center; padding: 0 5px; border-left: 1px solid #10B3D6;">
+                                <div style="font-size: 9px; font-weight: bold; color: #000;">{{ count($certifications) }}</div>
+                                <div style="font-size: 5px; color: #666; text-transform: uppercase;">CERTIFICATIONS</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Two Column Layout: Skills and Additional Info -->
+    <div style="width: 100%; margin-bottom: 6px;">
+        <div style="width: 48%; float: left; margin-right: 2%;">
+            <!-- Skills -->
+            @if(!empty($skills))
+            <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+                <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">💼 Skills</div>
+                <div>
+                    @foreach($skills as $skill)
+                        @php
+                            $skillName = is_object($skill) ? ($skill->name ?? '') : '';
+                            $isPrimary = is_object($skill) && isset($skill->pivot) && is_object($skill->pivot) ? ($skill->pivot->is_primary_skill ?? false) : false;
+                        @endphp
+                        @if($skillName)
+                            <span style="display: inline-block; padding: 2px 6px; margin: 2px; border: 1px solid #10B3D6; border-radius: 3px; font-size: 6px; background: {{ $isPrimary ? '#10B3D6' : '#FFF' }}; color: {{ $isPrimary ? '#FFF' : '#000' }};">{{ $skillName }}</span>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <div style="width: 48%; float: left; margin-left: 2%;">
+            <!-- Additional Info -->
+            @if($profile)
+            <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+                <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">ℹ️ Additional Info</div>
+                <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+                    @if(!empty($profile->work_authorization))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Work Auth</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->work_authorization }}</td></tr>
                     @endif
-                    <div class="profile-contact">
-                        @if(!empty($email))
-                            <span>📧 {{ $email }}</span>
-                        @endif
-                        @if(!empty($phone))
-                            <span>📞 {{ $phone }}</span>
-                        @endif
-                        @if(!empty($city) || !empty($province))
-                            <span>📍 {{ trim($city . ', ' . $province) }}</span>
-                        @endif
-                    </div>
-                </div>
+                    @if(isset($profile->has_vehicle))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Vehicle</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->has_vehicle ? '✓' : '✗' }}</td></tr>
+                    @endif
+                    @if(isset($profile->has_tools_equipment))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Tools</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->has_tools_equipment ? '✓' : '✗' }}</td></tr>
+                    @endif
+                    @if(isset($profile->is_insured))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Insured</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->is_insured ? '✓' : '✗' }}</td></tr>
+                    @endif
+                    @if(isset($profile->has_wcb_coverage))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">WCB</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->has_wcb_coverage ? '✓' : '✗' }}</td></tr>
+                    @endif
+                    @if(!empty($profile->travel_distance_max))
+                    <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Max Travel</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->travel_distance_max }} km</td></tr>
+                    @endif
+                </table>
             </div>
-            <div class="profile-stats">
-                <div class="stat-item">
-                    <div class="stat-value">${{ number_format($hourlyRateMin, 2) }}{{ $hourlyRateMax && $hourlyRateMax != $hourlyRateMin ? ' - $' . number_format($hourlyRateMax, 2) : '' }}</div>
-                    <div class="stat-label">Hourly Rate</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">{{ $avgRating > 0 ? $avgRating : 'N/A' }}</div>
-                    <div class="stat-label">Rating ({{ count($reviews) }} reviews)</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">{{ $overallExperience }}</div>
-                    <div class="stat-label">Years Experience</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-value">{{ count($skills) }}</div>
-                    <div class="stat-label">Skills</div>
-                </div>
-            </div>
+            @endif
         </div>
+        
+        <div style="clear: both;"></div>
+    </div>
 
-        <!-- Bio Section -->
-        @if(!empty($bio))
-        <div class="section">
-            <div class="section-title">
-                <span class="section-icon">ℹ</span>
-                About
-            </div>
-            <div class="section-content">
-                <p style="line-height: 1.8; color: #4B5563;">{{ $bio }}</p>
-            </div>
-        </div>
-        @endif
-
-        <!-- Two Column Layout -->
-        <div class="two-column">
-            <div class="column">
-                <!-- Skills -->
-                @if(!empty($skills))
-                <div class="section">
-                    <div class="section-title">
-                        <span class="section-icon">💼</span>
-                        Skills
-                    </div>
-                    <div class="section-content">
-                        <div class="skills-grid">
-                            @foreach($skills as $skill)
-                                <span class="badge {{ $skill->pivot->is_primary_skill ? 'badge-primary' : '' }}">
-                                    {{ $skill->name }}
-                                    @if($skill->pivot->proficiency_level)
-                                        ({{ ucfirst($skill->pivot->proficiency_level) }})
-                                    @endif
-                                </span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
+    <!-- Languages -->
+    @if(!empty($languages))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">🌐 Languages</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+            @foreach($languages as $language)
+                @php
+                    $langName = is_object($language) ? ($language->name ?? '') : '';
+                    $proficiency = is_object($language) && isset($language->pivot) && is_object($language->pivot) ? ($language->pivot->proficiency_level ?? '') : '';
+                @endphp
+                @if($langName)
+                <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">{{ $langName }}</td><td style="border: 1px solid #CCC; padding: 3px;">{{ ucfirst($proficiency) }}</td></tr>
                 @endif
+            @endforeach
+        </table>
+    </div>
+    @endif
 
-                <!-- Languages -->
-                @if(!empty($languages))
-                <div class="section">
-                    <div class="section-title">
-                        <span class="section-icon">🌐</span>
-                        Languages
-                    </div>
-                    <div class="section-content">
-                        <div class="skills-grid">
-                            @foreach($languages as $language)
-                                <span class="badge {{ $language->pivot->is_primary_language ? 'badge-primary' : '' }}">
-                                    {{ $language->name }}
-                                    @if($language->pivot->proficiency_level)
-                                        ({{ ucfirst($language->pivot->proficiency_level) }})
-                                    @endif
-                                </span>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-                @endif
-
-                <!-- Certifications -->
-                @if(!empty($certifications))
-                <div class="section">
-                    <div class="section-title">
-                        <span class="section-icon">🏆</span>
-                        Certifications
-                    </div>
-                    <div class="section-content">
-                        @foreach($certifications as $cert)
-                            <div style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #E5E7EB;">
-                                <div style="font-weight: bold; color: #192341; margin-bottom: 3px;">
-                                    {{ $cert->certification->name ?? 'Unknown Certification' }}
-                                </div>
-                                <div style="font-size: 9px; color: #6B7280;">
-                                    @if($cert->issued_date)
-                                        Issued: {{ date('M Y', strtotime($cert->issued_date)) }}
-                                    @endif
-                                    @if($cert->expiry_date)
-                                        | Expires: {{ date('M Y', strtotime($cert->expiry_date)) }}
-                                    @endif
-                                    @if($cert->verification_status)
-                                        | <span class="badge {{ $cert->verification_status === 'verified' ? 'badge-success' : 'badge-warning' }}">
-                                            {{ ucfirst($cert->verification_status) }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-
-            <div class="column">
-                <!-- Additional Information -->
-                <div class="section">
-                    <div class="section-title">
-                        <span class="section-icon">📋</span>
-                        Additional Information
-                    </div>
-                    <div class="section-content">
-                        <table class="info-table">
-                            @if(!empty($profile->work_authorization))
-                            <tr>
-                                <td>Work Authorization</td>
-                                <td>{{ $profile->work_authorization }}</td>
-                            </tr>
+    <!-- Availability -->
+    @if(!empty($availability))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">🕒 Availability</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+            <thead><tr><th style="background: #F0F8FA; border: 1px solid #10B3D6; padding: 3px; text-align: left;">Day</th><th style="background: #F0F8FA; border: 1px solid #10B3D6; padding: 3px; text-align: left;">Hours</th></tr></thead>
+            <tbody>
+                @php
+                    $daysMap = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                    $schedule = [];
+                    foreach ($availability as $avail) {
+                        if (is_object($avail)) {
+                            $dayNum = is_numeric($avail->day_of_week) ? $avail->day_of_week : array_search($avail->day_of_week, $daysMap);
+                            $schedule[$dayNum] = [
+                                'is_available' => $avail->is_available ?? false,
+                                'start_time' => $avail->start_time ?? null,
+                                'end_time' => $avail->end_time ?? null,
+                            ];
+                        }
+                    }
+                    ksort($schedule);
+                @endphp
+                @foreach([1, 2, 3, 4, 5, 6, 0] as $dayNum)
+                    @php
+                        $dayName = $daysMap[$dayNum];
+                        $daySchedule = $schedule[$dayNum] ?? null;
+                    @endphp
+                    <tr>
+                        <td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">{{ $dayName }}</td>
+                        <td style="border: 1px solid #CCC; padding: 3px;">
+                            @if($daySchedule && $daySchedule['is_available'])
+                                {{ date('g:iA', strtotime($daySchedule['start_time'])) }} - {{ date('g:iA', strtotime($daySchedule['end_time'])) }}
+                            @else
+                                <span style="color: #999;">Unavailable</span>
                             @endif
-                            @if(!empty($profile->has_vehicle))
-                            <tr>
-                                <td>Has Vehicle</td>
-                                <td>{{ $profile->has_vehicle ? 'Yes' : 'No' }}</td>
-                            </tr>
-                            @endif
-                            @if(!empty($profile->has_tools_equipment))
-                            <tr>
-                                <td>Has Tools/Equipment</td>
-                                <td>{{ $profile->has_tools_equipment ? 'Yes' : 'No' }}</td>
-                            </tr>
-                            @endif
-                            @if(!empty($profile->is_insured))
-                            <tr>
-                                <td>Insured</td>
-                                <td>{{ $profile->is_insured ? 'Yes' : 'No' }}</td>
-                            </tr>
-                            @endif
-                            @if(!empty($profile->has_wcb_coverage))
-                            <tr>
-                                <td>WCB Coverage</td>
-                                <td>{{ $profile->has_wcb_coverage ? 'Yes' : 'No' }}</td>
-                            </tr>
-                            @endif
-                            @if(!empty($profile->travel_distance_max))
-                            <tr>
-                                <td>Max Travel Distance</td>
-                                <td>{{ $profile->travel_distance_max }} km</td>
-                            </tr>
-                            @endif
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Service Areas -->
-                @if(!empty($serviceAreas))
-                <div class="section">
-                    <div class="section-title">
-                        <span class="section-icon">📍</span>
-                        Service Areas
-                    </div>
-                    <div class="section-content">
-                        @foreach($serviceAreas as $area)
-                            <div style="margin-bottom: 5px;">
-                                {{ $area->postal_code }}
-                                @if($area->city)
-                                    - {{ $area->city }}
-                                @endif
-                                @if($area->province)
-                                    , {{ $area->province }}
-                                @endif
-                                @if($area->radius_km)
-                                    ({{ $area->radius_km }} km radius)
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Work Experience -->
-        @if(!empty($workExperiences))
-        <div class="section">
-            <div class="section-title">
-                <span class="section-icon">💼</span>
-                Work Experience
-            </div>
-            <div class="section-content">
-                @foreach($workExperiences as $exp)
-                    <div class="experience-item">
-                        <div class="experience-header">
-                            <div class="experience-title">{{ $exp->job_title }}</div>
-                            <div class="experience-date">
-                                {{ date('M Y', strtotime($exp->start_date)) }} - 
-                                {{ $exp->is_current ? 'Present' : ($exp->end_date ? date('M Y', strtotime($exp->end_date)) : 'N/A') }}
-                            </div>
-                        </div>
-                        <div class="experience-company">{{ $exp->company_name }}</div>
-                        @if($exp->skill)
-                            <div style="font-size: 9px; color: #10B3D6; margin-bottom: 5px;">
-                                Skill: {{ $exp->skill->name }}
-                            </div>
-                        @endif
-                        @if($exp->industry)
-                            <div style="font-size: 9px; color: #10B3D6; margin-bottom: 5px;">
-                                Industry: {{ $exp->industry->name }}
-                            </div>
-                        @endif
-                        @if(!empty($exp->description))
-                            <div class="experience-description">{{ $exp->description }}</div>
-                        @endif
-                    </div>
+                        </td>
+                    </tr>
                 @endforeach
-            </div>
-        </div>
-        @endif
+            </tbody>
+        </table>
+    </div>
+    @endif
 
-        <!-- References -->
-        @if(!empty($references))
-        <div class="section">
-            <div class="section-title">
-                <span class="section-icon">👥</span>
-                Professional References
+    <!-- About -->
+    @if(!empty($bio))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">📄 About</div>
+        <div style="font-size: 6px; color: #000; line-height: 1.2;">{{ $bio }}</div>
+    </div>
+    @endif
+
+    <!-- Work Experience -->
+    @if(!empty($workExperiences))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">💼 Work Experience</div>
+        @foreach($workExperiences as $exp)
+            @php
+                $jobTitle = is_object($exp) ? ($exp->job_title ?? '') : '';
+                $companyName = is_object($exp) ? ($exp->company_name ?? '') : '';
+                $startDate = is_object($exp) ? ($exp->start_date ?? null) : null;
+                $endDate = is_object($exp) ? ($exp->end_date ?? null) : null;
+                $isCurrent = is_object($exp) ? ($exp->is_current ?? false) : false;
+                $description = is_object($exp) ? ($exp->description ?? '') : '';
+                $skillName = is_object($exp) && isset($exp->skill) && is_object($exp->skill) ? ($exp->skill->name ?? null) : null;
+                $industryName = is_object($exp) && isset($exp->industry) && is_object($exp->industry) ? ($exp->industry->name ?? null) : null;
+                $supervisorName = is_object($exp) ? ($exp->supervisor_name ?? null) : null;
+                $supervisorContact = is_object($exp) ? ($exp->supervisor_contact ?? null) : null;
+                
+                $dateRange = '';
+                if ($startDate) {
+                    $dateRange = date('M Y', strtotime($startDate)) . ' - ';
+                    $dateRange .= $isCurrent ? 'Present' : ($endDate ? date('M Y', strtotime($endDate)) : '');
+                }
+            @endphp
+            <div style="border-left: 2px solid #10B3D6; background: #F9F9F9; padding: 5px 6px; margin-bottom: 4px;">
+                <div style="font-size: 7px; font-weight: bold; color: #000; margin-bottom: 2px;">{{ $jobTitle }}</div>
+                @if($companyName)<div style="font-size: 5px; color: #666; margin-bottom: 2px;">{{ $companyName }} • {{ $dateRange }}</div>@endif
+                @if($skillName || $industryName)
+                    <div style="font-size: 5px; color: #666; margin-bottom: 2px;">@if($skillName)Skill: {{ $skillName }}@endif @if($skillName && $industryName)| @endif @if($industryName)Industry: {{ $industryName }}@endif</div>
+                @endif
+                @if($description)<div style="font-size: 6px; color: #000; line-height: 1.2; margin-top: 2px;">{{ $description }}</div>@endif
+                @if($hasPaidPlan && ($supervisorName || $supervisorContact))
+                    <div style="font-size: 5px; color: #666; margin-top: 3px; padding-top: 3px; border-top: 1px solid #DDD;">
+                        Supervisor: {{ $supervisorName ?? 'N/A' }}@if($supervisorContact) ({{ $supervisorContact }})@endif
+                    </div>
+                @endif
             </div>
-            <div class="section-content">
-                @foreach($references as $ref)
-                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #E5E7EB;">
-                        <div style="font-weight: bold; color: #192341; margin-bottom: 5px;">
-                            {{ $ref->reference_name }}
-                        </div>
-                        <div style="font-size: 9px; color: #6B7280;">
-                            @if($ref->relationship)
-                                {{ $ref->relationship }}
-                            @endif
-                            @if($ref->company_name)
-                                @ {{ $ref->company_name }}
-                            @endif
-                        </div>
-                        @if($ref->reference_phone)
-                            <div style="font-size: 9px; color: #4B5563; margin-top: 3px;">
-                                📞 {{ $ref->reference_phone }}
-                            </div>
-                        @endif
-                        @if($ref->reference_email)
-                            <div style="font-size: 9px; color: #4B5563;">
-                                📧 {{ $ref->reference_email }}
-                            </div>
-                        @endif
-                        @if($ref->notes)
-                            <div style="font-size: 9px; color: #6B7280; margin-top: 5px; font-style: italic;">
-                                {{ $ref->notes }}
-                            </div>
+        @endforeach
+    </div>
+    @endif
+
+    <!-- Certifications -->
+    @if(!empty($certifications))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">🏆 Certifications</div>
+        @foreach($certifications as $cert)
+            @php
+                $certName = is_object($cert) && isset($cert->certification) && is_object($cert->certification) ? ($cert->certification->name ?? 'N/A') : 'N/A';
+                $certNumber = is_object($cert) ? ($cert->certificate_number ?? null) : null;
+                $issuedDate = is_object($cert) ? ($cert->issued_date ?? null) : null;
+                $expiryDate = is_object($cert) ? ($cert->expiry_date ?? null) : null;
+                $verificationStatus = is_object($cert) ? ($cert->verification_status ?? 'pending') : 'pending';
+            @endphp
+            <div style="border-left: 2px solid #10B3D6; background: #F9F9F9; padding: 5px 6px; margin-bottom: 4px;">
+                <div style="font-size: 7px; font-weight: bold; color: #000;">{{ $certName }} <span style="display: inline-block; padding: 2px 6px; border: 1px solid #10B3D6; border-radius: 3px; font-size: 5px; background: #FFF;">{{ ucfirst($verificationStatus) }}</span></div>
+                @if($certNumber)<div style="font-size: 5px; color: #666; margin-bottom: 2px;">Certificate #: {{ $certNumber }}</div>@endif
+                @if($issuedDate || $expiryDate)
+                    <div style="font-size: 5px; color: #666;">
+                        @if($issuedDate)Issued: {{ date('M Y', strtotime($issuedDate)) }}@endif
+                        @if($issuedDate && $expiryDate) | @endif
+                        @if($expiryDate)Expires: {{ date('M Y', strtotime($expiryDate)) }}@endif
+                    </div>
+                @endif
+            </div>
+        @endforeach
+    </div>
+    @endif
+
+    <!-- References -->
+    @if(!empty($references))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">👥 References</div>
+        @foreach($references as $ref)
+            @php
+                $refName = is_object($ref) ? ($ref->reference_name ?? '') : '';
+                $refPhone = is_object($ref) ? ($ref->reference_phone ?? '') : '';
+                $refEmail = is_object($ref) ? ($ref->reference_email ?? null) : null;
+                $refRelation = is_object($ref) ? ($ref->relationship ?? '') : '';
+                $refCompany = is_object($ref) ? ($ref->company_name ?? null) : null;
+                $refNotes = is_object($ref) ? ($ref->notes ?? null) : null;
+                $canContact = is_object($ref) ? ($ref->permission_to_contact ?? false) : false;
+            @endphp
+            <div style="border-left: 2px solid #10B3D6; background: #F9F9F9; padding: 5px 6px; margin-bottom: 4px;">
+                <div style="font-size: 7px; font-weight: bold; color: #000; margin-bottom: 2px;">{{ $refName }}</div>
+                @if($refRelation)<div style="font-size: 5px; color: #666; margin-bottom: 2px;">{{ $refRelation }}@if($refCompany) @ {{ $refCompany }}@endif</div>@endif
+                <div style="font-size: 5px; color: #666;">📞 {{ $refPhone }}@if($refEmail) | ✉ {{ $refEmail }}@endif</div>
+                @if($refNotes)<div style="font-size: 6px; color: #000; line-height: 1.2; margin-top: 2px;">{{ $refNotes }}</div>@endif
+                @if($canContact)<div style="font-size: 5px; color: #000; font-weight: bold; margin-top: 2px;">✓ Permission to Contact</div>@endif
+            </div>
+        @endforeach
+    </div>
+    @endif
+
+    <!-- Emergency Contact -->
+    @if($hasPaidPlan && $profile && !empty($profile->emergency_contact_name))
+    <div style="border: 1px solid #10B3D6; padding: 8px; margin-bottom: 6px;">
+        <div style="font-size: 8px; font-weight: bold; background: #F0F8FA; padding: 4px; margin: -8px -8px 6px -8px; border-bottom: 1px solid #10B3D6;">🚨 Emergency Contact</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 6px;">
+            <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Name</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->emergency_contact_name }}</td></tr>
+            <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Phone</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->emergency_contact_phone ?? 'N/A' }}</td></tr>
+            <tr><td style="border: 1px solid #CCC; padding: 3px; font-weight: bold;">Relationship</td><td style="border: 1px solid #CCC; padding: 3px;">{{ $profile->emergency_contact_relationship ?? 'N/A' }}</td></tr>
+        </table>
+    </div>
+    @endif
+
+    <!-- Footer -->
+    <div style="margin-top: 8px; padding: 8px; border-top: 2px solid #10B3D6; background: #F0F8FA; text-align: center;">
+        <table style="width: 100%; border-collapse: collapse; border-spacing: 0;">
+            <tr>
+                <td style="text-align: center; vertical-align: middle; padding: 0;">
+                    <div style="display: inline-block; vertical-align: middle; margin-right: 5px;">
+                        @php
+                            $logoPath = public_path('logo.png');
+                        @endphp
+                        @if(file_exists($logoPath))
+                            <img src="{{ $logoPath }}" style="max-width: 50px; max-height: 40px; object-fit: contain; display: inline-block; vertical-align: middle;">
+                        @else
+                            <span style="font-size: 10px; font-weight: bold; color: #10B3D6; display: inline-block; vertical-align: middle;">SkillOnCall</span>
                         @endif
                     </div>
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        <!-- Footer -->
-        <div class="footer">
-            <div>This profile was generated by SkillOnCall.ca on {{ $generatedAt }}</div>
-            <div style="margin-top: 5px;">For more information, visit <strong>skilloncall.ca</strong></div>
-        </div>
+                    <div style="display: inline-block; vertical-align: middle; text-align: left;">
+                        <span style="font-weight: bold; color: #10B3D6; font-size: 8px;">SkillOnCall.ca</span>
+                        <span style="font-size: 6px; color: #666;"> - Generated: {{ $generatedAt }} - Visit skilloncall.ca for more information</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
-

@@ -95,9 +95,18 @@ class EmployerWorkerController extends Controller
 
         $workerDetails = $this->workerService->getWorkerDetails($worker);
 
+        // Check if employer has paid plan (Professional or Enterprise)
+        $employer = auth()->user();
+        $hasPaidPlan = false;
+        if ($employer) {
+            $currentPlan = $employer->getCurrentPlan();
+            $hasPaidPlan = $currentPlan && !$currentPlan->isFree();
+        }
+
         $pdf = PDF::loadView('pdfs.employee-profile', [
             'worker' => $workerDetails,
             'generatedAt' => now()->format('F j, Y \a\t g:i A'),
+            'hasPaidPlan' => $hasPaidPlan,
         ])->setPaper('a4', 'portrait');
 
         $filename = 'employee-profile-' . str_replace(' ', '-', strtolower($worker->name)) . '-' . date('Y-m-d') . '.pdf';

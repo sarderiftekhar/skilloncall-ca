@@ -445,21 +445,10 @@ export default function WorkerShow({ worker }: Props) {
                                 {/* Name and Basic Info */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h1 className="text-3xl md:text-4xl font-bold leading-tight page-title">
-                                                    {workerName}
-                                                </h1>
-                                                <Button
-                                                    onClick={() => window.open(`/employer/employees/${worker.id}/export-pdf?lang=${locale}`, '_blank')}
-                                                    className="cursor-pointer"
-                                                    style={{ backgroundColor: '#10B3D6', height: '2.7em' }}
-                                                    variant="default"
-                                                >
-                                                    <Download className="h-4 w-4 mr-2" />
-                                                    {t('dashboard.export_pdf', 'Export PDF')}
-                                                </Button>
-                                            </div>
+                                        <div>
+                                            <h1 className="text-3xl md:text-4xl font-bold leading-tight page-title mb-2">
+                                                {workerName}
+                                            </h1>
                                             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
                                                 <div className="flex items-center gap-1">
                                                     <MapPin className="h-4 w-4" />
@@ -504,13 +493,22 @@ export default function WorkerShow({ worker }: Props) {
 
                                         {/* Action Buttons */}
                                         <div className="flex items-center gap-3 mt-4">
+                                            <Button
+                                                onClick={() => window.open(`/employer/employees/${worker.id}/export-pdf?lang=${locale}`, '_blank')}
+                                                className="cursor-pointer"
+                                                variant="outline"
+                                                style={{ height: '2.7em', borderColor: '#10B3D6', color: '#10B3D6' }}
+                                            >
+                                                <Download className="h-4 w-4 mr-2" />
+                                                {t('dashboard.export_pdf', 'Export PDF')}
+                                            </Button>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <span>
                                                         <Button
                                                             disabled={isFree}
-                                                            className={isFree ? 'opacity-50 cursor-not-allowed' : ''}
-                                                            style={{ backgroundColor: isFree ? '#9CA3AF' : '#10B3D6', color: '#FFFFFF' }}
+                                                            className={isFree ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                                                            style={{ backgroundColor: isFree ? '#9CA3AF' : '#10B3D6', color: '#FFFFFF', height: '2.7em' }}
                                                             onClick={() => {
                                                                 if (!isFree) {
                                                                     // Navigate to messages or open message modal
