@@ -27,8 +27,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-import { logout } from '@/routes';
-
 import { 
 
     Users, 
@@ -1054,7 +1052,7 @@ export default function Welcome() {
 
                                                 <DropdownMenuItem asChild>
 
-                                                    <Link href={logout.url()} method="post" className="cursor-pointer">
+                                                    <Link href="/logout" method="post" className="cursor-pointer">
 
                                                         <LogOut className="mr-2 h-4 w-4" />
 
