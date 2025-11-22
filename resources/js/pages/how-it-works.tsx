@@ -473,16 +473,11 @@ export default function HowItWorks() {
                 </main>
 
                 {/* Footer */}
-                <footer className="w-full py-12 text-white" style={{ backgroundColor: '#10B3D6' }}>
+                <footer className="w-full py-8 text-white text-center" style={{ backgroundColor: '#10B3D6' }}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <p className="text-sm mb-2">
-                                {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
-                            </p>
-                            <p className="text-xs opacity-90">
-                                {t('footer.platform_description', 'Canada\'s premier platform for connecting skilled employees with local businesses. Built for Canadians, by Canadians.')}
-                            </p>
-                        </div>
+                        <p className="text-sm">
+                            {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
+                        </p>
                     </div>
                 </footer>
             </div>
