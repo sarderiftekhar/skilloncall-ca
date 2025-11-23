@@ -21,6 +21,8 @@ class OnboardingController extends Controller
 {
     public function index(Request $request): Response|RedirectResponse
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
         $user = $request->user();
 
         // Check if user already has a profile
@@ -33,13 +35,13 @@ class OnboardingController extends Controller
 
         $currentStep = $employeeProfile ? $employeeProfile->onboarding_step : 1;
 
-        // Load global reference data
+        // Load global reference data with optimized select
+        // NOTE: Data is now fetched via API on demand to prevent memory exhaustion
         $globalData = [
-            'globalSkills' => GlobalSkill::active()->ordered()->get(),
-            'globalIndustries' => GlobalIndustry::active()->ordered()->get(),
-            'globalLanguages' => GlobalLanguage::active()->ordered()->get(),
-            'globalCertifications' => GlobalCertification::where('is_active', true)->get(),
-            'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(),
+            'globalSkills' => [],
+            'globalIndustries' => [],
+            'globalLanguages' => [],
+            'globalCertifications' => [],
         ];
 
         // Load existing profile data
@@ -124,7 +126,7 @@ class OnboardingController extends Controller
         return Inertia::render('employee/onboarding', array_merge([
             'currentStep' => $currentStep,
             'profileData' => $profileData,
-            'translations' => trans('onboarding'),
+            // 'translations' => trans('onboarding'), // Handled by HandleInertiaRequests middleware
         ], $globalData));
     }
 

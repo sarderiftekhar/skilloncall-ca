@@ -218,4 +218,3 @@ return [
     'employer.steps.location.no_cities' => 'Aucune ville trouvée correspondant à',
     'employer.steps.location.postal_code' => 'Code postal',
 ];
-

@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Briefcase, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 import { CsrfTokenUpdater } from '@/components/CsrfTokenUpdater';
@@ -50,12 +50,55 @@ export default function EmployeeOnboarding({
     const [modalDetails, setModalDetails] = useState<string | string[] | undefined>(undefined);
     const [firstErrorField, setFirstErrorField] = useState<string | null>(null);
 
-    // Language switcher function
-    const switchLang = (next: 'en' | 'fr') => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', next);
-        window.location.href = url.toString();
-    };
+    // Reference Data State - Fetched on demand to reduce memory load
+    const [skills, setSkills] = useState<any[]>(globalSkills || []);
+    const [industries, setIndustries] = useState<any[]>(globalIndustries || []);
+    const [languages, setLanguages] = useState<any[]>(globalLanguages || []);
+    const [certifications, setCertifications] = useState<any[]>(globalCertifications || []);
+
+    useEffect(() => {
+        const fetchConfig = {
+            credentials: 'same-origin' as RequestCredentials,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        };
+
+        const loadSkillsData = async () => {
+            if (skills.length > 0) return;
+            try {
+                const [s, i, c] = await Promise.all([
+                    fetch('/employee/api/skills', fetchConfig).then(r => r.json()),
+                    fetch('/employee/api/industries', fetchConfig).then(r => r.json()),
+                    fetch('/employee/api/certifications', fetchConfig).then(r => r.json())
+                ]);
+                setSkills(s);
+                setIndustries(i);
+                setCertifications(c);
+            } catch (e) {
+                console.error('Error loading skills data', e);
+            }
+        };
+
+        const loadLanguageData = async () => {
+            if (languages.length > 0) return;
+            try {
+                const l = await fetch('/employee/api/languages', fetchConfig).then(r => r.json());
+                setLanguages(l);
+            } catch (e) {
+                console.error('Error loading language data', e);
+            }
+        };
+
+        // Load data based on step requirements
+        if (step === 2 || step === 3) {
+            loadSkillsData();
+        }
+        
+        // Load languages for location (step 4) and schedule/languages (step 5)
+        if (step === 4 || step === 5) {
+            loadLanguageData();
+        }
+    }, [step]);
+
 
     const queryLang = `?lang=${locale}`;
 
@@ -476,10 +519,10 @@ export default function EmployeeOnboarding({
             formData,
             updateFormData,
             validationErrors,
-            globalSkills,
-            globalIndustries,
-            globalLanguages,
-            globalCertifications,
+            globalSkills: skills,
+            globalIndustries: industries,
+            globalLanguages: languages,
+            globalCertifications: certifications,
         };
 
         switch (step) {
@@ -504,30 +547,6 @@ export default function EmployeeOnboarding({
             <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
                 <Head title={`${t('title', 'Employee Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
                 
-                {/* Language Switcher - Fixed at top right */}
-            <div className="fixed top-4 right-4 z-50 flex items-center space-x-1 border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
-                <button 
-                    onClick={() => switchLang('en')} 
-                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                        locale === 'en' 
-                            ? 'bg-[#10B3D6] text-white' 
-                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                    }`}
-                >
-                    EN
-                </button>
-                <button 
-                    onClick={() => switchLang('fr')} 
-                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                        locale === 'fr' 
-                            ? 'bg-[#10B3D6] text-white' 
-                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                    }`}
-                >
-                    FR
-                </button>
-            </div>
-
             <FeedbackModal
                 isOpen={modalOpen}
                 onClose={() => {

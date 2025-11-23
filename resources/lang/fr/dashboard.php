@@ -287,6 +287,7 @@ return [
         'applications' => 'Candidatures',
         'find_employee' => 'Trouver un Employé',
         'payments' => 'Paiements',
+        'error_logs' => 'Journal des erreurs',
     ],
     
     // Common menu items
@@ -310,6 +311,8 @@ return [
         'skills' => 'Compétences',
         'languages' => 'Langues',
         'unavailable' => 'Indisponible',
+        'search' => 'Rechercher',
+        'reset' => 'Réinitialiser',
     ],
     
     // Settings Page
@@ -336,5 +339,35 @@ return [
         'deactivate_confirm_description_end' => 'pour réactiver votre compte. Veuillez entrer votre mot de passe pour confirmer.',
         'password_label' => 'Mot de passe',
         'cancel' => 'Annuler',
+    ],
+
+    // Journaux & surveillance
+    'logs' => [
+        'exceptions' => [
+            'title' => 'Journal des exceptions',
+            'subtitle' => 'Surveillez les dernières exceptions de l’application et inspectez les traces.',
+            'search_placeholder' => 'Rechercher un message, une URL ou une exception',
+            'table_title' => 'Exceptions récentes',
+            'table_subtitle' => 'Les entrées les plus récentes apparaissent en premier. Développez une ligne pour voir la charge utile et la trace.',
+            'no_results' => 'Aucune exception n’a encore été enregistrée.',
+            'copy_trace' => 'Copier la trace',
+            'view_details' => 'Voir les détails',
+            'hide_details' => 'Masquer les détails',
+            'system_user' => 'Invité / Système',
+            'stats' => [
+                'total' => 'Total enregistré',
+                'today' => 'Enregistré aujourd’hui',
+                'unique' => 'Problèmes uniques',
+                'last_entry' => 'Dernière entrée',
+            ],
+            'fields' => [
+                'location' => 'Emplacement',
+                'user' => 'Utilisateur',
+                'ip' => 'Adresse IP',
+                'trace' => 'Trace de pile',
+                'payload' => 'Charge utile de la requête',
+                'headers' => 'En-têtes de requête',
+            ],
+        ],
     ],
 ];
