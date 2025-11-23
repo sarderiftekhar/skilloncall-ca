@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Head, router } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Briefcase, CheckCircle, Clock, FileText, Globe, MapPin, User } from 'react-feather';
 import { useTranslations } from '@/hooks/useTranslations';
 import { CsrfTokenUpdater } from '@/components/CsrfTokenUpdater';
