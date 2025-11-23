@@ -3,6 +3,7 @@ import users from './users'
 import jobs from './jobs'
 import payments from './payments'
 import reports from './reports'
+import logs from './logs'
 import settings from './settings'
 /**
 * @see \App\Http\Controllers\Admin\AdminDashboardController::dashboard
@@ -52,6 +53,7 @@ users: Object.assign(users, users),
 jobs: Object.assign(jobs, jobs),
 payments: Object.assign(payments, payments),
 reports: Object.assign(reports, reports),
+logs: Object.assign(logs, logs),
 settings: Object.assign(settings, settings),
 }
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AdminJobController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminReportController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\ExceptionLogController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,6 +51,9 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
     Route::get('reports/jobs', [AdminReportController::class, 'jobs'])->name('reports.jobs');
     Route::get('reports/payments', [AdminReportController::class, 'payments'])->name('reports.payments');
     Route::get('reports/export/{type}', [AdminReportController::class, 'export'])->name('reports.export');
+    
+    // Exception Logs
+    Route::get('logs/exceptions', [ExceptionLogController::class, 'index'])->name('logs.exceptions.index');
     
     // Settings
     Route::get('settings', [AdminSettingsController::class, 'index'])->name('settings.index');
