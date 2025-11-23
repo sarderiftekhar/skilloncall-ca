@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        ini_set('memory_limit', '512M');
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
         $user = $request->user();

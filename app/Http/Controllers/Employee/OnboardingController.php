@@ -21,6 +21,8 @@ class OnboardingController extends Controller
 {
     public function index(Request $request): Response|RedirectResponse
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(120);
         $user = $request->user();
 
         // Check if user already has a profile
@@ -35,10 +37,10 @@ class OnboardingController extends Controller
 
         // Load global reference data with optimized select
         $globalData = [
-            'globalSkills' => GlobalSkill::active()->ordered()->select('id', 'name', 'category')->get(),
-            'globalIndustries' => GlobalIndustry::active()->ordered()->select('id', 'name')->get(),
+            'globalSkills' => GlobalSkill::active()->ordered()->select('id', 'name', 'category')->toBase()->get(),
+            'globalIndustries' => GlobalIndustry::active()->ordered()->select('id', 'name')->toBase()->get(),
             'globalLanguages' => GlobalLanguage::active()->ordered()->select('id', 'name', 'code', 'is_official_canada')->get(),
-            'globalCertifications' => GlobalCertification::where('is_active', true)->select('id', 'name')->get(),
+            'globalCertifications' => GlobalCertification::where('is_active', true)->select('id', 'name')->toBase()->get(),
             // 'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(), // Unused and heavy
         ];
 
