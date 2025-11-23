@@ -39,7 +39,7 @@ class OnboardingController extends Controller
             'globalIndustries' => GlobalIndustry::active()->ordered()->get(),
             'globalLanguages' => GlobalLanguage::active()->ordered()->get(),
             'globalCertifications' => GlobalCertification::where('is_active', true)->get(),
-            'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(),
+            // 'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(), // Unused and heavy
         ];
 
         // Load existing profile data

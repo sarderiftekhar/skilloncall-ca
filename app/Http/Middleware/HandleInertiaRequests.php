@@ -140,8 +140,11 @@ class HandleInertiaRequests extends Middleware
             $routeName = $request->route()?->getName();
             $currentPath = $request->path();
             
-            // Load dashboard translations for all employee pages since they share navigation
-            if (str_contains($routeName ?? '', 'dashboard') || 
+            // Load translations based on route
+            // Check for specific pages first
+            if (str_contains($routeName ?? '', 'onboarding')) {
+                $translations = __('onboarding');
+            } elseif (str_contains($routeName ?? '', 'dashboard') || 
                 str_contains($currentPath, 'employee/') || 
                 str_contains($routeName ?? '', 'employee.') ||
                 str_contains($currentPath, 'worker/') || 
@@ -159,8 +162,6 @@ class HandleInertiaRequests extends Middleware
                         $translations = array_merge($translations ?? [], ['jobs' => $jobsTranslations]);
                     }
                 }
-            } elseif (str_contains($routeName ?? '', 'onboarding')) {
-                $translations = __('onboarding');
             } elseif (str_contains($routeName ?? '', 'uat-testing') || str_contains($currentPath, 'uat-testing')) {
                 $translations = __('uat-testing');
             } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/' || str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
