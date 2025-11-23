@@ -63,6 +63,20 @@ export default function BusinessInfoStep({
                         placeholder={t('employer.steps.business_info.business_name_placeholder', 'Enter your business name')}
                     />
 
+                    {/* Company Number */}
+                    <ValidatedInput
+                        id="company_number"
+                        label={t('employer.steps.business_info.company_number', 'Company Number')}
+                        fieldType="text"
+                        value={formData.company_number || ''}
+                        onChange={(value) => handleInputChange('company_number', value)}
+                        error={validationErrors.company_number}
+                        required
+                        maxLength={30}
+                        helperText={t('employer.steps.business_info.company_number_helper', 'Business registration number (max 30 characters)')}
+                        placeholder={t('employer.steps.business_info.company_number_placeholder', 'Enter company registration number')}
+                    />
+
                     {/* Phone Number */}
                     <ValidatedInput
                         id="phone"

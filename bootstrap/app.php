@@ -10,7 +10,9 @@ use App\Http\Middleware\EnsureWorkerProfileComplete;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\LocaleFromQuery;
+use App\Http\Middleware\CheckInactivity;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\WorkerMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +29,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->web(append: [
+            SecurityHeaders::class,
+            CheckInactivity::class,
             LocaleFromQuery::class,
             HandleAppearance::class,
             HandleInertiaRequests::class,

@@ -14,6 +14,7 @@ class EmployerProfile extends Model
     protected $fillable = [
         'user_id',
         'business_name',
+        'company_number',
         'phone',
         'global_industry_id',
         'bio',
@@ -88,6 +89,7 @@ class EmployerProfile extends Model
         // Check for essential fields that are captured in onboarding
         $essentialFields = [
             'business_name',
+            'company_number',
             'phone',
             'address_line_1',
             'city',

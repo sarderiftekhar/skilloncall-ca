@@ -148,7 +148,7 @@ class OnboardingController extends Controller
         if (!$employerProfile->canCompleteOnboarding()) {
             // Get detailed info about what's missing
             $missingFields = [];
-            $essentialFields = ['business_name', 'phone', 'address_line_1', 'city', 'province', 'postal_code'];
+            $essentialFields = ['business_name', 'company_number', 'phone', 'address_line_1', 'city', 'province', 'postal_code'];
             foreach ($essentialFields as $field) {
                 if (empty($employerProfile->$field)) {
                     $missingFields[] = $field;
@@ -184,11 +184,14 @@ class OnboardingController extends Controller
     {
         $validated = validator($data, [
             'business_name' => 'required|string|max:255',
+            'company_number' => 'required|string|max:30',
             'phone' => 'required|string|max:20',
             'global_industry_id' => 'nullable|exists:global_industries,id',
             'bio' => 'nullable|string|max:1000',
         ], [
             'business_name.required' => __('validation.employer.business_name_required'),
+            'company_number.required' => __('validation.employer.company_number_required'),
+            'company_number.max' => __('validation.employer.company_number_max'),
             'phone.required' => __('validation.employer.phone_required'),
             'global_industry_id.exists' => __('validation.employer.industry_exists'),
         ])->validate();

@@ -30,6 +30,8 @@ return [
     // Employer Onboarding
     'employer' => [
         'business_name_required' => 'Business name is required.',
+        'company_number_required' => 'Company number is required.',
+        'company_number_max' => 'Company number must not exceed 30 characters.',
         'phone_required' => 'Phone number is required.',
         'industry_exists' => 'Please select a valid industry.',
         'address_line_1_required' => 'Street address is required.',

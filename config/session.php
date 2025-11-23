@@ -214,4 +214,19 @@ return [
 
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Inactivity Timeout
+    |--------------------------------------------------------------------------
+    |
+    | This option determines the number of minutes a user can be inactive
+    | before requiring password re-authentication. After this timeout,
+    | users must re-enter their password to continue their session.
+    |
+    */
+
+    'inactivity_timeout' => (int) env('INACTIVITY_TIMEOUT', 15),
+
+    'inactivity_warning_enabled' => env('INACTIVITY_WARNING_ENABLED', true),
+
 ];

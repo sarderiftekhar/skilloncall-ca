@@ -221,6 +221,9 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Include CSRF token in every response so frontend can update meta tag
             'csrfToken' => $request->session()->token(),
+            // Inactivity timeout configuration
+            'inactivityTimeout' => config('session.inactivity_timeout', 15),
+            'requiresReauth' => $request->session()->get('requires_reauth', false),
         ];
     }
 }

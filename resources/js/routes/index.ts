@@ -274,3 +274,46 @@ logout.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: logout.url(options),
     method: 'post',
 })
+
+/**
+* @see \App\Http\Controllers\Auth\ReauthenticateController::reauthenticate
+ * @see app/Http/Controllers/Auth/ReauthenticateController.php:18
+ * @route '/reauthenticate'
+ */
+export const reauthenticate = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: reauthenticate.url(options),
+    method: 'get',
+})
+
+reauthenticate.definition = {
+    methods: ["get","head"],
+    url: '/reauthenticate',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Auth\ReauthenticateController::reauthenticate
+ * @see app/Http/Controllers/Auth/ReauthenticateController.php:18
+ * @route '/reauthenticate'
+ */
+reauthenticate.url = (options?: RouteQueryOptions) => {
+    return reauthenticate.definition.url + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Auth\ReauthenticateController::reauthenticate
+ * @see app/Http/Controllers/Auth/ReauthenticateController.php:18
+ * @route '/reauthenticate'
+ */
+reauthenticate.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: reauthenticate.url(options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\Auth\ReauthenticateController::reauthenticate
+ * @see app/Http/Controllers/Auth/ReauthenticateController.php:18
+ * @route '/reauthenticate'
+ */
+reauthenticate.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: reauthenticate.url(options),
+    method: 'head',
+})

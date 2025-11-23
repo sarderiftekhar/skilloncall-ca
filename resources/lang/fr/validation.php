@@ -31,6 +31,8 @@ return [
     // Configuration de l'employeur
     'employer' => [
         'business_name_required' => 'Le nom de l\'entreprise est requis.',
+        'company_number_required' => 'Le numéro d\'entreprise est requis.',
+        'company_number_max' => 'Le numéro d\'entreprise ne doit pas dépasser 30 caractères.',
         'phone_required' => 'Le numéro de téléphone est requis.',
         'industry_exists' => 'Veuillez sélectionner une industrie valide.',
         'address_line_1_required' => 'L\'adresse est requise.',

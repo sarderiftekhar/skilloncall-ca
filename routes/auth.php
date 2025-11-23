@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\ReauthenticateController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
@@ -57,4 +58,14 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // Re-authentication routes for inactivity timeout
+    Route::get('reauthenticate', [ReauthenticateController::class, 'show'])
+        ->name('reauthenticate');
+    
+    Route::post('reauthenticate', [ReauthenticateController::class, 'verify'])
+        ->name('reauthenticate.verify');
+    
+    Route::get('reauthenticate/check', [ReauthenticateController::class, 'check'])
+        ->name('reauthenticate.check');
 });
