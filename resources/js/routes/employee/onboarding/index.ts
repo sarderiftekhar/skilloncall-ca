@@ -44,7 +44,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::save
- * @see app/Http/Controllers/Employee/OnboardingController.php:131
+ * @see app/Http/Controllers/Employee/OnboardingController.php:133
  * @route '/employee/onboarding/save'
  */
 export const save = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ save.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::save
- * @see app/Http/Controllers/Employee/OnboardingController.php:131
+ * @see app/Http/Controllers/Employee/OnboardingController.php:133
  * @route '/employee/onboarding/save'
  */
 save.url = (options?: RouteQueryOptions) => {
@@ -68,7 +68,7 @@ save.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::save
- * @see app/Http/Controllers/Employee/OnboardingController.php:131
+ * @see app/Http/Controllers/Employee/OnboardingController.php:133
  * @route '/employee/onboarding/save'
  */
 save.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -78,7 +78,7 @@ save.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::complete
- * @see app/Http/Controllers/Employee/OnboardingController.php:248
+ * @see app/Http/Controllers/Employee/OnboardingController.php:250
  * @route '/employee/onboarding/complete'
  */
 export const complete = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -93,7 +93,7 @@ complete.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::complete
- * @see app/Http/Controllers/Employee/OnboardingController.php:248
+ * @see app/Http/Controllers/Employee/OnboardingController.php:250
  * @route '/employee/onboarding/complete'
  */
 complete.url = (options?: RouteQueryOptions) => {
@@ -102,7 +102,7 @@ complete.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\OnboardingController::complete
- * @see app/Http/Controllers/Employee/OnboardingController.php:248
+ * @see app/Http/Controllers/Employee/OnboardingController.php:250
  * @route '/employee/onboarding/complete'
  */
 complete.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
