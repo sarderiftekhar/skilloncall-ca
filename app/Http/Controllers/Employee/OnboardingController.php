@@ -33,12 +33,12 @@ class OnboardingController extends Controller
 
         $currentStep = $employeeProfile ? $employeeProfile->onboarding_step : 1;
 
-        // Load global reference data
+        // Load global reference data with optimized select
         $globalData = [
-            'globalSkills' => GlobalSkill::active()->ordered()->get(),
-            'globalIndustries' => GlobalIndustry::active()->ordered()->get(),
-            'globalLanguages' => GlobalLanguage::active()->ordered()->get(),
-            'globalCertifications' => GlobalCertification::where('is_active', true)->get(),
+            'globalSkills' => GlobalSkill::active()->ordered()->select('id', 'name', 'category')->get(),
+            'globalIndustries' => GlobalIndustry::active()->ordered()->select('id', 'name')->get(),
+            'globalLanguages' => GlobalLanguage::active()->ordered()->select('id', 'name', 'code', 'is_official_canada')->get(),
+            'globalCertifications' => GlobalCertification::where('is_active', true)->select('id', 'name')->get(),
             // 'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(), // Unused and heavy
         ];
 
@@ -124,7 +124,7 @@ class OnboardingController extends Controller
         return Inertia::render('employee/onboarding', array_merge([
             'currentStep' => $currentStep,
             'profileData' => $profileData,
-            'translations' => trans('onboarding'),
+            // 'translations' => trans('onboarding'), // Handled by HandleInertiaRequests middleware
         ], $globalData));
     }
 
