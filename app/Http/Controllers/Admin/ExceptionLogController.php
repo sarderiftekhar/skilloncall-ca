@@ -58,14 +58,14 @@ class ExceptionLogController extends Controller
 
         return Inertia::render('admin/logs/exceptions', [
             'logs' => [
-                'data' => $transformedLogs,
-                'current_page' => $logs->currentPage(),
-                'last_page' => $logs->lastPage(),
-                'per_page' => $logs->perPage(),
-                'total' => $logs->total(),
-                'from' => $logs->firstItem(),
-                'to' => $logs->lastItem(),
-                'links' => $logs->linkCollection()->toArray(),
+                'data' => $transformedLogs->items(),
+                'current_page' => $transformedLogs->currentPage(),
+                'last_page' => $transformedLogs->lastPage(),
+                'per_page' => $transformedLogs->perPage(),
+                'total' => $transformedLogs->total(),
+                'from' => $transformedLogs->firstItem(),
+                'to' => $transformedLogs->lastItem(),
+                'links' => $transformedLogs->linkCollection()->toArray(),
             ],
             'filters' => [
                 'search' => $search,
