@@ -144,6 +144,9 @@ class HandleInertiaRequests extends Middleware
             // Load translations based on route
             // Check for specific pages first
             if (str_contains($routeName ?? '', 'onboarding')) {
+                // Force English locale for onboarding pages to avoid memory issues with French
+                $locale = 'en';
+                app()->setLocale('en');
                 $translations = __('onboarding');
             } elseif (str_contains($routeName ?? '', 'dashboard') || 
                 str_contains($currentPath, 'employee/') || 

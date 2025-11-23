@@ -56,7 +56,6 @@ export default function EmployeeOnboarding({
     const [languages, setLanguages] = useState<any[]>(globalLanguages || []);
     const [certifications, setCertifications] = useState<any[]>(globalCertifications || []);
 
-    // Fetch reference data on demand
     useEffect(() => {
         const fetchConfig = {
             credentials: 'same-origin' as RequestCredentials,
@@ -100,12 +99,6 @@ export default function EmployeeOnboarding({
         }
     }, [step]);
 
-    // Language switcher function
-    const switchLang = (next: 'en' | 'fr') => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', next);
-        window.location.href = url.toString();
-    };
 
     const queryLang = `?lang=${locale}`;
 
@@ -554,30 +547,6 @@ export default function EmployeeOnboarding({
             <div className="min-h-screen bg-gray-50 px-4 py-4 sm:px-6">
                 <Head title={`${t('title', 'Employee Setup')} - ${t('step_of', 'Step :step of :total').replace(':step', String(step)).replace(':total', String(OnboardingSteps.length))}`} />
                 
-                {/* Language Switcher - Fixed at top right */}
-            <div className="fixed top-4 right-4 z-50 flex items-center space-x-1 border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
-                <button 
-                    onClick={() => switchLang('en')} 
-                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                        locale === 'en' 
-                            ? 'bg-[#10B3D6] text-white' 
-                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                    }`}
-                >
-                    EN
-                </button>
-                <button 
-                    onClick={() => switchLang('fr')} 
-                    className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                        locale === 'fr' 
-                            ? 'bg-[#10B3D6] text-white' 
-                            : 'bg-transparent text-gray-700 hover:bg-gray-100'
-                    }`}
-                >
-                    FR
-                </button>
-            </div>
-
             <FeedbackModal
                 isOpen={modalOpen}
                 onClose={() => {
