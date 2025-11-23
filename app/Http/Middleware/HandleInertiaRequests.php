@@ -126,6 +126,9 @@ class HandleInertiaRequests extends Middleware
         // Get current locale and translations
         $locale = $request->get('lang', session('locale', config('app.locale', 'en')));
         
+        // Check if this is first visit (no locale preference set yet)
+        $needsLanguageSelection = !session()->has('locale') && !$request->has('lang');
+        
         // Store the locale in session if provided via URL parameter
         if ($request->has('lang') && in_array($request->get('lang'), ['en', 'fr'])) {
             session(['locale' => $request->get('lang')]);
@@ -223,6 +226,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale' => $locale,
             'translations' => $translations,
+            'needsLanguageSelection' => $needsLanguageSelection ?? false,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Include CSRF token in every response so frontend can update meta tag
             'csrfToken' => $request->session()->token(),

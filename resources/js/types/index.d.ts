@@ -36,6 +36,7 @@ export interface SharedData {
     subscription: SubscriptionInfo | null;
     locale: string;
     translations: Record<string, any>;
+    needsLanguageSelection?: boolean;
     sidebarOpen: boolean;
     [key: string]: unknown;
 }

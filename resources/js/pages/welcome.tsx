@@ -62,12 +62,13 @@ import {
 } from 'react-feather';
 
 import { useTranslations } from '@/hooks/useTranslations';
+import { LanguageSelectionModal } from '@/components/language-selection-modal';
 
 
 
 export default function Welcome() {
 
-    const { auth, isProfileComplete } = usePage<SharedData>().props as any;
+    const { auth, isProfileComplete, needsLanguageSelection } = usePage<SharedData>().props as any;
 
     const { t, locale } = useTranslations();
 
@@ -848,6 +849,14 @@ export default function Welcome() {
     return (
 
         <>
+
+            {/* Language Selection Modal - Shows on first visit */}
+            <LanguageSelectionModal 
+                isOpen={needsLanguageSelection === true} 
+                onLanguageSelect={(locale) => {
+                    // Language selection handled in modal component via redirect
+                }} 
+            />
 
             <Head title={isFrench ? 'Bienvenue sur SkillOnCall.ca' : 'Welcome to SkillOnCall.ca'}>
 
