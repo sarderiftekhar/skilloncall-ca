@@ -36,12 +36,12 @@ class OnboardingController extends Controller
         $currentStep = $employeeProfile ? $employeeProfile->onboarding_step : 1;
 
         // Load global reference data with optimized select
+        // NOTE: Data is now fetched via API on demand to prevent memory exhaustion
         $globalData = [
-            'globalSkills' => GlobalSkill::active()->ordered()->select('id', 'name', 'category')->toBase()->get(),
-            'globalIndustries' => GlobalIndustry::active()->ordered()->select('id', 'name')->toBase()->get(),
-            'globalLanguages' => GlobalLanguage::active()->ordered()->select('id', 'name', 'code', 'is_official_canada')->get(),
-            'globalCertifications' => GlobalCertification::where('is_active', true)->select('id', 'name')->toBase()->get(),
-            // 'globalProvinces' => GlobalProvince::with('cities')->orderBy('name')->get(), // Unused and heavy
+            'globalSkills' => [],
+            'globalIndustries' => [],
+            'globalLanguages' => [],
+            'globalCertifications' => [],
         ];
 
         // Load existing profile data

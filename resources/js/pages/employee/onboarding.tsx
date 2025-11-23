@@ -50,6 +50,56 @@ export default function EmployeeOnboarding({
     const [modalDetails, setModalDetails] = useState<string | string[] | undefined>(undefined);
     const [firstErrorField, setFirstErrorField] = useState<string | null>(null);
 
+    // Reference Data State - Fetched on demand to reduce memory load
+    const [skills, setSkills] = useState<any[]>(globalSkills || []);
+    const [industries, setIndustries] = useState<any[]>(globalIndustries || []);
+    const [languages, setLanguages] = useState<any[]>(globalLanguages || []);
+    const [certifications, setCertifications] = useState<any[]>(globalCertifications || []);
+
+    // Fetch reference data on demand
+    useEffect(() => {
+        const fetchConfig = {
+            credentials: 'same-origin' as RequestCredentials,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        };
+
+        const loadSkillsData = async () => {
+            if (skills.length > 0) return;
+            try {
+                const [s, i, c] = await Promise.all([
+                    fetch('/employee/api/skills', fetchConfig).then(r => r.json()),
+                    fetch('/employee/api/industries', fetchConfig).then(r => r.json()),
+                    fetch('/employee/api/certifications', fetchConfig).then(r => r.json())
+                ]);
+                setSkills(s);
+                setIndustries(i);
+                setCertifications(c);
+            } catch (e) {
+                console.error('Error loading skills data', e);
+            }
+        };
+
+        const loadLanguageData = async () => {
+            if (languages.length > 0) return;
+            try {
+                const l = await fetch('/employee/api/languages', fetchConfig).then(r => r.json());
+                setLanguages(l);
+            } catch (e) {
+                console.error('Error loading language data', e);
+            }
+        };
+
+        // Load data based on step requirements
+        if (step === 2 || step === 3) {
+            loadSkillsData();
+        }
+        
+        // Load languages for location (step 4) and schedule/languages (step 5)
+        if (step === 4 || step === 5) {
+            loadLanguageData();
+        }
+    }, [step]);
+
     // Language switcher function
     const switchLang = (next: 'en' | 'fr') => {
         const url = new URL(window.location.href);
@@ -476,10 +526,10 @@ export default function EmployeeOnboarding({
             formData,
             updateFormData,
             validationErrors,
-            globalSkills,
-            globalIndustries,
-            globalLanguages,
-            globalCertifications,
+            globalSkills: skills,
+            globalIndustries: industries,
+            globalLanguages: languages,
+            globalCertifications: certifications,
         };
 
         switch (step) {
