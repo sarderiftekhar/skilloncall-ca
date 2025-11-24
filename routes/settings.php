@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\LocaleController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -14,4 +15,7 @@ Route::middleware(['auth', 'check.user.active'])->group(function () {
     Route::put('settings/password', [PasswordController::class, 'update'])
         ->middleware('throttle:6,1')
         ->name('password.update');
+    
+    Route::post('settings/locale', [LocaleController::class, 'update'])
+        ->name('locale.update');
 });

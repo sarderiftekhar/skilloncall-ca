@@ -29,6 +29,11 @@ Route::get('/how-it-works', function (Illuminate\Http\Request $request) {
     return Inertia::render('how-it-works');
 })->name('how-it-works');
 
+Route::get('/pricing', function (Illuminate\Http\Request $request) {
+    // Translations are loaded by HandleInertiaRequests middleware
+    return Inertia::render('pricing');
+})->name('pricing');
+
 // Contact form route
 Route::post('/contact', [App\Http\Controllers\ContactController::class, 'submit'])->name('contact.submit');
 

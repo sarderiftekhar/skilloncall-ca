@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        ini_set('memory_limit', '512M');
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
         $user = $request->user();
@@ -122,13 +123,75 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        // Get current locale and translations
-        $locale = $request->get('lang', session('locale', config('app.locale', 'en')));
+        // Locale Resolution Logic (Priority Order):
+        // 1. URL parameter ?lang= (highest priority)
+        // 2. Authenticated user's database locale
+        // 3. Guest's X-Locale header (from localStorage)
+        // 4. Session locale
+        // 5. Default 'en'
         
-        // Store the locale in session if provided via URL parameter
+        $locale = null;
+        $needsLanguageSelection = false;
+        
+        // 1. Check URL parameter first
         if ($request->has('lang') && in_array($request->get('lang'), ['en', 'fr'])) {
-            session(['locale' => $request->get('lang')]);
             $locale = $request->get('lang');
+            
+            // Update session
+            session(['locale' => $locale]);
+            
+            // If authenticated, update database
+            if ($request->user()) {
+                try {
+                    $request->user()->update(['locale' => $locale]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to update user locale: ' . $e->getMessage());
+                }
+            }
+        }
+        
+        // 2. If authenticated and no URL param, check user's database locale
+        if (!$locale && $request->user()) {
+            $locale = $request->user()->getPreferredLocale();
+        }
+        
+        // 3. If guest and no URL param, check X-Locale header (from localStorage)
+        if (!$locale && !$request->user() && $request->header('X-Locale')) {
+            $headerLocale = $request->header('X-Locale');
+            if (in_array($headerLocale, ['en', 'fr'])) {
+                $locale = $headerLocale;
+            }
+        }
+        
+        // 4. Fall back to session locale
+        if (!$locale && session()->has('locale')) {
+            $locale = session('locale');
+        }
+        
+        // 5. Fall back to browser language auto-detection
+        $showLanguageBanner = false;
+        if (!$locale) {
+            // Get browser's Accept-Language header
+            $browserLanguage = $request->header('Accept-Language', '');
+            
+            // Auto-detect: French if browser prefers French, otherwise default to English
+            // Supported languages: en, fr
+            // Any other language (es, de, zh, etc.) defaults to English
+            if (!empty($browserLanguage) && str_contains(strtolower($browserLanguage), 'fr')) {
+                $locale = 'fr';
+            } else {
+                // Default to English for all other languages (en, es, de, zh, etc.)
+                $locale = 'en';
+            }
+            
+            // Show dismissible banner (not blocking modal)
+            $showLanguageBanner = true;
+            $needsLanguageSelection = false; // Don't block with modal
+        }
+        
+        // Store in session for consistency
+        if (!session()->has('locale')) {
+            session(['locale' => $locale]);
         }
         
         app()->setLocale($locale);
@@ -140,8 +203,14 @@ class HandleInertiaRequests extends Middleware
             $routeName = $request->route()?->getName();
             $currentPath = $request->path();
             
-            // Load dashboard translations for all employee pages since they share navigation
-            if (str_contains($routeName ?? '', 'dashboard') || 
+            // Load translations based on route
+            // Check for specific pages first
+            if (str_contains($routeName ?? '', 'onboarding')) {
+                // Force English locale for onboarding pages to avoid memory issues with French
+                $locale = 'en';
+                app()->setLocale('en');
+                $translations = __('onboarding');
+            } elseif (str_contains($routeName ?? '', 'dashboard') || 
                 str_contains($currentPath, 'employee/') || 
                 str_contains($routeName ?? '', 'employee.') ||
                 str_contains($currentPath, 'worker/') || 
@@ -159,12 +228,25 @@ class HandleInertiaRequests extends Middleware
                         $translations = array_merge($translations ?? [], ['jobs' => $jobsTranslations]);
                     }
                 }
-            } elseif (str_contains($routeName ?? '', 'onboarding')) {
-                $translations = __('onboarding');
             } elseif (str_contains($routeName ?? '', 'uat-testing') || str_contains($currentPath, 'uat-testing')) {
                 $translations = __('uat-testing');
             } elseif (str_contains($routeName ?? '', 'welcome') || str_contains($routeName ?? '', 'home') || $currentPath === '/' || str_contains($routeName ?? '', 'how-it-works') || str_contains($currentPath, 'how-it-works')) {
                 $translations = __('welcome');
+            } elseif (str_contains($routeName ?? '', 'pricing') || str_contains($currentPath, 'pricing')) {
+                // Force English locale for pricing page to avoid crashes
+                $originalLocale = app()->getLocale();
+                app()->setLocale('en');
+                $pricingTranslations = __('pricing');
+                $welcomeTranslations = __('welcome');
+                app()->setLocale($originalLocale);
+                
+                if (is_array($pricingTranslations) && is_array($welcomeTranslations)) {
+                    $translations = array_merge($pricingTranslations, ['welcome' => $welcomeTranslations]);
+                } elseif (is_array($pricingTranslations)) {
+                    $translations = $pricingTranslations;
+                } else {
+                    $translations = [];
+                }
             }
             
             // Always include common translations
@@ -203,6 +285,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'locale' => $locale,
             'translations' => $translations,
+            'needsLanguageSelection' => $needsLanguageSelection ?? false,
+            'showLanguageBanner' => $showLanguageBanner ?? false,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Include CSRF token in every response so frontend can update meta tag
             'csrfToken' => $request->session()->token(),

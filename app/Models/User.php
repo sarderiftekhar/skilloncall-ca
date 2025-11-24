@@ -25,6 +25,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'locale',
     ];
 
     /**
@@ -80,6 +81,14 @@ class User extends Authenticatable
     public function isEmployee(): bool
     {
         return $this->role === 'employee';
+    }
+
+    /**
+     * Get the user's preferred locale
+     */
+    public function getPreferredLocale(): string
+    {
+        return $this->locale ?? 'en';
     }
 
     /**

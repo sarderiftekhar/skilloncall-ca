@@ -11,6 +11,7 @@ use App\Http\Controllers\Employee\EmployeeProfileController as EmployeeProfileCr
 use App\Http\Controllers\Employee\EmployeeSkillController;
 use App\Http\Controllers\Employee\EmployeeAvailabilityController;
 use App\Http\Controllers\Employee\EmployeeReviewController;
+use App\Http\Controllers\Employee\ReferenceDataController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,6 +38,12 @@ Route::middleware(['auth', 'employee'])->prefix('employee')->name('employee.')->
         Route::get('/provinces', [LocationController::class, 'getProvinces'])->name('provinces');
         Route::get('/provinces/{provinceId}/cities', [LocationController::class, 'getCitiesByProvince'])->name('cities');
         Route::get('/provinces/code/{provinceCode}/cities', [LocationController::class, 'getCitiesByProvinceCode'])->name('cities.by.code');
+        
+        // Reference Data API routes
+        Route::get('/skills', [ReferenceDataController::class, 'getSkills'])->name('skills');
+        Route::get('/industries', [ReferenceDataController::class, 'getIndustries'])->name('industries');
+        Route::get('/languages', [ReferenceDataController::class, 'getLanguages'])->name('languages');
+        Route::get('/certifications', [ReferenceDataController::class, 'getCertifications'])->name('certifications');
     });
 });
 

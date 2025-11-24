@@ -288,6 +288,7 @@ return [
         'applications' => 'Applications',
         'find_employee' => 'Find Employee',
         'payments' => 'Payments',
+        'error_logs' => 'Error Logs',
     ],
     
     // Common menu items
@@ -311,12 +312,15 @@ return [
         'skills' => 'Skills',
         'languages' => 'Languages',
         'unavailable' => 'Unavailable',
+        'search' => 'Search',
+        'reset' => 'Reset',
     ],
     
     // Settings Page
     'settings_page' => [
         'title' => 'Account Settings',
         'password_tab' => 'Password',
+        'language_tab' => 'Language',
         'deactivate_tab' => 'Deactivate Account',
         'current_password' => 'Current password',
         'new_password' => 'New password',
@@ -324,6 +328,12 @@ return [
         'save_password' => 'Save password',
         'password_updated' => 'Password updated successfully!',
         'password_update_failed' => 'Failed to update password. Please try again.',
+        
+        // Language Preference
+        'language_preference' => 'Language Preference',
+        'language_description' => 'Select your preferred language for the platform',
+        'changing_language' => 'Changing language...',
+        'language_update_failed' => 'Failed to update language preference. Please try again.',
         
         // Deactivate Account
         'deactivate_note' => 'Note:',
@@ -337,5 +347,35 @@ return [
         'deactivate_confirm_description_end' => 'to reactivate your account. Please enter your password to confirm.',
         'password_label' => 'Password',
         'cancel' => 'Cancel',
+    ],
+
+    // Logs & monitoring
+    'logs' => [
+        'exceptions' => [
+            'title' => 'Exception Logs',
+            'subtitle' => 'Monitor recent application exceptions and inspect stack traces.',
+            'search_placeholder' => 'Search message, URL or exception',
+            'table_title' => 'Recent Exceptions',
+            'table_subtitle' => 'Newest entries appear first. Expand a row to view payload and stack trace.',
+            'no_results' => 'No exceptions have been logged yet.',
+            'copy_trace' => 'Copy trace',
+            'view_details' => 'View details',
+            'hide_details' => 'Hide details',
+            'system_user' => 'Guest / System',
+            'stats' => [
+                'total' => 'Total Logged',
+                'today' => 'Logged Today',
+                'unique' => 'Unique Issues',
+                'last_entry' => 'Last Entry',
+            ],
+            'fields' => [
+                'location' => 'Location',
+                'user' => 'User',
+                'ip' => 'IP Address',
+                'trace' => 'Stack trace',
+                'payload' => 'Request Payload',
+                'headers' => 'Request Headers',
+            ],
+        ],
     ],
 ];

@@ -27,8 +27,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
-import { logout } from '@/routes';
-
 import { 
 
     Users, 
@@ -64,12 +62,13 @@ import {
 } from 'react-feather';
 
 import { useTranslations } from '@/hooks/useTranslations';
+import { LanguageBanner } from '@/components/language-banner';
 
 
 
 export default function Welcome() {
 
-    const { auth, isProfileComplete } = usePage<SharedData>().props as any;
+    const { auth, isProfileComplete, needsLanguageSelection, showLanguageBanner } = usePage<SharedData>().props as any;
 
     const { t, locale } = useTranslations();
 
@@ -541,7 +540,7 @@ export default function Welcome() {
 
             label: t('footer.employer_links.subscription_plans', 'Subscription Plans'),
 
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
 
             highlight: true,
 
@@ -565,7 +564,7 @@ export default function Welcome() {
 
             label: t('footer.employee_links.pro_plans', 'Pro Plans'),
 
-            href: `/subscriptions${queryLang}`,
+            href: `/pricing${queryLang}`,
 
             highlight: true,
 
@@ -835,21 +834,13 @@ export default function Welcome() {
 
 
 
-    const switchLang = (next: 'en' | 'fr') => {
-
-        const url = new URL(window.location.href);
-
-        url.searchParams.set('lang', next);
-
-        window.location.href = url.toString();
-
-    };
-
-
 
     return (
 
         <>
+
+            {/* Language Auto-Detection Banner - Shows on first visit with auto-detected language */}
+            {showLanguageBanner && <LanguageBanner detectedLocale={locale as 'en' | 'fr'} />}
 
             <Head title={isFrench ? 'Bienvenue sur SkillOnCall.ca' : 'Welcome to SkillOnCall.ca'}>
 
@@ -968,7 +959,7 @@ export default function Welcome() {
 
                                 <Link href={`/how-it-works${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.how_it_works')}</Link>
 
-                                <a href={`/${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</a>
+                                <Link href={`/pricing${queryLang}`} className="text-gray-300 hover:text-white cursor-pointer transition-colors">{t('nav.pricing')}</Link>
 
                             </nav>
 
@@ -977,52 +968,6 @@ export default function Welcome() {
                             {/* User Menu */}
 
                             <div className="flex items-center space-x-3 md:space-x-4">
-
-                                {/* Language Switcher - Always Visible */}
-
-                                <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
-
-                                    <button 
-
-                                        onClick={() => switchLang('en')} 
-
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-
-                                            locale === 'en' 
-
-                                                ? 'bg-white text-gray-900' 
-
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-
-                                        }`}
-
-                                    >
-
-                                        EN
-
-                                    </button>
-
-                                    <button 
-
-                                        onClick={() => switchLang('fr')} 
-
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-
-                                            locale === 'fr' 
-
-                                                ? 'bg-white text-gray-900' 
-
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-
-                                        }`}
-
-                                    >
-
-                                        FR
-
-                                    </button>
-
-                                </div>
 
                         {auth.user ? (
 
@@ -1054,7 +999,7 @@ export default function Welcome() {
 
                                                 <DropdownMenuItem asChild>
 
-                                                    <Link href={logout()} method="post" className="cursor-pointer">
+                                                    <Link href="/logout" method="post" className="cursor-pointer">
 
                                                         <LogOut className="mr-2 h-4 w-4" />
 
@@ -1576,7 +1521,7 @@ export default function Welcome() {
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
 
-                            <Link href={`/subscriptions${queryLang}`} className="w-full sm:w-auto">
+                            <Link href={`/pricing${queryLang}`} className="w-full sm:w-auto">
 
                                 <Button 
 
@@ -1594,21 +1539,23 @@ export default function Welcome() {
 
                             </Link>
 
-                            <Button 
+                            <Link href={`/how-it-works${queryLang}`} className="w-full sm:w-auto">
+                                <Button 
 
-                                variant="outline" 
+                                    variant="outline" 
 
-                                size="lg" 
+                                    size="lg" 
 
-                                className="w-full sm:w-auto border-2 bg-white/10 hover:bg-white/20 px-10 py-6 text-base font-medium cursor-pointer transition-all"
+                                    className="w-full sm:w-auto border-2 bg-white/10 hover:bg-white/20 px-10 py-6 text-base font-medium cursor-pointer transition-all"
 
-                                style={{borderColor: '#10B3D6', color: 'white', height: '2.7em'}}
+                                    style={{borderColor: '#10B3D6', color: 'white', height: '2.7em'}}
 
-                            >
+                                >
 
-                                {t('cta.learn_more', 'Learn More')}
+                                    {t('cta.learn_more', 'Learn More')}
 
-                            </Button>
+                                </Button>
+                            </Link>
 
                         </div>
 

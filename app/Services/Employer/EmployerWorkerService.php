@@ -33,7 +33,8 @@ class EmployerWorkerService
                         ->orWhere('last_name', 'like', "%{$search}%");
                   })
                   ->orWhereHas('employeeProfile.skills', function (Builder $q) use ($search) {
-                      $q->where('global_skills.name', 'like', "%{$search}%");
+                      $locale = app()->getLocale();
+                      $q->where("global_skills.name->{$locale}", 'like', "%{$search}%");
                   });
             });
         }

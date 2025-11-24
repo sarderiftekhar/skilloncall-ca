@@ -17,7 +17,8 @@ import {
     Calendar,
     Clock,
     Bookmark,
-    Search
+    Search,
+    AlertTriangle
 } from 'react-feather';
 import AppLogo from './app-logo';
 
@@ -69,6 +70,11 @@ function getNavItems(userRole: string, t: (key: string) => string, locale: strin
                 title: 'System Settings',
                 href: addLangParam('/admin/settings', locale),
                 icon: Settings,
+            },
+            {
+                title: t('nav.error_logs', 'Error Logs'),
+                href: addLangParam('/admin/logs/exceptions', locale),
+                icon: AlertTriangle,
             },
         ];
     }

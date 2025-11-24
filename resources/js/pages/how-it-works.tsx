@@ -98,12 +98,6 @@ export default function HowItWorks() {
         }
     };
 
-    const switchLang = (newLocale: string) => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', newLocale);
-        window.location.href = url.toString();
-    };
-
     const employerSteps = [
         {
             icon: UserPlus,
@@ -215,30 +209,6 @@ export default function HowItWorks() {
 
                             {/* User Menu */}
                             <div className="flex items-center space-x-3 md:space-x-4">
-                                {/* Language Switcher */}
-                                <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
-                                    <button 
-                                        onClick={() => switchLang('en')} 
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                            locale === 'en' 
-                                                ? 'bg-white text-gray-900' 
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                        }`}
-                                    >
-                                        EN
-                                    </button>
-                                    <button 
-                                        onClick={() => switchLang('fr')} 
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                            locale === 'fr' 
-                                                ? 'bg-white text-gray-900' 
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                        }`}
-                                    >
-                                        FR
-                                    </button>
-                                </div>
-
                                 {auth?.user ? (
                                     <Link 
                                         href={`/dashboard${queryLang}`}
@@ -547,254 +517,132 @@ export default function HowItWorks() {
                 </main>
 
                 {/* Footer with Newsletter */}
-
                 <footer className="text-white py-12" style={{backgroundColor: '#10B3D6'}}>
-
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
                         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-
                             <div className="lg:col-span-2">
-
                                 <div className="flex items-center mb-4">
-
                                     <div className="flex-shrink-0 flex items-center">
-
                                         <img 
-
                                             src="/logo-white.png" 
-
                                             alt="SkillOnCall Logo" 
-
                                             className="w-8 h-8 mr-3"
-
                                         />
-
                                         <span className="text-xl font-bold text-white">SkillOnCall</span>
-
                                         <span className="ml-1" style={{color: '#FCF2F0'}}>.ca</span>
-
                                     </div>
-
                                 </div>
-
                                 <p className="text-gray-100 mb-6 max-w-md">
-
                                     {platformDescription}
-
                                 </p>
-
                                 <div>
-
                                     <h3 className="text-lg font-semibold mb-4">📧 {t('footer.newsletter', 'Newsletter Signup')}</h3>
-
                                     <p className="text-gray-200 text-sm mb-3">{t('footer.newsletter_hint', 'Get updates on new jobs, platform features, and industry news')}</p>
-
                                     <div className="flex space-x-3">
-
                                         <Input 
-
                                             type="email" 
-
                                             placeholder={t('footer.enter_email', 'Enter your email')} 
-
                                             className="flex-1 text-gray-900" 
-
                                             style={{backgroundColor: '#FFFFFF', borderColor: '#F6FBFD'}}
-
                                             value={email}
-
                                             onChange={(e) => setEmail(e.target.value)}
-
                                             onKeyPress={(e) => e.key === 'Enter' && handleNewsletterSubscribe()}
-
                                         />
-
                                         <Button 
-
                                             className="text-white hover:opacity-90 cursor-pointer" 
-
                                             style={{backgroundColor: '#FCF2F0', color: '#10B3D6'}}
-
                                             onClick={handleNewsletterSubscribe}
-
                                             disabled={isSubscribing}
-
                                         >
-
                                             {isSubscribing ? (
-
                                                 <>
-
                                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
-
                                                     {t('footer.subscribing', 'Subscribing...')}
-
                                                 </>
-
                                             ) : (
-
                                                 t('footer.subscribe', 'Subscribe')
-
                                             )}
-
                                         </Button>
-
                                     </div>
-
                                 </div>
-
                             </div>
 
                             <div>
-
                                 <h3 className="text-lg font-semibold mb-4">{t('footer.for_employers', 'For Employers')}</h3>
-
                                 <ul className="space-y-2 text-gray-100">
-
                                     {footerEmployerLinks.map((item, index) => {
-
                                         const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
-
                                         const label = `${item.prefix ?? ''}${item.label}`;
 
-
-
                                         return (
-
                                             <li key={index}>
-
                                                 {item.href.startsWith('/') ? (
-
                                                     <Link href={item.href} className={commonClasses}>
-
                                                         {label}
-
                                                     </Link>
-
                                                 ) : (
-
                                                     <a href={item.href} className={commonClasses}>
-
                                                         {label}
-
                                                     </a>
-
                                                 )}
-
                                             </li>
-
                                         );
-
                                     })}
-
                                 </ul>
-
                             </div>
 
-
-
                             <div>
-
                                 <h3 className="text-lg font-semibold mb-4">{t('footer.for_employees', 'For Employees')}</h3>
-
                                 <ul className="space-y-2 text-gray-100">
-
                                     {footerEmployeeLinks.map((item, index) => {
-
                                         const commonClasses = `hover:text-white cursor-pointer${item.highlight ? ' font-semibold text-yellow-300' : ''}`;
 
-
-
                                         return (
-
                                             <li key={index}>
-
                                                 {item.href.startsWith('/') ? (
-
                                                     <Link href={item.href} className={commonClasses}>
-
                                                         {item.label}
-
                                                     </Link>
-
                                                 ) : (
-
                                                     <a href={item.href} className={commonClasses}>
-
                                                         {item.label}
-
                                                     </a>
-
                                                 )}
-
                                             </li>
-
                                         );
-
                                     })}
-
-                            </ul>
-
-                        </div>
-
+                                </ul>
+                            </div>
                         </div>
 
                         <div className="mt-8 pt-8" style={{borderTop: '1px solid #FFFFFF'}}>
-
                             <div className="flex flex-col md:flex-row justify-between items-center">
-
                                 <p className="text-gray-100 text-sm">
-
                                     © 2025 SkillOnCall.ca. {t('footer.copyright', 'All rights reserved. Made with 🍁 in Canada.')}
-
                                 </p>
-
                                 <div className="flex space-x-6 mt-4 md:mt-0">
-
                                     <button 
-
                                         onClick={() => setShowContactModal(true)}
-
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
-
                                     >
-
                                         {t('footer.contact', 'Contact')}
-
                                     </button>
-
                                     <button 
-
                                         onClick={() => setShowPrivacyModal(true)}
-
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
-
                                     >
-
                                         {t('footer.privacy', 'Privacy')}
-
                                     </button>
-
                                     <button 
-
                                         onClick={() => setShowTermsModal(true)}
-
                                         className="text-gray-100 hover:text-white text-sm cursor-pointer transition-colors"
-
                                     >
-
                                         {t('footer.terms', 'Terms')}
-
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </div>
-                </div>
-
+                    </div>
                 </footer>
 
                 {/* Modals */}

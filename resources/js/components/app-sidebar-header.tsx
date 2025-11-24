@@ -4,7 +4,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useSidebar } from '@/components/ui/sidebar';
 import { SubscriptionBadge } from '@/components/subscription-badge';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import { useTranslations } from '@/hooks/useTranslations';
 import { cn } from '@/lib/utils';
 // Temporarily using simple route strings to fix import issues
@@ -327,9 +326,6 @@ export function AppSidebarHeader({ breadcrumbs = [] }: { breadcrumbs?: Breadcrum
                         <Menu className="h-5 w-5 text-gray-700" />
                     </Button>
                 </div>
-                
-                {/* Language Switcher */}
-                <LanguageSwitcher variant="compact" />
                 
                 <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>

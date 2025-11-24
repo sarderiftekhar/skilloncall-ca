@@ -30,4 +30,37 @@ class GlobalCity extends Model
     {
         return $this->hasMany(WorkerProfile::class, 'global_city_id');
     }
+
+    /**
+     * Get the translated name for this city
+     * This uses a slug-based lookup in translation files
+     */
+    public function getTranslatedNameAttribute(): string
+    {
+        // Create a slug for translation lookup
+        $slug = \Illuminate\Support\Str::slug($this->name);
+        
+        // Try to get translation, fall back to original name
+        $translationKey = 'geo.cities.' . $slug;
+        $translated = __($translationKey);
+        
+        // If no translation found, return original name
+        if ($translated === $translationKey) {
+            return $this->name;
+        }
+        
+        return $translated;
+    }
+
+    /**
+     * Get the name in a specific locale
+     */
+    public function getNameInLocale(string $locale): string
+    {
+        $currentLocale = app()->getLocale();
+        app()->setLocale($locale);
+        $name = $this->translated_name;
+        app()->setLocale($currentLocale);
+        return $name;
+    }
 }
