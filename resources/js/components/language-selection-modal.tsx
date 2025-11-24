@@ -1,25 +1,37 @@
-import { useState, useEffect } from 'react';
-import { router } from '@inertiajs/react';
+import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Globe } from 'react-feather';
+import { setStoredLocale, syncLocaleToServer, type Locale } from '@/lib/locale-storage';
+import type { SharedData } from '@/types';
 
 interface LanguageSelectionModalProps {
     isOpen: boolean;
-    onLanguageSelect: (locale: 'en' | 'fr') => void;
 }
 
-export function LanguageSelectionModal({ isOpen, onLanguageSelect }: LanguageSelectionModalProps) {
-    const [selectedLang, setSelectedLang] = useState<'en' | 'fr' | null>(null);
+export function LanguageSelectionModal({ isOpen }: LanguageSelectionModalProps) {
+    const { auth } = usePage<SharedData>().props;
+    const [selectedLang, setSelectedLang] = useState<Locale | null>(null);
 
     if (!isOpen) return null;
 
-    const handleSelect = (locale: 'en' | 'fr') => {
+    const handleSelect = async (locale: Locale) => {
         setSelectedLang(locale);
-        // Update URL with language parameter and reload to set session
+        
+        // Store in localStorage for guests and persistence
+        setStoredLocale(locale);
+        
+        // If authenticated, sync to database
+        if (auth?.user) {
+            try {
+                await syncLocaleToServer(locale);
+            } catch (error) {
+                console.error('Failed to sync locale to server:', error);
+            }
+        }
+        
+        // Redirect with language parameter to set session
         const url = new URL(window.location.href);
         url.searchParams.set('lang', locale);
-        // Store in localStorage for future visits
-        localStorage.setItem('preferred_language', locale);
-        // Redirect to set locale in session
         window.location.href = url.toString();
     };
 

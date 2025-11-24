@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\LocationController::code
- * @see app/Http/Controllers/LocationController.php:45
+ * @see app/Http/Controllers/LocationController.php:58
  * @route '/employee/api/provinces/code/{provinceCode}/cities'
  */
 export const code = (args: { provinceCode: string | number } | [provinceCode: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ code.definition = {
 
 /**
 * @see \App\Http\Controllers\LocationController::code
- * @see app/Http/Controllers/LocationController.php:45
+ * @see app/Http/Controllers/LocationController.php:58
  * @route '/employee/api/provinces/code/{provinceCode}/cities'
  */
 code.url = (args: { provinceCode: string | number } | [provinceCode: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ code.url = (args: { provinceCode: string | number } | [provinceCode: string | nu
 
 /**
 * @see \App\Http\Controllers\LocationController::code
- * @see app/Http/Controllers/LocationController.php:45
+ * @see app/Http/Controllers/LocationController.php:58
  * @route '/employee/api/provinces/code/{provinceCode}/cities'
  */
 code.get = (args: { provinceCode: string | number } | [provinceCode: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -53,7 +53,7 @@ code.get = (args: { provinceCode: string | number } | [provinceCode: string | nu
 })
 /**
 * @see \App\Http\Controllers\LocationController::code
- * @see app/Http/Controllers/LocationController.php:45
+ * @see app/Http/Controllers/LocationController.php:58
  * @route '/employee/api/provinces/code/{provinceCode}/cities'
  */
 code.head = (args: { provinceCode: string | number } | [provinceCode: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({

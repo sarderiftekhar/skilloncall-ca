@@ -123,16 +123,75 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
-        // Get current locale and translations
-        $locale = $request->get('lang', session('locale', config('app.locale', 'en')));
+        // Locale Resolution Logic (Priority Order):
+        // 1. URL parameter ?lang= (highest priority)
+        // 2. Authenticated user's database locale
+        // 3. Guest's X-Locale header (from localStorage)
+        // 4. Session locale
+        // 5. Default 'en'
         
-        // Check if this is first visit (no locale preference set yet)
-        $needsLanguageSelection = !session()->has('locale') && !$request->has('lang');
+        $locale = null;
+        $needsLanguageSelection = false;
         
-        // Store the locale in session if provided via URL parameter
+        // 1. Check URL parameter first
         if ($request->has('lang') && in_array($request->get('lang'), ['en', 'fr'])) {
-            session(['locale' => $request->get('lang')]);
             $locale = $request->get('lang');
+            
+            // Update session
+            session(['locale' => $locale]);
+            
+            // If authenticated, update database
+            if ($request->user()) {
+                try {
+                    $request->user()->update(['locale' => $locale]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to update user locale: ' . $e->getMessage());
+                }
+            }
+        }
+        
+        // 2. If authenticated and no URL param, check user's database locale
+        if (!$locale && $request->user()) {
+            $locale = $request->user()->getPreferredLocale();
+        }
+        
+        // 3. If guest and no URL param, check X-Locale header (from localStorage)
+        if (!$locale && !$request->user() && $request->header('X-Locale')) {
+            $headerLocale = $request->header('X-Locale');
+            if (in_array($headerLocale, ['en', 'fr'])) {
+                $locale = $headerLocale;
+            }
+        }
+        
+        // 4. Fall back to session locale
+        if (!$locale && session()->has('locale')) {
+            $locale = session('locale');
+        }
+        
+        // 5. Fall back to browser language auto-detection
+        $showLanguageBanner = false;
+        if (!$locale) {
+            // Get browser's Accept-Language header
+            $browserLanguage = $request->header('Accept-Language', '');
+            
+            // Auto-detect: French if browser prefers French, otherwise default to English
+            // Supported languages: en, fr
+            // Any other language (es, de, zh, etc.) defaults to English
+            if (!empty($browserLanguage) && str_contains(strtolower($browserLanguage), 'fr')) {
+                $locale = 'fr';
+            } else {
+                // Default to English for all other languages (en, es, de, zh, etc.)
+                $locale = 'en';
+            }
+            
+            // Show dismissible banner (not blocking modal)
+            $showLanguageBanner = true;
+            $needsLanguageSelection = false; // Don't block with modal
+        }
+        
+        // Store in session for consistency
+        if (!session()->has('locale')) {
+            session(['locale' => $locale]);
         }
         
         app()->setLocale($locale);
@@ -227,6 +286,7 @@ class HandleInertiaRequests extends Middleware
             'locale' => $locale,
             'translations' => $translations,
             'needsLanguageSelection' => $needsLanguageSelection ?? false,
+            'showLanguageBanner' => $showLanguageBanner ?? false,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             // Include CSRF token in every response so frontend can update meta tag
             'csrfToken' => $request->session()->token(),

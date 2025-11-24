@@ -319,6 +319,7 @@ return [
     'settings_page' => [
         'title' => 'Account Settings',
         'password_tab' => 'Password',
+        'language_tab' => 'Language',
         'deactivate_tab' => 'Deactivate Account',
         'current_password' => 'Current password',
         'new_password' => 'New password',
@@ -326,6 +327,12 @@ return [
         'save_password' => 'Save password',
         'password_updated' => 'Password updated successfully!',
         'password_update_failed' => 'Failed to update password. Please try again.',
+        
+        // Language Preference
+        'language_preference' => 'Language Preference',
+        'language_description' => 'Select your preferred language for the platform',
+        'changing_language' => 'Changing language...',
+        'language_update_failed' => 'Failed to update language preference. Please try again.',
         
         // Deactivate Account
         'deactivate_note' => 'Note:',

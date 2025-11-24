@@ -62,13 +62,13 @@ import {
 } from 'react-feather';
 
 import { useTranslations } from '@/hooks/useTranslations';
-import { LanguageSelectionModal } from '@/components/language-selection-modal';
+import { LanguageBanner } from '@/components/language-banner';
 
 
 
 export default function Welcome() {
 
-    const { auth, isProfileComplete, needsLanguageSelection } = usePage<SharedData>().props as any;
+    const { auth, isProfileComplete, needsLanguageSelection, showLanguageBanner } = usePage<SharedData>().props as any;
 
     const { t, locale } = useTranslations();
 
@@ -834,29 +834,13 @@ export default function Welcome() {
 
 
 
-    const switchLang = (next: 'en' | 'fr') => {
-
-        const url = new URL(window.location.href);
-
-        url.searchParams.set('lang', next);
-
-        window.location.href = url.toString();
-
-    };
-
-
 
     return (
 
         <>
 
-            {/* Language Selection Modal - Shows on first visit */}
-            <LanguageSelectionModal 
-                isOpen={needsLanguageSelection === true} 
-                onLanguageSelect={(locale) => {
-                    // Language selection handled in modal component via redirect
-                }} 
-            />
+            {/* Language Auto-Detection Banner - Shows on first visit with auto-detected language */}
+            {showLanguageBanner && <LanguageBanner detectedLocale={locale as 'en' | 'fr'} />}
 
             <Head title={isFrench ? 'Bienvenue sur SkillOnCall.ca' : 'Welcome to SkillOnCall.ca'}>
 
@@ -984,52 +968,6 @@ export default function Welcome() {
                             {/* User Menu */}
 
                             <div className="flex items-center space-x-3 md:space-x-4">
-
-                                {/* Language Switcher - Always Visible */}
-
-                                <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
-
-                                    <button 
-
-                                        onClick={() => switchLang('en')} 
-
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-
-                                            locale === 'en' 
-
-                                                ? 'bg-white text-gray-900' 
-
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-
-                                        }`}
-
-                                    >
-
-                                        EN
-
-                                    </button>
-
-                                    <button 
-
-                                        onClick={() => switchLang('fr')} 
-
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-
-                                            locale === 'fr' 
-
-                                                ? 'bg-white text-gray-900' 
-
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-
-                                        }`}
-
-                                    >
-
-                                        FR
-
-                                    </button>
-
-                                </div>
 
                         {auth.user ? (
 

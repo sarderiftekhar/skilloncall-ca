@@ -319,6 +319,7 @@ return [
     'settings_page' => [
         'title' => 'Paramètres du Compte',
         'password_tab' => 'Mot de passe',
+        'language_tab' => 'Langue',
         'deactivate_tab' => 'Désactiver le Compte',
         'current_password' => 'Mot de passe actuel',
         'new_password' => 'Nouveau mot de passe',
@@ -326,6 +327,12 @@ return [
         'save_password' => 'Enregistrer le mot de passe',
         'password_updated' => 'Mot de passe mis à jour avec succès !',
         'password_update_failed' => 'Échec de la mise à jour du mot de passe. Veuillez réessayer.',
+        
+        // Language Preference
+        'language_preference' => 'Préférence de Langue',
+        'language_description' => 'Sélectionnez votre langue préférée pour la plateforme',
+        'changing_language' => 'Changement de langue...',
+        'language_update_failed' => 'Échec de la mise à jour de la préférence de langue. Veuillez réessayer.',
         
         // Deactivate Account
         'deactivate_note' => 'Note :',

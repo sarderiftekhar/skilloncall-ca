@@ -2,7 +2,7 @@ import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
 import { Form } from '@inertiajs/react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslations } from '@/hooks/useTranslations';
 
 import DeleteUser from '@/components/delete-user';
@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
+import { setStoredLocale, syncLocaleToServer, type Locale } from '@/lib/locale-storage';
 
 // Breadcrumbs will be set dynamically based on locale
 const getBreadcrumbs = (t: (key: string, fallback?: string) => string, locale: string): BreadcrumbItem[] => [
@@ -28,6 +29,32 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const passwordInput = useRef<HTMLInputElement>(null);
     const currentPasswordInput = useRef<HTMLInputElement>(null);
     const breadcrumbs = getBreadcrumbs(t, locale);
+    const [changingLanguage, setChangingLanguage] = useState(false);
+
+    const handleLanguageChange = async (newLocale: Locale) => {
+        if (newLocale === locale || changingLanguage) return;
+        
+        setChangingLanguage(true);
+        
+        try {
+            // Store in localStorage
+            setStoredLocale(newLocale);
+            
+            // Sync to server if authenticated
+            if (auth?.user) {
+                await syncLocaleToServer(newLocale);
+            }
+            
+            // Redirect to reload page with new language
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', newLocale);
+            window.location.href = url.toString();
+        } catch (error) {
+            console.error('Failed to change language:', error);
+            alert(t('settings_page.language_update_failed', 'Failed to update language preference. Please try again.'));
+            setChangingLanguage(false);
+        }
+    };
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -71,9 +98,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 <Card className="border w-full max-w-2xl" style={{ borderColor: '#10B3D6', borderWidth: '0.05px' }}>
                     <CardContent className="p-6">
                         <Tabs defaultValue="password" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsList className="grid w-full grid-cols-3 mb-6">
                                 <TabsTrigger value="password" className="cursor-pointer">
                                     {t('settings_page.password_tab', 'Password')}
+                                </TabsTrigger>
+                                <TabsTrigger value="language" className="cursor-pointer">
+                                    {t('settings_page.language_tab', 'Language')}
                                 </TabsTrigger>
                                 <TabsTrigger value="deactivate" className="cursor-pointer">
                                     {t('settings_page.deactivate_tab', 'Deactivate Account')}
@@ -133,6 +163,80 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                         </Button>
                                     </div>
                                 </form>
+                            </TabsContent>
+
+                            <TabsContent value="language" className="space-y-4">
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-2">
+                                            {t('settings_page.language_preference', 'Language Preference')}
+                                        </h3>
+                                        <p className="text-sm text-gray-600 mb-4">
+                                            {t('settings_page.language_description', 'Select your preferred language for the platform')}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid gap-3">
+                                        <button
+                                            onClick={() => handleLanguageChange('en')}
+                                            disabled={changingLanguage}
+                                            className={`w-full p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer text-left ${
+                                                locale === 'en'
+                                                    ? 'border-[#10B3D6] bg-[#10B3D6]/5'
+                                                    : changingLanguage
+                                                    ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                                                    : 'border-gray-300 bg-white hover:border-[#10B3D6] hover:bg-[#10B3D6]/5'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-semibold text-lg">English</div>
+                                                    <div className="text-sm text-gray-600">Use English for all content</div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-2xl">🇬🇧</span>
+                                                    {locale === 'en' && (
+                                                        <div className="w-3 h-3 rounded-full bg-[#10B3D6]"></div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleLanguageChange('fr')}
+                                            disabled={changingLanguage}
+                                            className={`w-full p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer text-left ${
+                                                locale === 'fr'
+                                                    ? 'border-[#10B3D6] bg-[#10B3D6]/5'
+                                                    : changingLanguage
+                                                    ? 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                                                    : 'border-gray-300 bg-white hover:border-[#10B3D6] hover:bg-[#10B3D6]/5'
+                                            }`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <div className="font-semibold text-lg">Français</div>
+                                                    <div className="text-sm text-gray-600">Utiliser le français pour tout le contenu</div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-2xl">🇫🇷</span>
+                                                    {locale === 'fr' && (
+                                                        <div className="w-3 h-3 rounded-full bg-[#10B3D6]"></div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    {changingLanguage && (
+                                        <div className="text-center">
+                                            <div className="inline-flex items-center text-sm text-gray-600">
+                                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#10B3D6] border-t-transparent mr-2"></div>
+                                                {t('settings_page.changing_language', 'Changing language...')}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             </TabsContent>
 
                             <TabsContent value="deactivate" className="space-y-4">

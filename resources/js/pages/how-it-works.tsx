@@ -24,12 +24,6 @@ export default function HowItWorks() {
 
     const [activeTab, setActiveTab] = useState<'employers' | 'employees'>('employers');
 
-    const switchLang = (newLocale: string) => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('lang', newLocale);
-        window.location.href = url.toString();
-    };
-
     const employerSteps = [
         {
             icon: UserPlus,
@@ -141,30 +135,6 @@ export default function HowItWorks() {
 
                             {/* User Menu */}
                             <div className="flex items-center space-x-3 md:space-x-4">
-                                {/* Language Switcher */}
-                                <div className="flex items-center space-x-1 border border-gray-600 rounded-md overflow-hidden">
-                                    <button 
-                                        onClick={() => switchLang('en')} 
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                            locale === 'en' 
-                                                ? 'bg-white text-gray-900' 
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                        }`}
-                                    >
-                                        EN
-                                    </button>
-                                    <button 
-                                        onClick={() => switchLang('fr')} 
-                                        className={`px-3 py-1.5 text-sm font-medium cursor-pointer transition-all ${
-                                            locale === 'fr' 
-                                                ? 'bg-white text-gray-900' 
-                                                : 'bg-transparent text-gray-300 hover:bg-gray-700 hover:text-white'
-                                        }`}
-                                    >
-                                        FR
-                                    </button>
-                                </div>
-
                                 {auth?.user ? (
                                     <Link 
                                         href={`/dashboard${queryLang}`}

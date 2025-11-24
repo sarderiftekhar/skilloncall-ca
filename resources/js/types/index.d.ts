@@ -37,6 +37,7 @@ export interface SharedData {
     locale: string;
     translations: Record<string, any>;
     needsLanguageSelection?: boolean;
+    showLanguageBanner?: boolean;
     sidebarOpen: boolean;
     [key: string]: unknown;
 }

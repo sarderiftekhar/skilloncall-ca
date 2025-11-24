@@ -5,6 +5,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { router } from '@inertiajs/react';
 import { initializeTheme } from './hooks/use-appearance';
+import { getStoredLocale } from './lib/locale-storage';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -15,16 +16,22 @@ function getCsrfToken(): string | null {
     return metaTag?.getAttribute('content') || null;
 }
 
-// Set up CSRF token for Inertia requests
+// Set up CSRF token and locale header for Inertia requests
 router.on('before', (event) => {
+    // Ensure headers object exists
+    if (!event.detail.visit.headers) {
+        event.detail.visit.headers = {};
+    }
+    
+    // Add X-Locale header from localStorage (for guest users and all requests)
+    const storedLocale = getStoredLocale();
+    if (storedLocale) {
+        event.detail.visit.headers['X-Locale'] = storedLocale;
+    }
+    
     // Always get fresh token from meta tag (don't cache it)
     const csrfToken = getCsrfToken();
     if (csrfToken && event.detail.visit.method !== 'get') {
-        // Ensure headers object exists
-        if (!event.detail.visit.headers) {
-            event.detail.visit.headers = {};
-        }
-        
         // Always set X-CSRF-TOKEN header with fresh token
         event.detail.visit.headers['X-CSRF-TOKEN'] = csrfToken;
         event.detail.visit.headers['X-Requested-With'] = 'XMLHttpRequest';

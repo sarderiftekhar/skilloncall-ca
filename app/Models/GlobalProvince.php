@@ -32,4 +32,27 @@ class GlobalProvince extends Model
     {
         return $this->hasMany(EmployeeProfile::class, 'global_province_id');
     }
+
+    /**
+     * Get the translated name for this province
+     */
+    public function getTranslatedNameAttribute(): string
+    {
+        if ($this->code) {
+            return __('geo.provinces.' . $this->code);
+        }
+        return $this->name;
+    }
+
+    /**
+     * Get the name in a specific locale
+     */
+    public function getNameInLocale(string $locale): string
+    {
+        $currentLocale = app()->getLocale();
+        app()->setLocale($locale);
+        $name = $this->translated_name;
+        app()->setLocale($currentLocale);
+        return $name;
+    }
 }

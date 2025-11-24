@@ -8,7 +8,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { UserMenuContent } from '@/components/user-menu-content';
 import { SubscriptionBadge } from '@/components/subscription-badge';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { dashboard } from '@/routes';
@@ -295,9 +294,6 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
                     {/* Right Side Controls */}
                     <div className="ml-auto flex items-center gap-1 lg:gap-2">
-                        {/* Language Switcher */}
-                        <LanguageSwitcher variant="compact" />
-                        
                         {/* Subscription Badge - Hidden for admin users */}
                         {auth.user.role !== 'admin' && <SubscriptionBadge subscription={subscription} />}
                         

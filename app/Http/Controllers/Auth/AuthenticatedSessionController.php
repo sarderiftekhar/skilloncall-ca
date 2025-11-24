@@ -41,6 +41,20 @@ class AuthenticatedSessionController extends Controller
         // Check if there's an intended URL in session
         $intendedUrl = $request->session()->get('url.intended');
         $user = Auth::user();
+        
+        // Sync locale from localStorage to database on first login
+        // If user doesn't have a locale set and X-Locale header is present, sync it
+        if ($user && !$user->locale && $request->header('X-Locale')) {
+            $headerLocale = $request->header('X-Locale');
+            if (in_array($headerLocale, ['en', 'fr'])) {
+                try {
+                    $user->update(['locale' => $headerLocale]);
+                    session(['locale' => $headerLocale]);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning('Failed to sync locale on login: ' . $e->getMessage());
+                }
+            }
+        }
 
         // If there's an intended URL and user is employer, redirect there after profile check
         if ($intendedUrl && $user && $user->role === 'employer') {

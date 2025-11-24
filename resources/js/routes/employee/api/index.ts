@@ -45,7 +45,7 @@ provinces.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employee/api/provinces/{provinceId}/cities'
  */
 export const cities = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ cities.definition = {
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employee/api/provinces/{provinceId}/cities'
  */
 cities.url = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -88,7 +88,7 @@ cities.url = (args: { provinceId: string | number } | [provinceId: string | numb
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employee/api/provinces/{provinceId}/cities'
  */
 cities.get = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ cities.get = (args: { provinceId: string | number } | [provinceId: string | numb
 })
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employee/api/provinces/{provinceId}/cities'
  */
 cities.head = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -107,7 +107,7 @@ cities.head = (args: { provinceId: string | number } | [provinceId: string | num
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::skills
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:15
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:18
  * @route '/employee/api/skills'
  */
 export const skills = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -122,7 +122,7 @@ skills.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::skills
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:15
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:18
  * @route '/employee/api/skills'
  */
 skills.url = (options?: RouteQueryOptions) => {
@@ -131,7 +131,7 @@ skills.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::skills
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:15
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:18
  * @route '/employee/api/skills'
  */
 skills.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -140,7 +140,7 @@ skills.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::skills
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:15
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:18
  * @route '/employee/api/skills'
  */
 skills.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -150,7 +150,7 @@ skills.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::industries
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:26
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:38
  * @route '/employee/api/industries'
  */
 export const industries = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -165,7 +165,7 @@ industries.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::industries
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:26
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:38
  * @route '/employee/api/industries'
  */
 industries.url = (options?: RouteQueryOptions) => {
@@ -174,7 +174,7 @@ industries.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::industries
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:26
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:38
  * @route '/employee/api/industries'
  */
 industries.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -183,7 +183,7 @@ industries.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::industries
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:26
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:38
  * @route '/employee/api/industries'
  */
 industries.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -193,7 +193,7 @@ industries.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::languages
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:37
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:57
  * @route '/employee/api/languages'
  */
 export const languages = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -208,7 +208,7 @@ languages.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::languages
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:37
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:57
  * @route '/employee/api/languages'
  */
 languages.url = (options?: RouteQueryOptions) => {
@@ -217,7 +217,7 @@ languages.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::languages
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:37
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:57
  * @route '/employee/api/languages'
  */
 languages.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -226,7 +226,7 @@ languages.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::languages
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:37
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:57
  * @route '/employee/api/languages'
  */
 languages.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -236,7 +236,7 @@ languages.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::certifications
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:47
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:78
  * @route '/employee/api/certifications'
  */
 export const certifications = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -251,7 +251,7 @@ certifications.definition = {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::certifications
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:47
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:78
  * @route '/employee/api/certifications'
  */
 certifications.url = (options?: RouteQueryOptions) => {
@@ -260,7 +260,7 @@ certifications.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::certifications
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:47
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:78
  * @route '/employee/api/certifications'
  */
 certifications.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -269,7 +269,7 @@ certifications.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Employee\ReferenceDataController::certifications
- * @see app/Http/Controllers/Employee/ReferenceDataController.php:47
+ * @see app/Http/Controllers/Employee/ReferenceDataController.php:78
  * @route '/employee/api/certifications'
  */
 certifications.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({

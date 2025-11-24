@@ -45,7 +45,7 @@ provinces.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employer/api/provinces/{provinceId}/cities'
  */
 export const cities = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -60,7 +60,7 @@ cities.definition = {
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employer/api/provinces/{provinceId}/cities'
  */
 cities.url = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -88,7 +88,7 @@ cities.url = (args: { provinceId: string | number } | [provinceId: string | numb
 
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employer/api/provinces/{provinceId}/cities'
  */
 cities.get = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -97,7 +97,7 @@ cities.get = (args: { provinceId: string | number } | [provinceId: string | numb
 })
 /**
 * @see \App\Http\Controllers\LocationController::cities
- * @see app/Http/Controllers/LocationController.php:25
+ * @see app/Http/Controllers/LocationController.php:31
  * @route '/employer/api/provinces/{provinceId}/cities'
  */
 cities.head = (args: { provinceId: string | number } | [provinceId: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
